@@ -12518,7 +12518,9 @@ async function loadRealMessages() {
           text: m.text,
           time: new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }),
           date: new Date(m.created_at).toLocaleDateString('en-US', { weekday:'long' }),
-          supabaseId: m.id
+          supabaseId: m.id,
+          read: m.read,
+          readReceipt: (m.sender_id === userId && m.read) ? 'Seen' : null
         })),
         _real: true,
         _convoId: convo.id,
@@ -12529,6 +12531,54 @@ async function loadRealMessages() {
     console.warn('loadRealMessages failed:', e.message);
     realMessageConversations = [];
   }
+}
+
+// Real-time subscription for message read receipts and new messages
+var _realtimeChannel = null;
+function setupRealtimeMessages() {
+  if (_realtimeChannel || !sb) return;
+  try {
+    _realtimeChannel = sb.channel('messages-changes')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
+        // A message was updated (likely read status changed)
+        const updated = payload.new;
+        if (!updated) return;
+        // Find the conversation and update the message's read status
+        realMessageConversations.forEach(convo => {
+          convo.messages.forEach(m => {
+            if (m.supabaseId === updated.id && updated.read) {
+              m.read = true;
+              m.readReceipt = 'Seen';
+            }
+          });
+        });
+        // Re-render if we're viewing this conversation
+        if (activeConvoId) {
+          const c = allThreads().find(x => x.id == activeConvoId);
+          if (c) {
+            var msgContainer = document.getElementById('thread-messages-' + activeConvoId);
+            if (msgContainer) msgContainer.innerHTML = renderMessages(c);
+          }
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        // A new message arrived — reload conversations
+        loadRealMessages().then(() => {
+          renderConvoList();
+          if (activeConvoId) {
+            const c = allThreads().find(x => x.id == activeConvoId);
+            if (c) {
+              var msgContainer = document.getElementById('thread-messages-' + activeConvoId);
+              if (msgContainer) {
+                msgContainer.innerHTML = renderMessages(c);
+                scrollThreadToBottom(activeConvoId);
+              }
+            }
+          }
+        });
+      })
+      .subscribe();
+  } catch(e) { console.warn('Realtime setup failed:', e.message); }
 }
 
 function openInbox(convoId) {
@@ -12542,6 +12592,7 @@ function openInbox(convoId) {
       renderConvoList();
       if (convoId) openConvo(convoId);
     });
+    setupRealtimeMessages();
     renderConvoList();
     if (convoId) openConvo(convoId);
     else document.getElementById('inbox-main').innerHTML = `
@@ -12660,7 +12711,6 @@ function openConvo(id) {
   const c = allThreads().find(x => x.id == id);
   if (!c) { _openConvoRunning = false; return; }
   c.unread = false;
-  c.unread = false;
   // Also mark in source
   const bk = (inboxThreads||[]).find(t => t.id == id);
   if (bk) bk.unread = false;
@@ -12670,6 +12720,25 @@ function openConvo(id) {
   if (sv) sv.unread = false;
   const lv = (typeof landlordConversations !== "undefined" ? landlordConversations : []).find(x => x.id == id);
   if (lv) lv.unread = false;
+
+  // Mark real messages as read in Supabase
+  if (c._real && c._convoId && sb) {
+    (async () => {
+      try {
+        const { data: sessionData } = await sb.auth.getSession();
+        const userId = sessionData?.session?.user?.id;
+        if (!userId) return;
+        // Mark all unread messages from the OTHER person as read
+        const unreadIds = c.messages.filter(m => m.from !== 'me' && !m.read).map(m => m.supabaseId).filter(Boolean);
+        if (unreadIds.length > 0) {
+          await sb.from('messages').update({ read: true }).in('id', unreadIds);
+          // Update local state
+          c.messages.forEach(m => { if (m.from !== 'me') m.read = true; });
+        }
+      } catch(e) { console.warn('Mark read error:', e.message); }
+    })();
+  }
+
   updateInboxBadges();
   renderConvoList();
 
