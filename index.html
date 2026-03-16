@@ -12384,7 +12384,7 @@ function openInbox(convoId) {
       </div>`;
     showScreen('inbox');
   } catch(e) {
-    alert('Inbox error: ' + e.message + '\n' + e.stack);
+    console.error('Inbox error:', e);
   }
 }
 
