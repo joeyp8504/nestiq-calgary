@@ -442,13 +442,14 @@ aside {
 .range-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
 .range-val { color: var(--text2); }
 input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
-.dual-range-wrap { position: relative; height: 20px; }
-.dual-range { position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent; }
-.dual-range::-webkit-slider-thumb { pointer-events: all; -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.3); cursor: pointer; position: relative; z-index: 2; }
-.dual-range::-moz-range-thumb { pointer-events: all; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.3); cursor: pointer; }
-.dual-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--border2); }
-.dual-range-min::-webkit-slider-runnable-track { background: transparent; }
-.dual-range-max::-webkit-slider-runnable-track { background: transparent; }
+.dual-range-wrap { position: relative; height: 28px; }
+.dual-range-track { position: absolute; top: 12px; left: 0; right: 0; height: 4px; border-radius: 2px; background: var(--border2); }
+.dual-range-fill { position: absolute; top: 12px; height: 4px; border-radius: 2px; background: var(--accent); }
+.dual-range { position: absolute; width: 100%; top: 4px; left: 0; pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent; margin: 0; height: 20px; }
+.dual-range::-webkit-slider-thumb { pointer-events: all; -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 2.5px solid var(--surface); box-shadow: 0 1px 6px rgba(79,124,255,0.4); cursor: pointer; position: relative; z-index: 2; margin-top: -7px; }
+.dual-range::-webkit-slider-runnable-track { height: 4px; background: transparent; }
+.dual-range::-moz-range-thumb { pointer-events: all; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 2.5px solid var(--surface); box-shadow: 0 1px 6px rgba(79,124,255,0.4); cursor: pointer; }
+.dual-range::-moz-range-track { height: 4px; background: transparent; }
 
 .checkbox-item { display: flex; align-items: center; gap: 9px; padding: 6px 9px; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: var(--text2); transition: background 0.12s; }
 .checkbox-item:hover { background: var(--surface2); color: var(--text); }
@@ -4097,6 +4098,8 @@ body.light-mode #screen-dashboard nav {
         </div>
         <div class="range-slider">
           <div class="dual-range-wrap">
+            <div class="dual-range-track"></div>
+            <div class="dual-range-fill" id="price-range-fill"></div>
             <input type="range" class="dual-range dual-range-min" id="price-range-min" min="500" max="10000" step="50" value="500" oninput="setPriceRange()">
             <input type="range" class="dual-range dual-range-max" id="price-range-max" min="500" max="10000" step="50" value="10000" oninput="setPriceRange()">
           </div>
@@ -10513,12 +10516,21 @@ function setPriceFilter(val) {
   applyFilters();
 }
 
+function updateRangeFill(fillId, minVal, maxVal) {
+  var fill = document.getElementById(fillId);
+  if (!fill) return;
+  var min = 500, max = 10000;
+  var left = ((minVal - min) / (max - min)) * 100;
+  var right = ((maxVal - min) / (max - min)) * 100;
+  fill.style.left = left + '%';
+  fill.style.width = (right - left) + '%';
+}
+
 function setPriceRange() {
   var minEl = document.getElementById('price-range-min');
   var maxEl = document.getElementById('price-range-max');
   var minVal = parseInt(minEl.value);
   var maxVal = parseInt(maxEl.value);
-  // Prevent crossing
   if (minVal > maxVal - 100) {
     minEl.value = maxVal - 100;
     minVal = maxVal - 100;
@@ -10526,8 +10538,11 @@ function setPriceRange() {
   filterState.minPrice = minVal;
   filterState.maxPrice = maxVal;
   updatePriceLabel();
+  updateRangeFill('price-range-fill', minVal, maxVal);
   applyFilters();
 }
+// Init fill on load
+document.addEventListener('DOMContentLoaded', function() { updateRangeFill('price-range-fill', 500, 10000); });
 
 function updatePriceLabel() {
   var min = filterState.minPrice || 500;
@@ -12879,6 +12894,7 @@ function fdSetPriceRange() {
   filterState.minPrice = minVal;
   filterState.maxPrice = maxVal;
   updateFdPriceLabel();
+  updateRangeFill('fd-price-range-fill', minVal, maxVal);
 }
 
 function updateFdPriceLabel() {
@@ -14982,6 +14998,8 @@ function handleWizardPhoto(input) {
         </div>
         <div class="range-slider">
           <div class="dual-range-wrap">
+            <div class="dual-range-track"></div>
+            <div class="dual-range-fill" id="fd-price-range-fill"></div>
             <input type="range" class="dual-range dual-range-min" id="fd-price-range-min" min="500" max="10000" step="50" value="500" oninput="fdSetPriceRange()">
             <input type="range" class="dual-range dual-range-max" id="fd-price-range-max" min="500" max="10000" step="50" value="10000" oninput="fdSetPriceRange()">
           </div>
