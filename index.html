@@ -10526,6 +10526,7 @@ function updateRangeFill(fillId, minVal, maxVal) {
   fill.style.width = (right - left) + '%';
 }
 
+var _priceDebounce = null;
 function setPriceRange() {
   var minEl = document.getElementById('price-range-min');
   var maxEl = document.getElementById('price-range-max');
@@ -10539,7 +10540,8 @@ function setPriceRange() {
   filterState.maxPrice = maxVal;
   updatePriceLabel();
   updateRangeFill('price-range-fill', minVal, maxVal);
-  applyFilters();
+  clearTimeout(_priceDebounce);
+  _priceDebounce = setTimeout(applyFilters, 150);
 }
 // Init fill on load
 document.addEventListener('DOMContentLoaded', function() { updateRangeFill('price-range-fill', 500, 10000); });
