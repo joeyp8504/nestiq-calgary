@@ -12572,8 +12572,11 @@ function renderConvoList() {
 function openConvo(id) {
   try {
   activeConvoId = id;
+  alert('step1: finding convo ' + id);
   const c = allThreads().find(x => x.id == id);
-  if (!c) return;
+  if (!c) { alert('not found'); return; }
+  alert('step2: found ' + c.with.name + ', marking read');
+  c.unread = false;
   c.unread = false;
   // Also mark in source
   const bk = (inboxThreads||[]).find(t => t.id == id);
@@ -12584,8 +12587,11 @@ function openConvo(id) {
   if (sv) sv.unread = false;
   const lv = (typeof landlordConversations !== "undefined" ? landlordConversations : []).find(x => x.id == id);
   if (lv) lv.unread = false;
+  alert('step3: updating badges');
   updateInboxBadges();
+  alert('step4: rendering convo list');
   renderConvoList();
+  alert('step5: building header');
 
   const ll = c.with;
 
@@ -12640,7 +12646,7 @@ function openConvo(id) {
     ${stageHtml}
 
     <div class="thread-messages" id="thread-messages-${id}">
-      ${renderMessages(c)}
+      ${(alert('step6: rendering messages'),renderMessages(c))}
     </div>
 
     <div class="thread-compose">
