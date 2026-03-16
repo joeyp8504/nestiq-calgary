@@ -4324,6 +4324,23 @@ body.light-mode #screen-dashboard nav {
 </div><!-- /screen-dashboard -->
 
 <!-- ══ INBOX ══ -->
+<!--
+  Supabase messages table — Run in Supabase SQL editor:
+
+  create table messages (
+    id uuid default gen_random_uuid() primary key,
+    sender_id uuid references auth.users(id) not null,
+    receiver_id uuid references auth.users(id) not null,
+    listing_id text,
+    text text not null,
+    read boolean default false,
+    created_at timestamptz default now()
+  );
+  alter table messages enable row level security;
+  create policy "Users can view their own messages" on messages for select using (auth.uid() = sender_id or auth.uid() = receiver_id);
+  create policy "Users can send messages" on messages for insert with check (auth.uid() = sender_id);
+  create policy "Users can mark messages read" on messages for update using (auth.uid() = receiver_id);
+-->
 <div id="screen-inbox" class="screen">
   <nav>
     <div class="nav-logo" onclick="showScreen('listings')">
@@ -4354,9 +4371,23 @@ body.light-mode #screen-dashboard nav {
     </div>
     <div class="inbox-main" id="inbox-main">
       <div class="inbox-empty">
-        <div class="inbox-empty-icon">✉️</div>
-        <div class="inbox-empty-title">Select a conversation</div>
-        <div class="inbox-empty-sub">Choose a message thread on the left to read and reply.</div>
+        <div class="inbox-empty-icon" style="font-size:48px;margin-bottom:4px;">💬</div>
+        <div class="inbox-empty-title" style="font-size:18px;font-weight:800;">Welcome to your inbox</div>
+        <div class="inbox-empty-sub" style="max-width:320px;margin:0 auto;line-height:1.6;">Select a conversation from the left to get started.</div>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;max-width:340px;width:100%;">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;text-align:left;">
+            <span style="font-size:18px;flex-shrink:0;">🏠</span>
+            <span style="font-size:12.5px;color:var(--text2);">Messages from landlords and property managers will appear here</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;text-align:left;">
+            <span style="font-size:18px;flex-shrink:0;">🔧</span>
+            <span style="font-size:12.5px;color:var(--text2);">Service provider quotes and booking confirmations show up in threads</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;text-align:left;">
+            <span style="font-size:18px;flex-shrink:0;">🔔</span>
+            <span style="font-size:12.5px;color:var(--text2);">You'll be notified when you receive new messages or updates</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -12367,6 +12398,62 @@ const serviceConversations = [
 
 let activeConvoId = null;
 let inboxTab = 'all';
+let realMessageConversations = []; // populated by loadRealMessages()
+
+async function loadRealMessages() {
+  try {
+    if (!sb) return;
+    const { data: sessionData } = await sb.auth.getSession();
+    const userId = sessionData?.session?.user?.id;
+    if (!userId) return;
+
+    const { data: msgs, error } = await sb.from('messages')
+      .select('*')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .order('created_at', { ascending: true });
+
+    if (error || !msgs || msgs.length === 0) {
+      realMessageConversations = [];
+      return;
+    }
+
+    // Group messages by conversation partner
+    const grouped = {};
+    msgs.forEach(m => {
+      const partnerId = m.sender_id === userId ? m.receiver_id : m.sender_id;
+      const key = m.listing_id ? `${partnerId}_${m.listing_id}` : partnerId;
+      if (!grouped[key]) grouped[key] = { partnerId, listingId: m.listing_id, messages: [] };
+      grouped[key].messages.push(m);
+    });
+
+    realMessageConversations = Object.values(grouped).map((g, idx) => {
+      const partnerName = g.messages.find(m => m.sender_id !== userId)?.sender_name || 'User';
+      const initials = partnerName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+      return {
+        id: 'real_' + idx,
+        listingId: g.listingId || null,
+        unread: g.messages.some(m => m.receiver_id === userId && !m.read),
+        with: { name: partnerName, initials, color: '#4f7cff' },
+        listing: { address: g.listingId || 'Direct message', price: null },
+        messages: g.messages.map(m => ({
+          id: m.id,
+          from: m.sender_id === userId ? 'me' : 'them',
+          text: m.text,
+          time: new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }),
+          date: new Date(m.created_at).toLocaleDateString('en-US', { weekday:'long' }),
+          supabaseId: m.id,
+          receiverId: m.receiver_id,
+          senderId: m.sender_id
+        })),
+        _real: true,
+        _partnerId: g.partnerId
+      };
+    });
+  } catch (e) {
+    console.warn('loadRealMessages failed (table may not exist yet):', e.message);
+    realMessageConversations = [];
+  }
+}
 
 function openInbox(convoId) {
   try {
@@ -12374,13 +12461,32 @@ function openInbox(convoId) {
       setUserAvatar('inbox-nav-avatar', currentUser);
       document.getElementById('inbox-nav-name').textContent = currentUser.name || '';
     }
+    // Try loading real messages, then render (non-blocking — falls back to demo data)
+    loadRealMessages().finally(() => {
+      renderConvoList();
+      if (convoId) openConvo(convoId);
+    });
     renderConvoList();
     if (convoId) openConvo(convoId);
     else document.getElementById('inbox-main').innerHTML = `
       <div class="inbox-empty">
-        <div class="inbox-empty-icon">✉️</div>
-        <div class="inbox-empty-title">Select a conversation</div>
-        <div class="inbox-empty-sub">Choose a message thread on the left to read and reply.</div>
+        <div class="inbox-empty-icon" style="font-size:48px;margin-bottom:4px;">💬</div>
+        <div class="inbox-empty-title" style="font-size:18px;font-weight:800;">Welcome to your inbox</div>
+        <div class="inbox-empty-sub" style="max-width:320px;margin:0 auto;line-height:1.6;">Select a conversation from the left to get started.</div>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;max-width:340px;width:100%;">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;text-align:left;">
+            <span style="font-size:18px;flex-shrink:0;">🏠</span>
+            <span style="font-size:12.5px;color:var(--text2);">Messages from landlords and property managers will appear here</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;text-align:left;">
+            <span style="font-size:18px;flex-shrink:0;">🔧</span>
+            <span style="font-size:12.5px;color:var(--text2);">Service provider quotes and booking confirmations show up in threads</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;text-align:left;">
+            <span style="font-size:18px;flex-shrink:0;">🔔</span>
+            <span style="font-size:12.5px;color:var(--text2);">You'll be notified when you receive new messages or updates</span>
+          </div>
+        </div>
       </div>`;
     showScreen('inbox');
   } catch(e) {
@@ -12406,7 +12512,7 @@ function allThreads() {
     isBooking: true,
     preview: t.preview
   }));
-  return [...bkThreads, ...landlordConversations, ...serviceConversations, ...conversations];
+  return [...realMessageConversations, ...bkThreads, ...landlordConversations, ...serviceConversations, ...conversations];
 }
 
 function renderConvoList() {
@@ -12651,7 +12757,8 @@ function sendReply(convoId) {
 
   const c = allThreads().find(x => x.id == convoId);
   // Get source reference for mutation — check all thread arrays
-  const src = (inboxThreads||[]).find(t => t.id == convoId)
+  const src = realMessageConversations.find(x => x.id == convoId)
+    || (inboxThreads||[]).find(t => t.id == convoId)
     || conversations.find(x => x.id == convoId)
     || serviceConversations.find(x => x.id == convoId)
     || (typeof landlordConversations !== 'undefined' ? landlordConversations : []).find(x => x.id == convoId);
@@ -12665,7 +12772,28 @@ function sendReply(convoId) {
   input.style.height = 'auto';
   openConvo(convoId);
 
-  // Simulate reply after 2s (contextual to thread type)
+  // If this is a real Supabase conversation, insert the message into the messages table
+  if (c._real && c._partnerId && sb) {
+    (async () => {
+      try {
+        const { data: sessionData } = await sb.auth.getSession();
+        const userId = sessionData?.session?.user?.id;
+        if (!userId) return;
+        const { error } = await sb.from('messages').insert({
+          sender_id: userId,
+          receiver_id: c._partnerId,
+          listing_id: c.listing?.address || null,
+          text: text
+        });
+        if (error) console.warn('Failed to save message to Supabase:', error.message);
+      } catch (e) {
+        console.warn('Supabase send error:', e.message);
+      }
+    })();
+    return; // No simulated reply for real conversations
+  }
+
+  // Simulate reply after 2s (contextual to thread type) — demo conversations only
   setTimeout(() => {
     const isLandlordApp = c.type === 'landlord-app';
     const isSvc = c.type === 'service';
