@@ -6257,7 +6257,7 @@ try {
   }
 } catch(e) {}
 
-function showScreen(id) {
+var _showScreenBase = function(id) {
   // Save scroll position when leaving listings
   const wasListings = document.querySelector('.screen.active')?.id === 'screen-listings';
   if (wasListings && id !== 'listings') {
@@ -6274,7 +6274,8 @@ function showScreen(id) {
       if (wrap) wrap.scrollTop = listingsScrollY;
     });
   }
-}
+};
+function showScreen(id) { _showScreenBase(id); }
 
 // ── RENDER CARDS ──
 const badgeMap = {
@@ -12660,13 +12661,8 @@ function updateMobileNav(screen) {
 }
 
 // Patch showScreen to update mobile nav
-const _origShowScreen = showScreen;
-var _showScreenRunning = false;
 function showScreen(id) {
-  if (_showScreenRunning) return;
-  _showScreenRunning = true;
-  _origShowScreen(id);
-  _showScreenRunning = false;
+  _showScreenBase(id);
   updateMobileNav(id);
   const map = { listings:'mbn-listings', inbox:'mbn-inbox', services:'mbn-services' };
   document.querySelectorAll('.mbn-item').forEach(el => el.classList.remove('active'));
