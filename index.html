@@ -12409,7 +12409,7 @@ async function loadRealMessages() {
 
     const { data: msgs, error } = await sb.from('messages')
       .select('*')
-      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .or(`sender_id.eq.${userId},conversation_id.eq.${userId}`)
       .order('created_at', { ascending: true });
 
     if (error || !msgs || msgs.length === 0) {
@@ -12420,9 +12420,9 @@ async function loadRealMessages() {
     // Group messages by conversation partner
     const grouped = {};
     msgs.forEach(m => {
-      const partnerId = m.sender_id === userId ? m.receiver_id : m.sender_id;
-      const key = m.listing_id ? `${partnerId}_${m.listing_id}` : partnerId;
-      if (!grouped[key]) grouped[key] = { partnerId, listingId: m.listing_id, messages: [] };
+      const partnerId = m.sender_id === userId ? m.conversation_id : m.sender_id;
+      const key = partnerId;
+      if (!grouped[key]) grouped[key] = { partnerId, messages: [] };
       grouped[key].messages.push(m);
     });
 
@@ -12431,8 +12431,8 @@ async function loadRealMessages() {
       const initials = partnerName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
       return {
         id: 'real_' + idx,
-        listingId: g.listingId || null,
-        unread: g.messages.some(m => m.receiver_id === userId && !m.read),
+        listingId: null,
+        unread: g.messages.some(m => m.conversation_id === userId && !m.read),
         with: { name: partnerName, initials, color: '#4f7cff' },
         listing: { address: g.listingId || 'Direct message', price: null },
         messages: g.messages.map(m => ({
@@ -12442,7 +12442,7 @@ async function loadRealMessages() {
           time: new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }),
           date: new Date(m.created_at).toLocaleDateString('en-US', { weekday:'long' }),
           supabaseId: m.id,
-          receiverId: m.receiver_id,
+          conversationId: m.conversation_id,
           senderId: m.sender_id
         })),
         _real: true,
@@ -12781,8 +12781,7 @@ function sendReply(convoId) {
         if (!userId) return;
         const { error } = await sb.from('messages').insert({
           sender_id: userId,
-          receiver_id: c._partnerId,
-          listing_id: c.listing?.address || null,
+          conversation_id: c._partnerId,
           text: text
         });
         if (error) console.warn('Failed to save message to Supabase:', error.message);
