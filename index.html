@@ -12407,50 +12407,62 @@ async function loadRealMessages() {
     const userId = sessionData?.session?.user?.id;
     if (!userId) return;
 
-    const { data: msgs, error } = await sb.from('messages')
+    // Get conversations where user is tenant or landlord
+    const { data: convos, error: convErr } = await sb.from('conversations')
       .select('*')
-      .or(`sender_id.eq.${userId},conversation_id.eq.${userId}`)
-      .order('created_at', { ascending: true });
+      .or(`tenant_id.eq.${userId},landlord_id.eq.${userId}`);
 
-    if (error || !msgs || msgs.length === 0) {
+    if (convErr || !convos || convos.length === 0) {
       realMessageConversations = [];
       return;
     }
 
-    // Group messages by conversation partner
-    const grouped = {};
-    msgs.forEach(m => {
-      const partnerId = m.sender_id === userId ? m.conversation_id : m.sender_id;
-      const key = partnerId;
-      if (!grouped[key]) grouped[key] = { partnerId, messages: [] };
-      grouped[key].messages.push(m);
-    });
+    // Get all messages for those conversations
+    const convoIds = convos.map(c => c.id);
+    const { data: msgs, error: msgErr } = await sb.from('messages')
+      .select('*')
+      .in('conversation_id', convoIds)
+      .order('created_at', { ascending: true });
 
-    realMessageConversations = Object.values(grouped).map((g, idx) => {
-      const partnerName = g.messages.find(m => m.sender_id !== userId)?.sender_name || 'User';
+    if (msgErr) { realMessageConversations = []; return; }
+
+    // Get partner profiles
+    const partnerIds = convos.map(c => c.tenant_id === userId ? c.landlord_id : c.tenant_id);
+    const { data: profiles } = await sb.from('profiles')
+      .select('id, full_name, avatar_url')
+      .in('id', partnerIds);
+    const profileMap = {};
+    (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+    realMessageConversations = convos.map((convo, idx) => {
+      const partnerId = convo.tenant_id === userId ? convo.landlord_id : convo.tenant_id;
+      const partner = profileMap[partnerId] || {};
+      const partnerName = partner.full_name || 'User';
       const initials = partnerName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+      const convoMsgs = (msgs || []).filter(m => m.conversation_id === convo.id);
+      const hasUnread = convoMsgs.some(m => m.sender_id !== userId && !m.read);
+
       return {
-        id: 'real_' + idx,
-        listingId: null,
-        unread: g.messages.some(m => m.conversation_id === userId && !m.read),
-        with: { name: partnerName, initials, color: '#4f7cff' },
-        listing: { address: g.listingId || 'Direct message', price: null },
-        messages: g.messages.map(m => ({
+        id: 'real_' + convo.id,
+        listingId: convo.listing_id,
+        unread: hasUnread,
+        with: { name: partnerName, initials, color: '#4f7cff', photo: partner.avatar_url },
+        listing: { address: convo.listing_id ? 'Listing enquiry' : 'Direct message', price: null },
+        messages: convoMsgs.map(m => ({
           id: m.id,
           from: m.sender_id === userId ? 'me' : 'them',
           text: m.text,
           time: new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }),
           date: new Date(m.created_at).toLocaleDateString('en-US', { weekday:'long' }),
-          supabaseId: m.id,
-          conversationId: m.conversation_id,
-          senderId: m.sender_id
+          supabaseId: m.id
         })),
         _real: true,
-        _partnerId: g.partnerId
+        _convoId: convo.id,
+        _partnerId: partnerId
       };
     });
   } catch (e) {
-    console.warn('loadRealMessages failed (table may not exist yet):', e.message);
+    console.warn('loadRealMessages failed:', e.message);
     realMessageConversations = [];
   }
 }
@@ -12773,7 +12785,7 @@ function sendReply(convoId) {
   openConvo(convoId);
 
   // If this is a real Supabase conversation, insert the message into the messages table
-  if (c._real && c._partnerId && sb) {
+  if (c._real && c._convoId && sb) {
     (async () => {
       try {
         const { data: sessionData } = await sb.auth.getSession();
@@ -12781,7 +12793,7 @@ function sendReply(convoId) {
         if (!userId) return;
         const { error } = await sb.from('messages').insert({
           sender_id: userId,
-          conversation_id: c._partnerId,
+          conversation_id: c._convoId,
           text: text
         });
         if (error) console.warn('Failed to save message to Supabase:', error.message);
