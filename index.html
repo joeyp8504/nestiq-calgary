@@ -12661,8 +12661,12 @@ function updateMobileNav(screen) {
 
 // Patch showScreen to update mobile nav
 const _origShowScreen = showScreen;
+var _showScreenRunning = false;
 function showScreen(id) {
+  if (_showScreenRunning) return;
+  _showScreenRunning = true;
   _origShowScreen(id);
+  _showScreenRunning = false;
   updateMobileNav(id);
   const map = { listings:'mbn-listings', inbox:'mbn-inbox', services:'mbn-services' };
   document.querySelectorAll('.mbn-item').forEach(el => el.classList.remove('active'));
