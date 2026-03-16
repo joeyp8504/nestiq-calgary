@@ -12508,8 +12508,10 @@ let activeConvoId = null;
 let inboxTab = 'all';
 
 function openInbox(convoId) {
-  setUserAvatar('inbox-nav-avatar', currentUser);
-  document.getElementById('inbox-nav-name').textContent = currentUser.name || 'Sarah Mitchell';
+  if (currentUser) {
+    setUserAvatar('inbox-nav-avatar', currentUser);
+    document.getElementById('inbox-nav-name').textContent = currentUser.name || '';
+  }
   renderConvoList();
   if (convoId) openConvo(convoId);
   else document.getElementById('inbox-main').innerHTML = `
