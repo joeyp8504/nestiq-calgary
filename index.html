@@ -3820,6 +3820,114 @@ body.light-mode #screen-dashboard nav {
   border-bottom: 1px solid #e2e5ed !important;
   box-shadow: 0 1px 3px rgba(0,0,0,0.07) !important;
 }
+/* ── IMPROVED SERVICES LAYOUT ── */
+.svc-results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 768px) { .svc-results-grid { grid-template-columns: 1fr; } }
+
+.svc-results-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; padding: 0 2px;
+}
+.svc-results-count { font-size: 13px; color: var(--text2); }
+.svc-results-count strong { color: var(--text); }
+.svc-sort-select {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 6px 12px; color: var(--text2);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; outline: none; cursor: pointer;
+}
+
+.svc-sticky-bar {
+  position: sticky; top: 0; z-index: 20; background: var(--bg);
+  padding: 12px 0 0; margin: 0 -20px; padding-left: 20px; padding-right: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.svc-booking-panel {
+  border-top: 1px solid var(--border);
+  padding: 16px 18px;
+  background: var(--surface2);
+  animation: svcDropIn 0.2s ease;
+}
+
+.svc-pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.svc-pill {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--border2); background: var(--surface);
+  color: var(--text2); transition: all 0.15s; user-select: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.svc-pill:hover { border-color: var(--text3); color: var(--text); }
+.svc-pill.selected { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 10px rgba(91,138,255,0.3); }
+
+.svc-date-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; }
+.svc-date-row::-webkit-scrollbar { display: none; }
+.svc-date-chip {
+  padding: 8px 12px; border-radius: 10px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--border2); background: var(--surface);
+  color: var(--text2); transition: all 0.15s; user-select: none; white-space: nowrap;
+  font-family: 'DM Sans', sans-serif; text-align: center; min-width: 64px; flex-shrink: 0;
+}
+.svc-date-chip .svc-date-day { font-size: 10px; color: var(--text3); display: block; margin-bottom: 2px; }
+.svc-date-chip .svc-date-num { font-size: 13px; font-weight: 800; display: block; }
+.svc-date-chip:hover { border-color: var(--text3); color: var(--text); }
+.svc-date-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 10px rgba(91,138,255,0.3); }
+.svc-date-chip.selected .svc-date-day { color: rgba(255,255,255,0.7); }
+.svc-date-chip.custom-date { background: var(--surface2); border-style: dashed; }
+.svc-date-chip.custom-date:hover { border-color: var(--accent); color: var(--accent); }
+
+.svc-time-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+.svc-quick-replies { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.svc-quick-chip {
+  padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--border2); background: var(--surface);
+  color: var(--text2); transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.svc-quick-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.svc-quick-chip.selected { background: var(--accent-glow); color: var(--accent); border-color: rgba(91,138,255,0.35); }
+
+.svc-inline-msg {
+  width: 100%; padding: 9px 13px; border-radius: 10px; border: 1.5px solid var(--border2);
+  background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px; outline: none; resize: none; transition: border-color 0.18s;
+}
+.svc-inline-msg:focus { border-color: var(--accent); }
+
+.svc-section-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text3); margin-bottom: 6px;
+}
+
+.svc-send-bar { display: flex; gap: 8px; margin-top: 4px; }
+.svc-send-btn {
+  padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 700; background: var(--accent); color: #fff;
+  font-family: 'DM Sans', sans-serif; transition: all 0.18s; flex-shrink: 0;
+}
+.svc-send-btn:hover { background: var(--accent2); box-shadow: 0 4px 16px rgba(91,138,255,0.3); }
+.svc-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.svc-send-btn.ghost {
+  background: transparent; color: var(--text2); border: 1.5px solid var(--border2);
+}
+.svc-send-btn.ghost:hover { border-color: var(--text2); color: var(--text); }
+
+.svc-booking-success {
+  text-align: center; padding: 20px 16px;
+  animation: svcDropIn 0.25s ease;
+}
+.svc-booking-success .svc-success-icon { font-size: 36px; margin-bottom: 8px; }
+.svc-booking-success .svc-success-title { font-size: 15px; font-weight: 800; color: var(--green); margin-bottom: 4px; }
+.svc-booking-success .svc-success-sub { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+
+.svc-price-highlight {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 14px; font-weight: 800; color: var(--accent);
+  margin-left: auto;
+}
+.svc-price-highlight .svc-price-from { font-size: 10.5px; font-weight: 600; color: var(--text3); }
+
+.svc-hidden-date { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+
 </style>
 </head>
 <body>
@@ -5738,16 +5846,41 @@ function setSvcFilter(f) {
   renderServices();
 }
 
+let svcSort = 'rating';
+
 function renderServices() {
   const container = document.getElementById('svc-results');
   if (!container) return;
   let list = serviceData[svcCategory] || [];
   if (svcFilter === 'claimed') list = list.filter(s => s.claimed);
+
+  list = [...list];
+  if (svcSort === 'rating') list.sort((a, b) => (b.googleRating ?? 0) - (a.googleRating ?? 0));
+  else if (svcSort === 'distance') list.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+  else if (svcSort === 'reviews') list.sort((a, b) => (b.googleReviewCount ?? 0) - (a.googleReviewCount ?? 0));
+  else if (svcSort === 'nestiq') list.sort((a, b) => (b.nestiqRating ?? 0) - (a.nestiqRating ?? 0));
+
+  const catLabels = { cleaning: 'cleaners', handymen: 'handymen', junk: 'junk removal services', movers: 'movers' };
+  const addr = document.getElementById('svc-address-input')?.value || 'your area';
+
   if (!list.length) {
-    container.innerHTML = '<div style="text-align:center;color:var(--text3);padding:48px 20px;font-size:14px;">No results — try removing filters.</div>';
+    container.innerHTML = '<div style="text-align:center;color:var(--text3);padding:48px 20px;font-size:14px;">No results — try removing filters or switching categories.</div>';
     return;
   }
-  container.innerHTML = list.map(renderServiceCard).join('');
+
+  container.innerHTML = `
+    <div class="svc-results-bar">
+      <div class="svc-results-count"><strong>${list.length}</strong> ${catLabels[svcCategory] || 'providers'} near ${addr}</div>
+      <select class="svc-sort-select" onchange="svcSort=this.value;renderServices()">
+        <option value="rating"${svcSort==='rating'?' selected':''}>Highest rated</option>
+        <option value="distance"${svcSort==='distance'?' selected':''}>Nearest first</option>
+        <option value="reviews"${svcSort==='reviews'?' selected':''}>Most reviews</option>
+        <option value="nestiq"${svcSort==='nestiq'?' selected':''}>Best NestIQ score</option>
+      </select>
+    </div>
+    <div class="svc-results-grid">
+      ${list.map(renderServiceCard).join('')}
+    </div>`;
 }
 
 function starsHtml(r) {
@@ -5772,43 +5905,28 @@ function svcReliabilityHtml(s) {
 function renderServiceCard(s) {
   const verifiedBadge = s.claimed ? '<span class="cleaner-badge verified">✓ NestIQ Verified</span>' : '';
   const tagBadges = s.tags.slice(0, 3).map(t => `<span class="cleaner-badge">${t}</span>`).join('');
-  const priceRow = s.packages
-    ? `<div class="cleaner-pricing-row">
-         <div><div class="cleaner-price-label">Starting from</div><div class="cleaner-price-note">${s.packages[0].note}</div></div>
-         <div class="cleaner-price-val">${s.packages[0].price}</div>
-       </div>` : '';
-  // ── DUAL RATING ROWS: Google (public rep) + NestIQ (verified bookings only) ──
   const gRating = s.googleRating ?? s.rating ?? '—';
   const gCount  = (s.googleReviewCount ?? s.reviewCount ?? 0).toLocaleString();
   const nRating = s.nestiqRating;
   const nCount  = s.nestiqReviewCount ?? s.nestiqReviews ?? 0;
-  const googleRow = `
-    <div class="svc-rating-row">
-      <span class="svc-rating-source">Google</span>
-      <span class="svc-rating-stars">★</span>
-      <strong class="svc-rating-val">${gRating}</strong>
-      <span class="svc-rating-count">${gCount} reviews · ${s.distance}</span>
-    </div>`;
+  const googleRow = `<div class="svc-rating-row"><span class="svc-rating-source">Google</span><span class="svc-rating-stars">★</span><strong class="svc-rating-val">${gRating}</strong><span class="svc-rating-count">${gCount} reviews · ${s.distance}</span></div>`;
   const nestiqRow = nRating
-    ? `<div class="svc-rating-row">
-        <span class="svc-rating-source nestiq">NestIQ</span>
-        <span class="svc-rating-stars" style="color:#f5c842;">★</span>
-        <strong class="svc-rating-val">${nRating}</strong>
-        <span class="svc-rating-count">${nCount} verified booking${nCount!==1?'s':''}</span>
-       </div>`
-    : `<div class="svc-rating-row">
-        <span class="svc-rating-source nestiq">NestIQ</span>
-        <span class="svc-rating-count" style="font-style:italic;">No bookings yet on NestIQ</span>
-       </div>`;
+    ? `<div class="svc-rating-row"><span class="svc-rating-source nestiq">NestIQ</span><span class="svc-rating-stars" style="color:#f5c842;">★</span><strong class="svc-rating-val">${nRating}</strong><span class="svc-rating-count">${nCount} verified booking${nCount!==1?'s':''}</span></div>`
+    : `<div class="svc-rating-row"><span class="svc-rating-source nestiq">NestIQ</span><span class="svc-rating-count" style="font-style:italic;">No bookings yet</span></div>`;
   const reliabilityHtml = svcReliabilityHtml(s);
-  const msgBtn   = `<button class="cleaner-btn-ghost"   onclick="openSvcMessage('${s.id}')">💬 Message</button>`;
-  const quoteBtn = `<button class="cleaner-btn-primary" onclick="openSvcQuote('${s.id}')">📋 Get a Quote</button>`;
+  const priceHighlight = s.packages && s.packages.length > 0
+    ? `<div class="svc-price-highlight"><span class="svc-price-from">from</span> ${s.packages[0].price}</div>`
+    : '';
+
   return `
-    <div class="cleaner-card${s.claimed ? ' claimed' : ''}">
+    <div class="cleaner-card${s.claimed ? ' claimed' : ''}" id="svc-card-${s.id}">
       <div class="cleaner-header">
         <div class="cleaner-avatar" style="background:${s.color}22;font-size:26px;">${s.emoji}</div>
         <div style="flex:1;min-width:0;">
-          <div class="cleaner-name">${s.name}</div>
+          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+            <div class="cleaner-name">${s.name}</div>
+            ${priceHighlight}
+          </div>
           <div class="svc-ratings-block">${googleRow}${nestiqRow}</div>
           ${reliabilityHtml}
           <div class="cleaner-meta" style="margin-top:5px;">⏰ ${s.hours}</div>
@@ -5816,10 +5934,13 @@ function renderServiceCard(s) {
         </div>
       </div>
       <div class="cleaner-body">
-        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px;">${s.bio}</div>
-        ${priceRow}
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:6px;">${s.bio}</div>
       </div>
-      <div class="cleaner-footer">${msgBtn}${quoteBtn}</div>
+      <div class="cleaner-footer">
+        <button class="cleaner-btn-ghost" onclick="event.stopPropagation();toggleSvcBooking('${s.id}','message')">💬 Message</button>
+        <button class="cleaner-btn-primary" onclick="event.stopPropagation();toggleSvcBooking('${s.id}','book')">📅 Book Now</button>
+      </div>
+      <div id="svc-booking-${s.id}" style="display:none;"></div>
     </div>`;
 }
 
@@ -5941,6 +6062,272 @@ function submitSvcQuote(id) {
 function closeSvcModal() {
   document.getElementById('svc-quote-overlay').style.display = 'none';
 }
+
+// ── INLINE BOOKING SYSTEM ──
+let svcBookingState = {};
+
+function getNext7Days() {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const result = [];
+  const now = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + i);
+    result.push({
+      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : days[d.getDay()],
+      date: `${months[d.getMonth()]} ${d.getDate()}`,
+      iso: d.toISOString().split('T')[0],
+      dayName: days[d.getDay()]
+    });
+  }
+  return result;
+}
+
+function getSizePills(cat) {
+  const sizes = {
+    cleaning: ['Studio/1-bed', '2-bed', '3-bed', '3+ bed', 'Full house'],
+    handymen: ['Small job (1-2 hrs)', 'Half day', 'Full day', 'Multi-day project'],
+    junk: ['Few items', '1/4 truck', '1/2 truck', 'Full truck', 'Full cleanout'],
+    movers: ['Studio/1-bed', '2-bed', '3-bed', '3+ bed', 'Office/commercial']
+  };
+  return sizes[cat] || sizes.cleaning;
+}
+
+function getTimePills() {
+  return [
+    { label: '☀️ Morning', value: 'morning', sub: '8 AM – 12 PM' },
+    { label: '🌤 Afternoon', value: 'afternoon', sub: '12 – 4 PM' },
+    { label: '🌙 Evening', value: 'evening', sub: '4 – 8 PM' },
+    { label: '🔄 Flexible', value: 'flexible', sub: 'Any time' }
+  ];
+}
+
+function getQuickReplies(cat) {
+  const common = [
+    { text: 'Is this date available?', icon: '📅' },
+    { text: 'Can you do same-day?', icon: '⚡' },
+    { text: 'Do you offer landlord invoicing?', icon: '🧾' },
+  ];
+  const specific = {
+    cleaning: [
+      { text: 'Do you document for deposit recovery?', icon: '📸' },
+      { text: 'Do you include carpet steam clean?', icon: '🧹' },
+      { text: 'Can you clean appliances (oven, fridge)?', icon: '🍳' },
+    ],
+    handymen: [
+      { text: 'Can you patch drywall + paint?', icon: '🎨' },
+      { text: 'Do you handle plumbing issues?', icon: '🔧' },
+      { text: 'Can you do a pre-move inspection list?', icon: '📋' },
+    ],
+    junk: [
+      { text: 'Do you donate/recycle items?', icon: '♻️' },
+      { text: 'Can you handle appliance removal?', icon: '🏗' },
+      { text: 'Is there a minimum charge?', icon: '💰' },
+    ],
+    movers: [
+      { text: 'Do you wrap all furniture?', icon: '📦' },
+      { text: 'Do you offer storage?', icon: '🏠' },
+      { text: 'Can you move a piano/safe?', icon: '🎹' },
+    ]
+  };
+  return [...common, ...(specific[cat] || [])];
+}
+
+function toggleSvcBooking(id, mode) {
+  const panel = document.getElementById('svc-booking-' + id);
+  if (!panel) return;
+  document.querySelectorAll('[id^="svc-booking-"]').forEach(p => {
+    if (p.id !== 'svc-booking-' + id) { p.style.display = 'none'; p.innerHTML = ''; }
+  });
+  if (panel.style.display !== 'none' && svcBookingState[id]?.mode === mode) {
+    panel.style.display = 'none'; panel.innerHTML = ''; delete svcBookingState[id]; return;
+  }
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (!s) return;
+  svcBookingState[id] = { mode, size: null, date: null, time: null, message: '', quickReplies: [], customDate: '' };
+  panel.style.display = 'block';
+  renderBookingPanel(id, s, mode);
+}
+
+function renderBookingPanel(id, s, mode) {
+  const panel = document.getElementById('svc-booking-' + id);
+  if (!panel) return;
+  const state = svcBookingState[id];
+  if (!state) return;
+  const addr = document.getElementById('svc-address-input')?.value || '42 Scarboro Ave SW, Calgary';
+
+  if (state.submitted) {
+    panel.innerHTML = `
+      <div class="svc-booking-panel">
+        <div class="svc-booking-success">
+          <div class="svc-success-icon">${mode === 'book' ? '📅' : '✉️'}</div>
+          <div class="svc-success-title">${mode === 'book' ? 'Booking request sent!' : 'Message sent!'}</div>
+          <div class="svc-success-sub">${s.name} will respond in your Inbox. ${s.claimed ? 'Typically replies within 1-2 hours.' : 'NestIQ will email them on your behalf.'}</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button class="svc-send-btn" onclick="closeSvcBooking('${id}');openInboxToNewSvcThread('${id}')">View in Inbox →</button>
+            <button class="svc-send-btn ghost" onclick="closeSvcBooking('${id}')">Close</button>
+          </div>
+        </div>
+      </div>`;
+    injectSvcConversation(s, mode === 'book' ? 'quote' : 'message');
+    return;
+  }
+
+  if (mode === 'book') {
+    const days = getNext7Days();
+    const sizes = getSizePills(s.cat);
+    const times = getTimePills();
+    const pkgSection = s.packages && s.packages.length > 0 ? `
+      <div class="svc-section-label">Select a package</div>
+      <div class="svc-pill-row">
+        ${s.packages.map((p, i) => `<div class="svc-pill${state.pkg === i ? ' selected' : ''}" onclick="selectBookingPkg('${id}',${i})">
+          <div style="font-weight:700;">${p.name}</div>
+          <div style="font-size:10.5px;opacity:0.8;margin-top:1px;">${p.price} · ${p.note}</div>
+        </div>`).join('')}
+      </div>` : '';
+
+    panel.innerHTML = `
+      <div class="svc-booking-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:800;color:var(--text);">📅 Quick Book — ${s.name}</div>
+          <button onclick="closeSvcBooking('${id}')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text3);">✕</button>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;">
+          📍 <span style="color:var(--text);font-weight:600;">${addr}</span>
+        </div>
+        ${pkgSection}
+        <div class="svc-section-label">${s.cat === 'handymen' ? 'Job scope' : s.cat === 'junk' ? 'Load size' : 'Property size'}</div>
+        <div class="svc-pill-row">
+          ${sizes.map(sz => `<div class="svc-pill${state.size === sz ? ' selected' : ''}" onclick="selectBookingSize('${id}','${sz.replace(/'/g,"\\'")}')">${sz}</div>`).join('')}
+        </div>
+        <div class="svc-section-label">When do you need this?</div>
+        <div class="svc-date-row">
+          ${days.map(d => `<div class="svc-date-chip${state.date === d.iso ? ' selected' : ''}" onclick="selectBookingDate('${id}','${d.iso}')">
+            <span class="svc-date-day">${d.label}</span>
+            <span class="svc-date-num">${d.date}</span>
+          </div>`).join('')}
+          <div class="svc-date-chip custom-date" onclick="openCustomDate('${id}')" style="position:relative;">
+            <span class="svc-date-day">Other</span>
+            <span class="svc-date-num">📅</span>
+            <input type="date" class="svc-hidden-date" id="svc-custom-date-${id}" onchange="selectCustomDate('${id}', this.value)">
+          </div>
+        </div>
+        <div class="svc-section-label">Preferred time</div>
+        <div class="svc-time-row">
+          ${times.map(t => `<div class="svc-pill${state.time === t.value ? ' selected' : ''}" onclick="selectBookingTime('${id}','${t.value}')">
+            ${t.label}<span style="font-size:10px;opacity:0.7;margin-left:4px;">${t.sub}</span>
+          </div>`).join('')}
+        </div>
+        <div class="svc-section-label">Notes (optional)</div>
+        <textarea class="svc-inline-msg" rows="2" id="svc-book-notes-${id}" placeholder="Any details about the job…" oninput="svcBookingState['${id}'].message=this.value">${state.message}</textarea>
+        <div class="svc-send-bar" style="margin-top:12px;">
+          <button class="svc-send-btn ghost" onclick="closeSvcBooking('${id}')">Cancel</button>
+          <button class="svc-send-btn" onclick="submitBooking('${id}')" style="flex:1;" ${!state.size || !state.date || !state.time ? 'disabled' : ''}>
+            ${state.size && state.date && state.time ? '📅 Send Booking Request →' : 'Select size, date & time to book'}
+          </button>
+        </div>
+      </div>`;
+  } else {
+    const quickReplies = getQuickReplies(s.cat);
+    panel.innerHTML = `
+      <div class="svc-booking-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:800;color:var(--text);">💬 Quick Message — ${s.name}</div>
+          <button onclick="closeSvcBooking('${id}')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text3);">✕</button>
+        </div>
+        <div class="svc-section-label">Quick questions (tap to add)</div>
+        <div class="svc-quick-replies">
+          ${quickReplies.map((q, i) => `<div class="svc-quick-chip${state.quickReplies.includes(i) ? ' selected' : ''}" onclick="toggleQuickReply('${id}',${i})">${q.icon} ${q.text}</div>`).join('')}
+        </div>
+        <div class="svc-section-label">Or write your own</div>
+        <textarea class="svc-inline-msg" rows="3" id="svc-msg-text-${id}" placeholder="Type a message…" oninput="svcBookingState['${id}'].message=this.value">${state.message}</textarea>
+        <div class="svc-send-bar" style="margin-top:10px;">
+          <button class="svc-send-btn ghost" onclick="closeSvcBooking('${id}')">Cancel</button>
+          <button class="svc-send-btn" onclick="submitMessage('${id}')" style="flex:1;">Send Message →</button>
+        </div>
+      </div>`;
+  }
+}
+
+function selectBookingSize(id, size) {
+  if (!svcBookingState[id]) return;
+  svcBookingState[id].size = svcBookingState[id].size === size ? null : size;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'book');
+}
+
+function selectBookingDate(id, iso) {
+  if (!svcBookingState[id]) return;
+  svcBookingState[id].date = svcBookingState[id].date === iso ? null : iso;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'book');
+}
+
+function selectBookingTime(id, time) {
+  if (!svcBookingState[id]) return;
+  svcBookingState[id].time = svcBookingState[id].time === time ? null : time;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'book');
+}
+
+function selectBookingPkg(id, i) {
+  if (!svcBookingState[id]) return;
+  svcBookingState[id].pkg = svcBookingState[id].pkg === i ? null : i;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'book');
+}
+
+function openCustomDate(id) {
+  const input = document.getElementById('svc-custom-date-' + id);
+  if (input) { input.style.pointerEvents = 'auto'; input.showPicker ? input.showPicker() : input.click(); }
+}
+
+function selectCustomDate(id, val) {
+  if (!val || !svcBookingState[id]) return;
+  svcBookingState[id].date = val;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'book');
+}
+
+function toggleQuickReply(id, index) {
+  if (!svcBookingState[id]) return;
+  const qr = svcBookingState[id].quickReplies;
+  const idx = qr.indexOf(index);
+  if (idx >= 0) qr.splice(idx, 1); else qr.push(index);
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (!s) return;
+  const allReplies = getQuickReplies(s.cat);
+  const selected = qr.map(i => allReplies[i]?.text).filter(Boolean);
+  const customText = document.getElementById('svc-msg-text-' + id)?.value || '';
+  if (!customText || selected.length > 0) {
+    svcBookingState[id].message = selected.join('\n');
+  }
+  renderBookingPanel(id, s, 'message');
+}
+
+function closeSvcBooking(id) {
+  const panel = document.getElementById('svc-booking-' + id);
+  if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+  delete svcBookingState[id];
+}
+
+function submitBooking(id) {
+  if (!svcBookingState[id]) return;
+  svcBookingState[id].submitted = true;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'book');
+  showToast('📅 Booking request sent to ' + (s?.name || 'provider'));
+}
+
+function submitMessage(id) {
+  if (!svcBookingState[id]) return;
+  svcBookingState[id].submitted = true;
+  const s = Object.values(serviceData).flat().find(x => x.id === id);
+  if (s) renderBookingPanel(id, s, 'message');
+  showToast('✉️ Message sent to ' + (s?.name || 'provider'));
+}
+
 
 // ── EMAIL-BRIDGE INBOX INJECTION ──
 // Creates a real thread in Inbox for ANY business — claimed or not.
@@ -15251,34 +15638,31 @@ function handleWizardPhoto(input) {
     <button class="btn btn-ghost" onclick="showScreen('listings')" style="font-size:13px;">← Back</button>
   </nav>
 
-  <div style="flex:1;overflow-y:auto;padding:20px 20px 60px;">
-
-    <!-- Address bar -->
-    <div style="background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:16px 18px;margin-bottom:18px;display:flex;gap:10px;align-items:center;">
-      <span style="font-size:18px;flex-shrink:0;">📍</span>
-      <input id="svc-address-input" placeholder="Enter your property address…"
-        style="flex:1;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;"
-        value="42 Scarboro Ave SW, Calgary" oninput="renderServices()">
-      <button onclick="renderServices()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-size:12.5px;cursor:pointer;flex-shrink:0;">Search</button>
+  <div style="flex:1;overflow-y:auto;padding:0;" id="svc-scroll-area">
+    <div style="padding:20px 20px 0;">
+      <div style="background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:16px 18px;margin-bottom:18px;display:flex;gap:10px;align-items:center;">
+        <span style="font-size:18px;flex-shrink:0;">📍</span>
+        <input id="svc-address-input" placeholder="Enter your property address…"
+          style="flex:1;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;"
+          value="42 Scarboro Ave SW, Calgary" oninput="renderServices()">
+        <button onclick="renderServices()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-size:12.5px;cursor:pointer;flex-shrink:0;">Search</button>
+      </div>
     </div>
 
-    <!-- Category tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;" id="svc-cat-tabs">
-      <div class="svc-cat-tab active" id="sct-cleaning"   onclick="setSvcCat('cleaning')">🧹 Cleaning</div>
-      <div class="svc-cat-tab"        id="sct-handymen"   onclick="setSvcCat('handymen')">🔧 Handymen</div>
-      <div class="svc-cat-tab"        id="sct-junk"       onclick="setSvcCat('junk')">🗑 Junk Removal</div>
-      <div class="svc-cat-tab"        id="sct-movers"     onclick="setSvcCat('movers')">🚛 Movers</div>
+    <div class="svc-sticky-bar">
+      <div style="display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;" id="svc-cat-tabs">
+        <div class="svc-cat-tab active" id="sct-cleaning" onclick="setSvcCat('cleaning')">🧹 Cleaning</div>
+        <div class="svc-cat-tab" id="sct-handymen" onclick="setSvcCat('handymen')">🔧 Handymen</div>
+        <div class="svc-cat-tab" id="sct-junk" onclick="setSvcCat('junk')">🗑 Junk Removal</div>
+        <div class="svc-cat-tab" id="sct-movers" onclick="setSvcCat('movers')">🚛 Movers</div>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:12px;flex-wrap:wrap;">
+        <div class="cleaner-filter-chip active" id="sf-all" onclick="setSvcFilter('all')">All</div>
+        <div class="cleaner-filter-chip" id="sf-claimed" onclick="setSvcFilter('claimed')">✓ NestIQ Verified</div>
+      </div>
     </div>
 
-    <!-- Verified filter -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-      <div class="cleaner-filter-chip active" id="sf-all"     onclick="setSvcFilter('all')">All</div>
-      <div class="cleaner-filter-chip"        id="sf-claimed" onclick="setSvcFilter('claimed')">✓ NestIQ Verified</div>
-    </div>
-
-    <!-- Results -->
-    <div id="svc-results"></div>
-
+    <div style="padding:16px 20px 60px;" id="svc-results"></div>
   </div>
 </div>
 
