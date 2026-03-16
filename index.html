@@ -10210,7 +10210,7 @@ function toggleFav(id, el) {
   if (filterState.showSaved) applyFilters();
 }
 
-function updateSavedBadge() {
+var _updateSavedBadgeBase = function() {
   const count = savedIds.size;
   const badge = document.getElementById('saved-count-badge');
   const tab = document.getElementById('saved-tab');
@@ -10221,7 +10221,8 @@ function updateSavedBadge() {
   if (tab) {
     tab.style.color = filterState.showSaved ? 'var(--accent)' : count > 0 ? 'var(--text)' : 'var(--text2)';
   }
-}
+};
+function updateSavedBadge() { _updateSavedBadgeBase(); }
 
 function setSavedView() {
   filterState.showSaved = !filterState.showSaved;
@@ -12572,7 +12573,7 @@ function openConvo(id) {
   try {
   activeConvoId = id;
   const c = allThreads().find(x => x.id == id);
-  if (!c) { alert('Conversation not found: ' + id); return; }
+  if (!c) return;
   c.unread = false;
   // Also mark in source
   const bk = (inboxThreads||[]).find(t => t.id == id);
@@ -12661,7 +12662,7 @@ function openConvo(id) {
   }
 
   scrollThreadToBottom(id);
-  } catch(e) { alert('openConvo error: ' + e.message); }
+  } catch(e) { console.error('openConvo error:', e); }
 }
 
 function closeMobileThread() {
@@ -12833,13 +12834,14 @@ function scrollThreadToBottom(id) {
   });
 }
 
-function updateInboxBadges() {
+var _updateInboxBadgesBase = function() {
   const count = allThreads().filter(c => c.unread).length;
   ['inbox-badge-listings','inbox-badge-prop'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = count; el.style.display = count > 0 ? 'flex' : 'none'; }
   });
-}
+};
+function updateInboxBadges() { _updateInboxBadgesBase(); }
 
 function updateInboxBadge() { updateInboxBadges(); }
 
@@ -12953,18 +12955,16 @@ function fdSetBeds(beds, el) {
 }
 
 // Update saved badge in mobile nav
-const _origUpdateSavedBadge = updateSavedBadge;
 function updateSavedBadge() {
-  _origUpdateSavedBadge();
+  _updateSavedBadgeBase();
   const count = savedIds.size;
   const badge = document.getElementById('mbn-saved-badge');
   if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
 }
 
 // Update inbox badge in mobile nav
-const _origUpdateInboxBadges = updateInboxBadges;
 function updateInboxBadges() {
-  _origUpdateInboxBadges();
+  _updateInboxBadgesBase();
   const count = [...conversations, ...serviceConversations, ...(typeof landlordConversations !== "undefined" ? landlordConversations : [])].filter(c => c.unread).length;
   const badge = document.getElementById('mbn-inbox-badge');
   if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
