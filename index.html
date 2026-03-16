@@ -4348,12 +4348,45 @@ body.light-mode #screen-dashboard nav {
     </div>
     <div class="nav-right">
       <button class="btn btn-ghost" onclick="showScreen('listings')">← Listings</button>
+      <div style="position:relative;display:inline-block;" id="svc-dropdown-wrap-inbox">
+        <button class="svc-nav-btn" onclick="toggleSvcDropdownInbox()">
+          <span class="svc-nav-icon">🛠</span>
+          <span>Services</span>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="opacity:0.5;"><path d="M2 4l3 3 3-3"/></svg>
+        </button>
+        <div id="svc-dropdown-inbox" class="svc-dropdown" style="display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:8px;background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.03);padding:8px;min-width:230px;z-index:9000;">
+          <div style="padding:6px 12px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Move Services</div>
+          <div class="svc-drop-item" onclick="goService('cleaning')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;"><div class="svc-icon" style="background:rgba(79,124,255,0.1);">🧹</div><div><div style="font-weight:700;font-size:13.5px;">Cleaners</div></div></div>
+          <div class="svc-drop-divider"></div>
+          <div class="svc-drop-item" onclick="goService('moving')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;"><div class="svc-icon" style="background:rgba(45,211,111,0.1);">🚚</div><div><div style="font-weight:700;font-size:13.5px;">Movers</div></div></div>
+          <div class="svc-drop-divider"></div>
+          <div class="svc-drop-item" onclick="goService('junk')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;"><div class="svc-icon" style="background:rgba(240,78,78,0.1);">🗑️</div><div><div style="font-weight:700;font-size:13.5px;">Junk Removal</div></div></div>
+          <div class="svc-drop-divider"></div>
+          <div class="svc-drop-item" onclick="goService('handymen')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;"><div class="svc-icon" style="background:rgba(245,166,35,0.1);">🔧</div><div><div style="font-weight:700;font-size:13.5px;">Home Repair</div></div></div>
+        </div>
+      </div>
+      <div class="inbox-bell-btn" onclick="openInbox()" title="Messages" style="border-color:var(--accent);background:var(--accent-glow);">
+        ✉️
+      </div>
       <div class="notif-bell has-unread" onclick="toggleNotifPanel(event)" title="Notifications">
         🔔<div class="notif-badge" id="inbox-notif-badge">3</div>
       </div>
-      <div class="user-pill">
-        <div class="user-avatar" id="inbox-nav-avatar">SM</div>
-        <span class="user-name" id="inbox-nav-name">Sarah Mitchell</span>
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</div>
+      <div style="position:relative;display:inline-block;" id="user-dropdown-wrap-inbox">
+        <div class="user-pill" style="cursor:pointer;" onclick="toggleUserDropdownInbox()">
+          <div class="user-avatar" id="inbox-nav-avatar">SM</div>
+          <span class="user-name" id="inbox-nav-name">Sarah Mitchell</span>
+          <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+        </div>
+        <div id="user-dropdown-inbox" class="user-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:8px;background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.45);padding:8px;min-width:220px;z-index:9000;">
+          <div style="padding:10px 14px 12px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <div id="user-dd-name-inbox" style="font-weight:700;font-size:14px;"></div>
+            <div id="user-dd-email-inbox" style="font-size:12px;color:var(--text3);margin-top:2px;"></div>
+          </div>
+          <div class="user-drop-item" onclick="closeUserDropdownInbox();showScreen('dashboard')" style="padding:10px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;"><span style="font-size:16px;">👤</span><div style="font-weight:600;font-size:13px;">Profile</div></div>
+          <div style="height:1px;background:var(--border);margin:4px 10px;"></div>
+          <div class="user-drop-item" onclick="closeUserDropdownInbox();doSupabaseSignOut()" style="padding:10px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;"><span style="font-size:16px;">🚪</span><div style="font-weight:600;font-size:13px;color:var(--red);">Sign out</div></div>
+        </div>
       </div>
     </div>
   </nav>
@@ -5631,6 +5664,23 @@ function toggleSvcDropdown() {
   var dd = document.getElementById('svc-dropdown');
   dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
 }
+function toggleSvcDropdownInbox() {
+  var dd = document.getElementById('svc-dropdown-inbox');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+function toggleUserDropdownInbox() {
+  var dd = document.getElementById('user-dropdown-inbox');
+  var isOpen = dd.style.display !== 'none';
+  dd.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen && currentUser) {
+    document.getElementById('user-dd-name-inbox').textContent = currentUser.name || '';
+    document.getElementById('user-dd-email-inbox').textContent = currentUser.email || '';
+  }
+}
+function closeUserDropdownInbox() {
+  var dd = document.getElementById('user-dropdown-inbox');
+  if (dd) dd.style.display = 'none';
+}
 
 function goService(cat) {
   document.getElementById('svc-dropdown').style.display = 'none';
@@ -5660,12 +5710,17 @@ function closeUserDropdown() {
 
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('#svc-dropdown-wrap')) {
+  if (!e.target.closest('#svc-dropdown-wrap') && !e.target.closest('#svc-dropdown-wrap-inbox')) {
     var dd = document.getElementById('svc-dropdown');
     if (dd) dd.style.display = 'none';
+    var dd2 = document.getElementById('svc-dropdown-inbox');
+    if (dd2) dd2.style.display = 'none';
   }
   if (!e.target.closest('#user-dropdown-wrap')) {
     closeUserDropdown();
+  }
+  if (!e.target.closest('#user-dropdown-wrap-inbox')) {
+    closeUserDropdownInbox();
   }
 });
 
