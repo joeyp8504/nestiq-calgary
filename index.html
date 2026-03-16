@@ -3954,10 +3954,10 @@ body.light-mode #screen-dashboard nav {
       <div class="search-dropdown" id="search-dropdown"></div>
     </div>
     <div class="nav-right">
-      <button class="btn btn-ghost" onclick="showScreen('signup')">Sign in</button>
+      <button class="btn btn-ghost" id="nav-signin-btn" onclick="showScreen('signup')">Sign in</button>
       <button class="btn btn-ghost" onclick="showScreen('dashboard')" style="border-color:rgba(79,124,255,0.3);color:var(--accent);">🏠 Dashboard</button>
       <button class="btn btn-ghost" onclick="showScreen('services')" style="border-color:rgba(45,211,111,0.3);color:var(--green);">🛠 Services</button>
-      <button class="btn btn-primary" onclick="showScreen('signup')">+ Add Review</button>
+      <button class="btn btn-primary" id="nav-review-btn" onclick="handleAddReview()">+ Add Review</button>
       <div class="inbox-bell-btn" onclick="openInbox()" title="Messages">
         ✉️<div class="inbox-unread-badge" id="inbox-badge-listings">2</div>
       </div>
@@ -14953,12 +14953,28 @@ function applySession(session) {
   document.getElementById('nav-name').textContent = name;
   setUserAvatar('prop-avatar', currentUser);
   document.getElementById('prop-name').textContent = name;
+  // Hide sign-in button when logged in
+  var signInBtn = document.getElementById('nav-signin-btn');
+  if (signInBtn) signInBtn.style.display = 'none';
+}
+
+function handleAddReview() {
+  if (currentUser) {
+    // If logged in, open the first property to leave a review
+    openProperty(1);
+  } else {
+    showScreen('signup');
+  }
 }
 
 async function doSupabaseSignOut() {
   await sb.auth.signOut();
   currentUser = null;
-  showScreen('signup');
+  // Show sign-in button again
+  var signInBtn = document.getElementById('nav-signin-btn');
+  if (signInBtn) signInBtn.style.display = '';
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-signup').classList.add('active');
   showToast('Signed out');
 }
 
