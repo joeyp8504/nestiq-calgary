@@ -4100,8 +4100,8 @@ body.light-mode #screen-dashboard nav {
           <div class="dual-range-wrap">
             <div class="dual-range-track"></div>
             <div class="dual-range-fill" id="price-range-fill"></div>
-            <input type="range" class="dual-range dual-range-min" id="price-range-min" min="500" max="10000" step="50" value="500" oninput="setPriceRange()">
-            <input type="range" class="dual-range dual-range-max" id="price-range-max" min="500" max="10000" step="50" value="10000" oninput="setPriceRange()">
+            <input type="range" class="dual-range dual-range-min" id="price-range-min" min="500" max="10000" step="50" value="500" oninput="setPriceRangeVisual()" onchange="setPriceRangeApply()">
+            <input type="range" class="dual-range dual-range-max" id="price-range-max" min="500" max="10000" step="50" value="10000" oninput="setPriceRangeVisual()" onchange="setPriceRangeApply()">
           </div>
           <div class="range-row" style="margin-top:6px;"><span style="font-size:11px;color:var(--text3);">$500</span><span style="font-size:11px;color:var(--text3);">$10,000</span></div>
         </div>
@@ -10526,8 +10526,7 @@ function updateRangeFill(fillId, minVal, maxVal) {
   fill.style.width = (right - left) + '%';
 }
 
-var _priceDebounce = null;
-function setPriceRange() {
+function _readPriceSliders() {
   var minEl = document.getElementById('price-range-min');
   var maxEl = document.getElementById('price-range-max');
   var minVal = parseInt(minEl.value);
@@ -10536,13 +10535,23 @@ function setPriceRange() {
     minEl.value = maxVal - 100;
     minVal = maxVal - 100;
   }
-  filterState.minPrice = minVal;
-  filterState.maxPrice = maxVal;
-  updatePriceLabel();
-  updateRangeFill('price-range-fill', minVal, maxVal);
-  clearTimeout(_priceDebounce);
-  _priceDebounce = setTimeout(applyFilters, 150);
+  return { minVal: minVal, maxVal: maxVal };
 }
+
+function setPriceRangeVisual() {
+  var v = _readPriceSliders();
+  filterState.minPrice = v.minVal;
+  filterState.maxPrice = v.maxVal;
+  updatePriceLabel();
+  updateRangeFill('price-range-fill', v.minVal, v.maxVal);
+}
+
+function setPriceRangeApply() {
+  setPriceRangeVisual();
+  applyFilters();
+}
+
+function setPriceRange() { setPriceRangeApply(); }
 // Init fill on load
 document.addEventListener('DOMContentLoaded', function() { updateRangeFill('price-range-fill', 500, 10000); });
 
