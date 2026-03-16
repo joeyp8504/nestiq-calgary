@@ -12569,9 +12569,10 @@ function renderConvoList() {
 }
 
 function openConvo(id) {
+  try {
   activeConvoId = id;
   const c = allThreads().find(x => x.id == id);
-  if (!c) return;
+  if (!c) { alert('Conversation not found: ' + id); return; }
   c.unread = false;
   // Also mark in source
   const bk = (inboxThreads||[]).find(t => t.id == id);
@@ -12660,6 +12661,7 @@ function openConvo(id) {
   }
 
   scrollThreadToBottom(id);
+  } catch(e) { alert('openConvo error: ' + e.message); }
 }
 
 function closeMobileThread() {
