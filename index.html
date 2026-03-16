@@ -14950,24 +14950,6 @@ function applySession(session) {
   document.getElementById('prop-name').textContent = name;
 }
 
-async function checkSession() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    applySession(session);
-    showScreen('listings');
-  } else {
-    showScreen('signup');
-  }
-}
-
-sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    applySession(session);
-    showScreen('listings');
-    showToast('Welcome, ' + (currentUser.name.split(' ')[0]) + '!');
-  }
-});
-
 async function doSupabaseSignOut() {
   await sb.auth.signOut();
   currentUser = null;
@@ -14975,8 +14957,18 @@ async function doSupabaseSignOut() {
   showToast('Signed out');
 }
 
-// Init
-checkSession();
+// Listen for auth changes (handles Google OAuth redirect + email sign in)
+sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    applySession(session);
+    showScreen('listings');
+    if (event === 'SIGNED_IN') {
+      showToast('Welcome, ' + (currentUser.name.split(' ')[0]) + '!');
+    }
+  } else if (event === 'SIGNED_OUT' || !session) {
+    showScreen('signup');
+  }
+});
 </script>
 </body>
 </html>
