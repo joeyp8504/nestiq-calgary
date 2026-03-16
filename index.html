@@ -12369,19 +12369,23 @@ let activeConvoId = null;
 let inboxTab = 'all';
 
 function openInbox(convoId) {
-  if (currentUser) {
-    setUserAvatar('inbox-nav-avatar', currentUser);
-    document.getElementById('inbox-nav-name').textContent = currentUser.name || '';
+  try {
+    if (currentUser) {
+      setUserAvatar('inbox-nav-avatar', currentUser);
+      document.getElementById('inbox-nav-name').textContent = currentUser.name || '';
+    }
+    renderConvoList();
+    if (convoId) openConvo(convoId);
+    else document.getElementById('inbox-main').innerHTML = `
+      <div class="inbox-empty">
+        <div class="inbox-empty-icon">✉️</div>
+        <div class="inbox-empty-title">Select a conversation</div>
+        <div class="inbox-empty-sub">Choose a message thread on the left to read and reply.</div>
+      </div>`;
+    showScreen('inbox');
+  } catch(e) {
+    alert('Inbox error: ' + e.message + '\n' + e.stack);
   }
-  renderConvoList();
-  if (convoId) openConvo(convoId);
-  else document.getElementById('inbox-main').innerHTML = `
-    <div class="inbox-empty">
-      <div class="inbox-empty-icon">✉️</div>
-      <div class="inbox-empty-title">Select a conversation</div>
-      <div class="inbox-empty-sub">Choose a message thread on the left to read and reply.</div>
-    </div>`;
-  showScreen('inbox');
 }
 
 function setInboxTab(tab) {
