@@ -14962,27 +14962,45 @@ async function doSupabaseSignOut() {
   showToast('Signed out');
 }
 
-// Check session on page load - handles OAuth redirects and returning users
-(async function() {
-  // Give Supabase a moment to process any OAuth hash tokens in the URL
-  await new Promise(r => setTimeout(r, 500));
+// DEBUG: show what's happening with auth
+var debugEl = document.createElement('div');
+debugEl.id = 'auth-debug';
+debugEl.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:10px;z-index:99999;max-height:200px;overflow:auto;';
+document.body.appendChild(debugEl);
+function dbg(msg) { debugEl.innerHTML += msg + '<br>'; }
 
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    applySession(session);
-    showScreen('listings');
-    // Clean up the URL hash if present
-    if (window.location.hash) {
-      history.replaceState(null, '', window.location.pathname);
+dbg('URL: ' + window.location.href);
+dbg('Hash: ' + (window.location.hash ? window.location.hash.substring(0, 80) + '...' : 'NONE'));
+dbg('Search: ' + (window.location.search || 'NONE'));
+
+// Check session on page load
+(async function() {
+  try {
+    dbg('Waiting 500ms for Supabase to process tokens...');
+    await new Promise(r => setTimeout(r, 500));
+
+    dbg('Calling getSession...');
+    const { data, error } = await sb.auth.getSession();
+    dbg('getSession error: ' + (error ? error.message : 'none'));
+    dbg('getSession session: ' + (data.session ? 'YES - ' + data.session.user.email : 'NULL'));
+
+    if (data.session) {
+      applySession(data.session);
+      showScreen('listings');
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname);
+      }
+      showToast('Welcome, ' + currentUser.name.split(' ')[0] + '!');
+    } else {
+      showScreen('signup');
     }
-    showToast('Welcome, ' + currentUser.name.split(' ')[0] + '!');
-  } else {
-    showScreen('signup');
+  } catch(e) {
+    dbg('ERROR: ' + e.message);
   }
 })();
 
-// Also listen for future auth changes (sign in/out while on page)
 sb.auth.onAuthStateChange((event, session) => {
+  dbg('AUTH EVENT: ' + event + ' session=' + (session ? session.user.email : 'null'));
   if (event === 'SIGNED_IN' && session) {
     applySession(session);
     showScreen('listings');
