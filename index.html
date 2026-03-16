@@ -5337,34 +5337,11 @@ const SUPABASE_URL = 'https://mrierjzbrawffwcwetdc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yaWVyanpicmF3ZmZ3Y3dldGRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDc5OTYsImV4cCI6MjA4OTE4Mzk5Nn0.r5iFtAAImLrFrkn1L_X01jVJpZN_l7P4e8eiya3tABA';
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let isSignInMode = false;
+var _authSession = null;
 
-// Register auth listener IMMEDIATELY so we don't miss the OAuth redirect event
+// Store session from auth events immediately
 sb.auth.onAuthStateChange((event, session) => {
-  // Wait for DOM and functions to be ready
-  function waitAndApply() {
-    if (typeof showScreen === 'undefined' || typeof setUserAvatar === 'undefined') {
-      setTimeout(waitAndApply, 100);
-      return;
-    }
-    if (session) {
-      var user = session.user;
-      var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email.split('@')[0];
-      var initials = name.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0, 2);
-      var role = (user.user_metadata && user.user_metadata.role) || 'tenant';
-      currentUser = { name: name, email: user.email, role: role, initials: initials, photo: (user.user_metadata && user.user_metadata.avatar_url) || null };
-      setUserAvatar('nav-avatar', currentUser);
-      document.getElementById('nav-name').textContent = name;
-      setUserAvatar('prop-avatar', currentUser);
-      document.getElementById('prop-name').textContent = name;
-      showScreen('listings');
-      if (event === 'SIGNED_IN') {
-        showToast('Welcome, ' + name.split(' ')[0] + '!');
-      }
-    } else if (event === 'SIGNED_OUT') {
-      showScreen('signup');
-    }
-  }
-  waitAndApply();
+  _authSession = session;
 });
 </script>
 <script>
@@ -14985,6 +14962,35 @@ async function doSupabaseSignOut() {
   showScreen('signup');
   showToast('Signed out');
 }
+
+// Check session on page load - handles OAuth redirects and returning users
+(async function() {
+  // Give Supabase a moment to process any OAuth hash tokens in the URL
+  await new Promise(r => setTimeout(r, 500));
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    applySession(session);
+    showScreen('listings');
+    // Clean up the URL hash if present
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+    showToast('Welcome, ' + currentUser.name.split(' ')[0] + '!');
+  } else {
+    showScreen('signup');
+  }
+})();
+
+// Also listen for future auth changes (sign in/out while on page)
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    applySession(session);
+    showScreen('listings');
+  } else if (event === 'SIGNED_OUT') {
+    showScreen('signup');
+  }
+});
 
 </script>
 </body>
