@@ -357,6 +357,25 @@ nav {
 .btn { padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
 .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
 .btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.svc-nav-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: linear-gradient(135deg, rgba(79,124,255,0.1), rgba(79,124,255,0.05));
+  border: 1.5px solid rgba(79,124,255,0.25);
+  border-radius: 10px; padding: 7px 14px;
+  color: var(--accent); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.18s;
+}
+.svc-nav-btn:hover {
+  background: linear-gradient(135deg, rgba(79,124,255,0.18), rgba(79,124,255,0.1));
+  border-color: rgba(79,124,255,0.45);
+  box-shadow: 0 2px 12px rgba(79,124,255,0.15);
+  transform: translateY(-1px);
+}
+.svc-nav-btn:active { transform: translateY(0); }
+.svc-nav-icon {
+  font-size: 15px;
+}
 .svc-dropdown {
   animation: svcDropIn 0.18s cubic-bezier(0.34,1.2,0.64,1);
 }
@@ -3975,7 +3994,11 @@ body.light-mode #screen-dashboard nav {
       <button class="btn btn-ghost" id="nav-signin-btn" onclick="showScreen('signup')">Sign in</button>
       <button class="btn btn-ghost" onclick="showScreen('dashboard')" style="border-color:rgba(79,124,255,0.3);color:var(--accent);">🏠 Dashboard</button>
       <div style="position:relative;display:inline-block;" id="svc-dropdown-wrap">
-        <button class="btn btn-ghost" onclick="toggleSvcDropdown()" style="border-color:rgba(79,124,255,0.3);color:var(--accent);">🛠 Services ▾</button>
+        <button class="svc-nav-btn" onclick="toggleSvcDropdown()">
+          <span class="svc-nav-icon">🛠</span>
+          <span>Services</span>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="opacity:0.5;"><path d="M2 4l3 3 3-3"/></svg>
+        </button>
         <div id="svc-dropdown" class="svc-dropdown" style="display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:8px;background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.03);padding:8px;min-width:230px;z-index:9000;">
           <div style="padding:6px 12px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Move Services</div>
           <div class="svc-drop-item" onclick="goService('cleaning')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
