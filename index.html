@@ -4360,7 +4360,15 @@ body.light-mode #screen-dashboard nav {
   <div class="inbox-body">
     <div class="inbox-sidebar">
       <div class="inbox-sidebar-header">
-        <div class="inbox-sidebar-title">Messages</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="inbox-sidebar-title" style="margin-bottom:0;">Messages</div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600;" id="inbox-msg-count"></div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <input type="text" id="inbox-search" placeholder="Search conversations..." oninput="filterInboxSearch(this.value)"
+            style="width:100%;padding:8px 12px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none;transition:border-color 0.15s;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        </div>
         <div class="inbox-tabs">
           <div class="inbox-tab active" id="itab-all"   onclick="setInboxTab('all')">All</div>
           <div class="inbox-tab"        id="itab-unread" onclick="setInboxTab('unread')">Unread <span id="itab-unread-count" style="background:var(--accent);color:#fff;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px;">2</span></div>
@@ -12528,13 +12536,32 @@ function allThreads() {
   return [...realMessageConversations, ...bkThreads, ...landlordConversations, ...serviceConversations, ...conversations];
 }
 
+var _inboxSearchQuery = '';
+function filterInboxSearch(q) {
+  _inboxSearchQuery = q.toLowerCase().trim();
+  renderConvoList();
+}
+
 function renderConvoList() {
   const list = allThreads();
-  const filtered = inboxTab === 'unread' ? list.filter(c => c.unread) : list;
+  let filtered = inboxTab === 'unread' ? list.filter(c => c.unread) : list;
+
+  // Apply search filter
+  if (_inboxSearchQuery) {
+    filtered = filtered.filter(c =>
+      (c.with?.name || '').toLowerCase().includes(_inboxSearchQuery) ||
+      (c.listing?.address || '').toLowerCase().includes(_inboxSearchQuery) ||
+      (c.messages?.length && c.messages[c.messages.length-1]?.text || '').toLowerCase().includes(_inboxSearchQuery)
+    );
+  }
 
   const unreadCount = list.filter(c => c.unread).length;
   const badge = document.getElementById('itab-unread-count');
   if (badge) badge.textContent = unreadCount;
+
+  // Update message count
+  const countEl = document.getElementById('inbox-msg-count');
+  if (countEl) countEl.textContent = filtered.length + ' conversation' + (filtered.length !== 1 ? 's' : '');
 
   const svcCatLabels = { cleaning:'🧹 Cleaning', handymen:'🔧 Handyman', junk:'🗑 Junk Removal', movers:'🚛 Moving' };
 
@@ -12569,13 +12596,14 @@ function renderConvoList() {
   }).join('') || `<div style="padding:30px 16px;text-align:center;color:var(--text3);font-size:13px;">No messages here yet.</div>`;
 }
 
+var _openConvoRunning = false;
 function openConvo(id) {
+  if (_openConvoRunning) return;
+  _openConvoRunning = true;
   try {
   activeConvoId = id;
-  alert('step1: finding convo ' + id);
   const c = allThreads().find(x => x.id == id);
-  if (!c) { alert('not found'); return; }
-  alert('step2: found ' + c.with.name + ', marking read');
+  if (!c) { _openConvoRunning = false; return; }
   c.unread = false;
   c.unread = false;
   // Also mark in source
@@ -12587,11 +12615,8 @@ function openConvo(id) {
   if (sv) sv.unread = false;
   const lv = (typeof landlordConversations !== "undefined" ? landlordConversations : []).find(x => x.id == id);
   if (lv) lv.unread = false;
-  alert('step3: updating badges');
   updateInboxBadges();
-  alert('step4: rendering convo list');
   renderConvoList();
-  alert('step5: building header');
 
   const ll = c.with;
 
@@ -12646,7 +12671,7 @@ function openConvo(id) {
     ${stageHtml}
 
     <div class="thread-messages" id="thread-messages-${id}">
-      ${(alert('step6: rendering messages'),renderMessages(c))}
+      ${renderMessages(c)}
     </div>
 
     <div class="thread-compose">
@@ -12668,7 +12693,7 @@ function openConvo(id) {
   }
 
   scrollThreadToBottom(id);
-  } catch(e) { console.error('openConvo error:', e); }
+  } catch(e) { console.error('openConvo error:', e); } finally { _openConvoRunning = false; }
 }
 
 function closeMobileThread() {
