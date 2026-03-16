@@ -442,6 +442,13 @@ aside {
 .range-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
 .range-val { color: var(--text2); }
 input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+.dual-range-wrap { position: relative; height: 20px; }
+.dual-range { position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent; }
+.dual-range::-webkit-slider-thumb { pointer-events: all; -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.3); cursor: pointer; position: relative; z-index: 2; }
+.dual-range::-moz-range-thumb { pointer-events: all; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.3); cursor: pointer; }
+.dual-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--border2); }
+.dual-range-min::-webkit-slider-runnable-track { background: transparent; }
+.dual-range-max::-webkit-slider-runnable-track { background: transparent; }
 
 .checkbox-item { display: flex; align-items: center; gap: 9px; padding: 6px 9px; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: var(--text2); transition: background 0.12s; }
 .checkbox-item:hover { background: var(--surface2); color: var(--text); }
@@ -4086,11 +4093,14 @@ body.light-mode #screen-dashboard nav {
 
       <div class="sidebar-section">
         <div class="sidebar-label" style="display:flex;justify-content:space-between;">
-          Monthly Rent <span id="price-label" style="color:var(--text);font-weight:700;">Up to $5,000</span>
+          Monthly Rent <span id="price-label" style="color:var(--text);font-weight:700;">$500 – $10,000</span>
         </div>
         <div class="range-slider">
-          <input type="range" id="price-range" min="800" max="5000" step="50" value="5000" oninput="setPriceFilter(this.value)">
-          <div class="range-row" style="margin-top:6px;"><span style="font-size:11px;color:var(--text3);">$800</span><span style="font-size:11px;color:var(--text3);">$5,000</span></div>
+          <div class="dual-range-wrap">
+            <input type="range" class="dual-range dual-range-min" id="price-range-min" min="500" max="10000" step="50" value="500" oninput="setPriceRange()">
+            <input type="range" class="dual-range dual-range-max" id="price-range-max" min="500" max="10000" step="50" value="10000" oninput="setPriceRange()">
+          </div>
+          <div class="range-row" style="margin-top:6px;"><span style="font-size:11px;color:var(--text3);">$500</span><span style="font-size:11px;color:var(--text3);">$10,000</span></div>
         </div>
       </div>
 
@@ -10332,7 +10342,8 @@ function setSavedView() {
 // ── FILTER STATE ──
 const filterState = {
   hood: 'all',
-  maxPrice: 5000,
+  minPrice: 500,
+  maxPrice: 10000,
   beds: 'any',
   scores: { high: true, mid: true, low: true },
   avail: { now: true, soon: true, pet: false },
@@ -10354,6 +10365,7 @@ function applyFiltersGetList() {
     if (filterState.showSaved && !savedIds.has(l.id)) return false;
     if (filterState.hood !== 'all' && l.hood !== filterState.hood) return false;
     if (l.price > filterState.maxPrice) return false;
+    if (filterState.minPrice && l.price < filterState.minPrice) return false;
     if (filterState.beds !== 'any') {
       const b = parseInt(filterState.beds);
       if (b === 3) { if (l.beds < 3) return false; }
@@ -10435,10 +10447,10 @@ function applyFilters() {
   const hoods = ['Beltline','Bankview','Kensington','East Village','Scarboro','Downtown West'];
   hoods.forEach(h => {
     const el = document.getElementById('hc-' + h);
-    if (el) el.textContent = listings.filter(l => l.hood === h && l.price <= filterState.maxPrice).length;
+    if (el) el.textContent = listings.filter(l => l.hood === h && l.price <= filterState.maxPrice && l.price >= (filterState.minPrice||0)).length;
   });
   const allEl = document.getElementById('hc-all');
-  if (allEl) allEl.textContent = listings.filter(l => l.price <= filterState.maxPrice).length;
+  if (allEl) allEl.textContent = listings.filter(l => l.price <= filterState.maxPrice && l.price >= (filterState.minPrice||0)).length;
 
   // Active tags
   renderActiveTags(filtered.length);
@@ -10465,7 +10477,10 @@ function renderActiveTags(count) {
   if (!wrap) return;
   const tags = [];
   if (filterState.hood !== 'all') tags.push({ label: filterState.hood, clear: () => { filterState.hood = 'all'; document.querySelectorAll('#hood-filters .filter-item').forEach(e => e.classList.remove('active')); document.querySelector('#hood-filters [data-hood="all"]').classList.add('active'); applyFilters(); } });
-  if (filterState.maxPrice < 5000) tags.push({ label: `Under $${filterState.maxPrice.toLocaleString()}`, clear: () => { filterState.maxPrice = 5000; document.getElementById('price-range').value = 5000; document.getElementById('price-label').textContent = 'Up to $5,000'; applyFilters(); } });
+  if (filterState.minPrice > 500 || filterState.maxPrice < 10000) {
+    var pLabel = filterState.minPrice > 500 && filterState.maxPrice < 10000 ? `$${filterState.minPrice.toLocaleString()} – $${filterState.maxPrice.toLocaleString()}` : filterState.minPrice > 500 ? `$${filterState.minPrice.toLocaleString()}+` : `Under $${filterState.maxPrice.toLocaleString()}`;
+    tags.push({ label: pLabel, clear: () => { filterState.minPrice = 500; filterState.maxPrice = 10000; document.getElementById('price-range-min').value = 500; document.getElementById('price-range-max').value = 10000; updatePriceLabel(); applyFilters(); } });
+  }
   if (filterState.beds !== 'any') { const bl = ['Studio','1 Bed','2 Beds','3+ Beds']; tags.push({ label: bl[parseInt(filterState.beds)] || filterState.beds + ' Beds', clear: () => { filterState.beds = 'any'; document.querySelectorAll('#bed-filters .filter-item').forEach(e => e.classList.remove('active')); document.querySelector('#bed-filters [data-beds="any"]').classList.add('active'); applyFilters(); } }); }
   if (!filterState.scores.high) tags.push({ label: 'No 4.5+ scores', clear: () => { filterState.scores.high = true; setCbState('score-high', true); applyFilters(); } });
   if (!filterState.scores.mid) tags.push({ label: 'No 3.5–4.5', clear: () => { filterState.scores.mid = true; setCbState('score-mid', true); applyFilters(); } });
@@ -10494,9 +10509,40 @@ function setHood(el, hood) {
 
 function setPriceFilter(val) {
   filterState.maxPrice = parseInt(val);
-  const label = parseInt(val) >= 5000 ? 'Up to $5,000' : `Up to $${parseInt(val).toLocaleString()}`;
-  document.getElementById('price-label').textContent = label;
+  updatePriceLabel();
   applyFilters();
+}
+
+function setPriceRange() {
+  var minEl = document.getElementById('price-range-min');
+  var maxEl = document.getElementById('price-range-max');
+  var minVal = parseInt(minEl.value);
+  var maxVal = parseInt(maxEl.value);
+  // Prevent crossing
+  if (minVal > maxVal - 100) {
+    minEl.value = maxVal - 100;
+    minVal = maxVal - 100;
+  }
+  filterState.minPrice = minVal;
+  filterState.maxPrice = maxVal;
+  updatePriceLabel();
+  applyFilters();
+}
+
+function updatePriceLabel() {
+  var min = filterState.minPrice || 500;
+  var max = filterState.maxPrice || 10000;
+  var label;
+  if (min <= 500 && max >= 10000) {
+    label = 'Any price';
+  } else if (min <= 500) {
+    label = 'Up to $' + max.toLocaleString();
+  } else if (max >= 10000) {
+    label = '$' + min.toLocaleString() + '+';
+  } else {
+    label = '$' + min.toLocaleString() + ' – $' + max.toLocaleString();
+  }
+  document.getElementById('price-label').textContent = label;
 }
 
 function setBeds(el, beds) {
@@ -10571,7 +10617,7 @@ function toggleLandlordFlexQual(listingId) {
 
 function resetFilters() {
   filterState.hood = 'all';
-  filterState.maxPrice = 5000;
+  filterState.minPrice = 500; filterState.maxPrice = 10000;
   filterState.beds = 'any';
   filterState.scores = { high: true, mid: true, low: true };
   filterState.avail = { now: true, soon: true, pet: false };
@@ -12813,8 +12859,9 @@ function showScreen(id) {
 // Filter drawer
 function openFilterDrawer() {
   // Sync drawer state from filterState
-  document.getElementById('fd-price-range').value = filterState.maxPrice;
-  document.getElementById('fd-price-label').textContent = 'Up to $' + Number(filterState.maxPrice).toLocaleString();
+  document.getElementById('fd-price-range-min').value = filterState.minPrice || 500;
+  document.getElementById('fd-price-range-max').value = filterState.maxPrice || 10000;
+  updateFdPriceLabel();
   document.getElementById('filter-drawer').classList.add('open');
 }
 
@@ -12823,10 +12870,33 @@ function closeFilterDrawer() {
   updateMobileFilterBtn();
 }
 
+function fdSetPriceRange() {
+  var minEl = document.getElementById('fd-price-range-min');
+  var maxEl = document.getElementById('fd-price-range-max');
+  var minVal = parseInt(minEl.value);
+  var maxVal = parseInt(maxEl.value);
+  if (minVal > maxVal - 100) { minEl.value = maxVal - 100; minVal = maxVal - 100; }
+  filterState.minPrice = minVal;
+  filterState.maxPrice = maxVal;
+  updateFdPriceLabel();
+}
+
+function updateFdPriceLabel() {
+  var min = filterState.minPrice || 500;
+  var max = filterState.maxPrice || 10000;
+  var label;
+  if (min <= 500 && max >= 10000) label = 'Any price';
+  else if (min <= 500) label = 'Up to $' + max.toLocaleString();
+  else if (max >= 10000) label = '$' + min.toLocaleString() + '+';
+  else label = '$' + min.toLocaleString() + ' – $' + max.toLocaleString();
+  var el = document.getElementById('fd-price-label');
+  if (el) el.textContent = label;
+}
+
 function updateMobileFilterBtn() {
   const btn = document.getElementById('mobile-filter-btn');
   if (!btn) return;
-  const hasFilters = filterState.maxPrice < 5000 || filterState.beds !== 'any' || filterState.hood !== 'all'
+  const hasFilters = filterState.maxPrice < 10000 || filterState.minPrice > 500 || filterState.beds !== 'any' || filterState.hood !== 'all'
     || !filterState.avail.pet === false || filterState.showSaved;
   btn.classList.toggle('has-filters', hasFilters);
 }
@@ -14908,11 +14978,14 @@ function handleWizardPhoto(input) {
 
       <div style="margin-bottom:20px;">
         <div class="sidebar-label" style="display:flex;justify-content:space-between;margin-bottom:10px;">
-          Monthly Rent <span id="fd-price-label" style="color:var(--text);font-weight:700;">Up to $5,000</span>
+          Monthly Rent <span id="fd-price-label" style="color:var(--text);font-weight:700;">$500 – $10,000</span>
         </div>
         <div class="range-slider">
-          <input type="range" id="fd-price-range" min="800" max="5000" step="50" value="5000"
-            oninput="filterState.maxPrice=+this.value;document.getElementById('fd-price-label').textContent='Up to $'+Number(this.value).toLocaleString()">
+          <div class="dual-range-wrap">
+            <input type="range" class="dual-range dual-range-min" id="fd-price-range-min" min="500" max="10000" step="50" value="500" oninput="fdSetPriceRange()">
+            <input type="range" class="dual-range dual-range-max" id="fd-price-range-max" min="500" max="10000" step="50" value="10000" oninput="fdSetPriceRange()">
+          </div>
+          <div class="range-row" style="margin-top:6px;"><span style="font-size:11px;color:var(--text3);">$500</span><span style="font-size:11px;color:var(--text3);">$10,000</span></div>
         </div>
       </div>
 
