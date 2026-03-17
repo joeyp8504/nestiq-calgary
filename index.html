@@ -6607,7 +6607,16 @@ function handlePhotoUpload(input) {
 }
 
 // ── GOOGLE LOGIN ──
-async function doGoogleLogin() {  var cleanUrl = window.location.origin + window.location.pathname;  console.log("[NestIQ Auth] Starting Google OAuth, redirectTo:", cleanUrl);  var result = await sb.auth.signInWithOAuth({    provider: "google",    options: {      redirectTo: cleanUrl,      queryParams: { access_type: "offline", prompt: "consent" }    }  });  if (result.error) {    console.error("[NestIQ Auth] OAuth error:", result.error);    showToast("Google sign-in failed: " + result.error.message);  } else {    console.log("[NestIQ Auth] Redirecting to Google...");  }}
+async function doGoogleLogin() {
+  var cleanUrl = window.location.origin + window.location.pathname;
+  var result = await sb.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: cleanUrl }
+  });
+  if (result.error) {
+    showToast("Google sign-in failed: " + result.error.message);
+  }
+}
 
 function selectGoogleAccount(name, email, initials, role, photoUrl) {
   // Legacy — now handled by Supabase OAuth
