@@ -6607,15 +6607,7 @@ function handlePhotoUpload(input) {
 }
 
 // ── GOOGLE LOGIN ──
-async function doGoogleLogin() {
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.href }
-  });
-  if (error) {
-    showToast('Google sign-in failed: ' + error.message);
-  }
-}
+async function doGoogleLogin() {  var cleanUrl = window.location.origin + window.location.pathname;  console.log("[NestIQ Auth] Starting Google OAuth, redirectTo:", cleanUrl);  var result = await sb.auth.signInWithOAuth({    provider: "google",    options: {      redirectTo: cleanUrl,      queryParams: { access_type: "offline", prompt: "consent" }    }  });  if (result.error) {    console.error("[NestIQ Auth] OAuth error:", result.error);    showToast("Google sign-in failed: " + result.error.message);  } else {    console.log("[NestIQ Auth] Redirecting to Google...");  }}
 
 function selectGoogleAccount(name, email, initials, role, photoUrl) {
   // Legacy — now handled by Supabase OAuth
@@ -15915,23 +15907,34 @@ async function doSupabaseSignOut() {
   showToast('Signed out');
 }
 
-// Check session on page load
+// Check session on page load (with OAuth hash detection)
 var _authHandled = false;
 
 (async function() {
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(function(r){ setTimeout(r, 300); });
   if (_authHandled) return;
-
-  const { data } = await sb.auth.getSession();
-  if (data.session) {
+  console.log("[NestIQ Auth] Checking session... hash:", window.location.hash ? "present" : "none");
+  var result = await sb.auth.getSession();
+  if (result.data.session) {
+    console.log("[NestIQ Auth] Session found:", result.data.session.user.email);
     _authHandled = true;
-    applySession(data.session);
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-listings').classList.add('active');
-    if (window.location.hash) {
-      history.replaceState(null, '', window.location.pathname);
+    applySession(result.data.session);
+    document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+    document.getElementById("screen-listings").classList.add("active");
+    if (window.location.hash) history.replaceState(null, "", window.location.pathname);
+  } else if (window.location.hash && window.location.hash.indexOf("access_token") !== -1) {
+    console.log("[NestIQ Auth] Hash has tokens, retrying...");
+    await new Promise(function(r){ setTimeout(r, 1500); });
+    var retry = await sb.auth.getSession();
+    if (retry.data.session && !_authHandled) {
+      _authHandled = true;
+      applySession(retry.data.session);
+      document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+      document.getElementById("screen-listings").classList.add("active");
+      history.replaceState(null, "", window.location.pathname);
     }
   }
+
 })();
 
 sb.auth.onAuthStateChange((event, session) => {
