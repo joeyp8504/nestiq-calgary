@@ -2180,7 +2180,9 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     flex-shrink: 0;
   }
 
-  /* ── SERVICES SCREEN ── */  #screen-services { overflow-y: auto !important; }  #screen-services .svc-container { flex-direction: column; height: auto; }  #screen-services .svc-sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 8px 0; }  #screen-services .svc-sidebar-title, #screen-services .svc-sidebar-divider, #screen-services .svc-sidebar-filter { display: none; }  #screen-services .svc-sidebar-item { padding: 8px 16px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }  #screen-services .svc-sidebar-item.active { border-left-color: transparent; border-bottom-color: var(--accent); } .svc-card-list { grid-template-columns: 1fr !important; }
+  /* ── SERVICES SCREEN ── */
+  #screen-services { flex-direction: column; }
+  #screen-services aside { display: none; }
 
   /* ── POST LISTING WIZARD ── */
   #post-listing-overlay { align-items: flex-end !important; padding: 0 !important; }
@@ -3969,6 +3971,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 .screen { scroll-behavior: smooth; }
+
+/* Services uses listings grid */
+#screen-services .listings-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+#screen-services aside { min-width: 200px; }
 
 </style>
 </head>
@@ -5876,7 +5882,7 @@ document.addEventListener('click', function(e) {
 
 function setSvcCat(cat) {
   svcCategory = cat;
-  document.querySelectorAll('.svc-sidebar-item').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('#screen-services .filter-item').forEach(function(el) { el.classList.remove('active'); });
   var el = document.getElementById('sct-' + cat);
   if (el) el.classList.add('active');
   renderServices();
@@ -5884,9 +5890,10 @@ function setSvcCat(cat) {
 
 function setSvcFilter(f) {
   svcFilter = f;
-  document.querySelectorAll('.svc-sidebar-filter').forEach(function(el) { el.classList.remove('active'); });
-  var el = document.getElementById('sf-' + f);
-  if (el) el.classList.add('active');
+  var allEl = document.getElementById('sf-all');
+  var claimedEl = document.getElementById('sf-claimed');
+  if (allEl) { var cb = allEl.querySelector('.cb'); if (cb) { if (f === 'all') { cb.classList.add('checked'); cb.textContent = '✓'; } else { cb.classList.remove('checked'); cb.textContent = ''; } } }
+  if (claimedEl) { var cb2 = claimedEl.querySelector('.cb'); if (cb2) { if (f === 'claimed') { cb2.classList.add('checked'); cb2.textContent = '✓'; } else { cb2.classList.remove('checked'); cb2.textContent = ''; } } }
   renderServices();
 }
 
@@ -5938,43 +5945,44 @@ function svcReliabilityHtml(s) {
 }
 
 function renderServiceCard(s, idx) {
-  var verifiedBadge = s.claimed ? '<span class="cleaner-badge verified">✓ Verified</span>' : '';
-  var tagBadges = s.tags.slice(0, 2).map(function(t) { return '<span class="cleaner-badge">' + t + '</span>'; }).join('');
-  var gRating = s.googleRating ?? '—';
-  var gCount = (s.googleReviewCount ?? 0).toLocaleString();
+  var verifiedBadge = s.claimed ? '<span style="color:var(--green);font-size:11px;font-weight:700;"> ✓ Verified</span>' : '';
+  var tagHtml = s.tags.slice(0, 3).map(function(t) { return '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;background:var(--surface2);color:var(--text3);margin-right:4px;">' + t + '</span>'; }).join('');
+  var gRating = s.googleRating != null ? s.googleRating : '—';
+  var gCount = (s.googleReviewCount || 0).toLocaleString();
   var nRating = s.nestiqRating;
-  var nCount = s.nestiqReviewCount ?? 0;
+  var nCount = s.nestiqReviewCount || 0;
   var reliabilityHtml = svcReliabilityHtml(s);
   var isTopPick = idx === 0;
-  var ratingLine = '<span class="svc-rating-source">Google</span> <span class="svc-rating-stars">★</span> <strong>' + gRating + '</strong> <span style="color:var(--text3)">(' + gCount + ')</span>';
-  if (nRating) {
-    ratingLine += ' &nbsp;<span class="svc-rating-source nestiq">NestIQ</span> <span class="svc-rating-stars">★</span> <strong>' + nRating + '</strong> <span style="color:var(--text3)">(' + nCount + ')</span>';
-  }
   var priceLine = '';
   if (s.packages && s.packages.length > 0) {
-    priceLine = '<div class="svc-price-tag"><span class="svc-price-from">from</span> ' + s.packages[0].price + '</div>';
+    priceLine = '<div style="font-size:18px;font-weight:800;letter-spacing:-0.5px;">' + s.packages[0].price + '<span style="font-size:11px;font-weight:400;color:var(--text3);"> starting</span></div>';
   }
-  return '<div class="cleaner-card' + (s.claimed ? ' claimed' : '') + (isTopPick ? ' top-pick' : '') + '" id="svc-card-' + s.id + '">' +
-    '<div class="svc-card-inner">' +
-      '<div class="cleaner-avatar" style="background:' + s.color + '18;font-size:22px;">' + s.emoji + '</div>' +
-      '<div class="svc-card-info">' +
-        '<div class="cleaner-name">' + s.name + (isTopPick ? ' <span style="font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-glow);padding:2px 7px;border-radius:4px;">TOP PICK</span>' : '') + '</div>' +
-        '<div style="font-size:12px;margin-bottom:4px;">' + ratingLine + '</div>' +
-        reliabilityHtml +
-        '<div class="cleaner-meta">⏰ ' + s.hours + ' · 📍 ' + s.distance + '</div>' +
-        '<div class="cleaner-badges">' + verifiedBadge + tagBadges + '</div>' +
-      '</div>' +
-      '<div class="svc-card-actions">' +
-        priceLine +
-        '<button class="cleaner-btn-primary" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'book\')">📅 Book</button>' +
-        '<button class="cleaner-btn-ghost" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'message\')">💬 Message</button>' +
-      '</div>' +
-    '</div>' +
-    '<div class="cleaner-body">' +
-      '<div style="font-size:12px;color:var(--text2);line-height:1.55;">' + s.bio + '</div>' +
-    '</div>' +
-    '<div id="svc-booking-' + s.id + '" style="display:none;"></div>' +
-  '</div>';
+  var nestiqLine = nRating ? '<span style="margin-left:8px;"><span style="background:var(--accent-glow);color:var(--accent);padding:1px 6px;border-radius:10px;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;">NestIQ</span> ★ ' + nRating + ' <span style="color:var(--text3)">(' + nCount + ')</span></span>' : '';
+  var topBadge = isTopPick ? '<span style="font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-glow);padding:3px 8px;border-radius:6px;text-transform:uppercase;">Top Pick</span>' : '';
+
+  var html = '<div class="card" style="border-radius:14px;overflow:hidden;cursor:default;" id="svc-card-' + s.id + '">';
+  html += '<div style="height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;background:' + s.color + '15;">' + s.emoji + '</div>';
+  html += '<div style="padding:14px 16px 10px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">';
+  html += '<div style="font-size:15px;font-weight:800;letter-spacing:-0.3px;">' + s.name + verifiedBadge + '</div>';
+  html += topBadge;
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">';
+  html += '<span style="color:#f5c842;">★</span> <strong>' + gRating + '</strong> <span style="color:var(--text3)">(' + gCount + ' Google)</span>' + nestiqLine;
+  html += '</div>';
+  html += reliabilityHtml;
+  html += '<div style="font-size:11.5px;color:var(--text3);margin:4px 0 6px;">📍 ' + s.distance + ' · ⏰ ' + s.hours + '</div>';
+  html += '<div style="margin-bottom:8px;">' + tagHtml + '</div>';
+  html += '<div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:10px;">' + s.bio + '</div>';
+  html += priceLine;
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px;padding:0 16px 14px;">';
+  html += '<button class="cleaner-btn-ghost" style="flex:1;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'message\')">💬 Message</button>';
+  html += '<button class="cleaner-btn-primary" style="flex:2;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'book\')">📅 Book Now</button>';
+  html += '</div>';
+  html += '<div id="svc-booking-' + s.id + '" style="display:none;"></div>';
+  html += '</div>';
+  return html;
 }
 // ── UNIFIED COMPOSE MODAL: MESSAGE (quick freeform) ──
 function openSvcMessage(id) {
@@ -15663,57 +15671,68 @@ function handleWizardPhoto(input) {
 </div>
 
 <!-- ══ SERVICES SCREEN ══ -->
-<div class="screen" id="screen-services" style="flex-direction:column;overflow:hidden;height:100%;background:var(--bg);">
+<div class="screen" id="screen-services" style="flex-direction:column;">
   <nav>
     <div class="nav-logo" onclick="showScreen('listings')">
       <div class="nav-logo-icon">🏠</div> <span style="letter-spacing:-1px">Nest<span style="color:#4f7cff">IQ</span></span>
     </div>
-    <span style="color:var(--border2);font-size:18px;font-weight:200;">|</span>
-    <span style="font-size:13px;font-weight:600;color:var(--text2);">Services</span>
-    <div style="margin-left:auto;">
-      <button class="btn btn-ghost" onclick="showScreen('listings')" style="font-size:12px;padding:5px 12px;">← Back to Listings</button>
+    <div class="nav-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="svc-address-input" placeholder="Search address for nearby services..." value="42 Scarboro Ave SW, Calgary" oninput="renderServices()">
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-ghost" onclick="showScreen('listings')" style="font-size:12px;">← Listings</button>
+      <div class="inbox-bell-btn" onclick="openInbox()" title="Messages">
+        ✉️<div class="inbox-unread-badge" id="inbox-badge-svc">2</div>
+      </div>
+      <div class="notif-bell has-unread" onclick="toggleNotifPanel(event)" title="Notifications">
+        🔔<div class="notif-badge" id="notif-badge-svc">3</div>
+      </div>
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</div>
+      <div style="position:relative;display:inline-block;">
+        <div class="user-pill" style="cursor:pointer;" onclick="toggleUserDropdown()">
+          <div class="user-avatar" id="nav-avatar-svc">SM</div>
+          <span class="user-name" id="nav-name-svc">Sarah</span>
+          <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+        </div>
+      </div>
     </div>
   </nav>
-  <div class="svc-container">
-    <div class="svc-sidebar">
-      <div class="svc-sidebar-title">Categories</div>
-      <div class="svc-sidebar-item active" id="sct-cleaning" onclick="setSvcCat('cleaning')">
-        <span class="svc-sidebar-emoji">🧹</span> Cleaning <span class="svc-sidebar-count" id="svc-count-cleaning">6</span>
-      </div>
-      <div class="svc-sidebar-item" id="sct-handymen" onclick="setSvcCat('handymen')">
-        <span class="svc-sidebar-emoji">🔧</span> Handymen <span class="svc-sidebar-count" id="svc-count-handymen">5</span>
-      </div>
-      <div class="svc-sidebar-item" id="sct-junk" onclick="setSvcCat('junk')">
-        <span class="svc-sidebar-emoji">🗑</span> Junk Removal <span class="svc-sidebar-count" id="svc-count-junk">3</span>
-      </div>
-      <div class="svc-sidebar-item" id="sct-movers" onclick="setSvcCat('movers')">
-        <span class="svc-sidebar-emoji">🚛</span> Movers <span class="svc-sidebar-count" id="svc-count-movers">5</span>
-      </div>
-      <div class="svc-sidebar-divider"></div>
-      <div class="svc-sidebar-title">Filters</div>
-      <div class="svc-sidebar-filter active" id="sf-all" onclick="setSvcFilter('all')">
-        <div class="svc-check">✓</div> Show all providers
-      </div>
-      <div class="svc-sidebar-filter" id="sf-claimed" onclick="setSvcFilter('claimed')">
-        <div class="svc-check"></div> NestIQ Verified only
-      </div>
-    </div>
-    <div class="svc-main">
-      <div class="svc-toolbar">
-        <div class="svc-toolbar-count" id="svc-toolbar-count"><strong>6</strong> cleaners near Calgary</div>
-        <div class="svc-addr-inline">
-          <span>📍</span>
-          <input id="svc-address-input" placeholder="Address…" value="42 Scarboro Ave SW, Calgary" oninput="renderServices()">
+
+  <div class="app-body">
+    <aside>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Service Type</div>
+        <div class="filter-group">
+          <div class="filter-item active" id="sct-cleaning" onclick="setSvcCat('cleaning')"><div class="filter-dot" style="background:#4f7cff"></div>🧹 Cleaning<span class="filter-count" id="svc-count-cleaning">6</span></div>
+          <div class="filter-item" id="sct-handymen" onclick="setSvcCat('handymen')"><div class="filter-dot" style="background:#f5a623"></div>🔧 Handymen<span class="filter-count" id="svc-count-handymen">5</span></div>
+          <div class="filter-item" id="sct-junk" onclick="setSvcCat('junk')"><div class="filter-dot" style="background:#ef4444"></div>🗑 Junk Removal<span class="filter-count" id="svc-count-junk">3</span></div>
+          <div class="filter-item" id="sct-movers" onclick="setSvcCat('movers')"><div class="filter-dot" style="background:#22c55e"></div>🚛 Movers<span class="filter-count" id="svc-count-movers">5</span></div>
         </div>
-        <select class="svc-toolbar-sort" onchange="svcSort=this.value;renderServices()">
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Verification</div>
+        <div class="filter-group">
+          <div class="checkbox-item" id="sf-all" onclick="setSvcFilter('all')"><div class="cb checked">✓</div>Show all providers</div>
+          <div class="checkbox-item" id="sf-claimed" onclick="setSvcFilter('claimed')"><div class="cb"></div>NestIQ Verified only</div>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="toolbar">
+        <span class="result-count" id="svc-toolbar-count"><strong>6</strong> cleaners near Calgary</span>
+        <select class="sort-select" onchange="svcSort=this.value;renderServices()">
           <option value="rating">Highest rated</option>
           <option value="distance">Nearest first</option>
           <option value="reviews">Most reviews</option>
           <option value="nestiq">Best NestIQ score</option>
         </select>
       </div>
-      <div class="svc-card-list" id="svc-results"></div>
-    </div>
+      <div class="listings-wrap">
+        <div class="listings-grid" id="svc-results"></div>
+      </div>
+    </main>
   </div>
 </div>
 
