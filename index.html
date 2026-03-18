@@ -657,8 +657,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
 .prop-hero { border-radius: 16px; overflow: hidden; height: 280px; position: relative; }
 .prop-hero img { width: 100%; height: 100%; object-fit: cover; }
-.prop-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,10,16,0.9) 0%, rgba(8,10,16,0.2) 50%, transparent 75%); }
-.prop-hero-info { position: absolute; bottom: 18px; left: 18px; right: 18px; display: flex; align-items: flex-end; justify-content: space-between; }
+.prop-hero-overlay { display:none; }
+.prop-hero-info { display:none; }
 .prop-price { font-size: 32px; font-weight: 900; letter-spacing: -1.5px; color: #fff; }
 .prop-price span { font-size: 16px; font-weight: 400; opacity: 0.65; }
 .prop-addr { font-size: 12.5px; color: rgba(255,255,255,0.65); margin-top: 3px; }
@@ -8361,10 +8361,9 @@ function renderCard(l, i) {
     </div>
     <div class="card-body">
       <div class="card-top">
-        <div class="card-price">$${l.price.toLocaleString()}<span>/mo</span></div>
+        <div class="card-price">$${l.price.toLocaleString()}<span>/mo</span>${l.incentive ? ` <span class="incentive-pill" style="margin-left:6px;vertical-align:middle;">🎁 ${l.incentive.text}</span>` : ''}</div>
         ${scoreDisplay}
       </div>
-      ${l.incentive ? `<div class="incentive-pill">🎁 ${l.incentive.text}</div>` : ''}
       <div class="card-address">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         ${l.address} · <span style="color:var(--text3)">${l.hood}</span>
@@ -9164,17 +9163,18 @@ function amenitiesSectionHtml(amenities) {
   if (!amenities?.length) return '';
   const items = amenities.map(a => {
     const d = AMENITY_DEFS[a] || { icon:'✓', label:a, sub:'', tier:'' };
-    return `<div class="amenity-item ${d.tier}">
-      <div class="amenity-icon">${d.icon}</div>
-      <div>
-        <div class="amenity-label">${d.label}</div>
-        ${d.sub ? `<div class="amenity-sublabel">${d.sub}</div>` : ''}
-      </div>
+    const dotColor = d.tier === 'premium' ? 'var(--accent)' : d.tier === 'highlight' ? 'var(--green)' : 'var(--text3)';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;">
+      <div style="width:6px;height:6px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
+      <div style="font-size:12.5px;font-weight:600;color:var(--text);">${d.label}</div>
+      ${d.sub ? `<div style="font-size:10.5px;color:var(--text3);margin-left:auto;">${d.sub}</div>` : ''}
     </div>`;
   }).join('');
-  return `<div class="prop-section amenities-section">
-    <div class="prop-section-title">Building amenities <span style="font-size:11px;font-weight:400;color:var(--text3);letter-spacing:0;">${amenities.length} included</span></div>
-    <div class="amenities-grid">${items}</div>
+  return `<div class="prop-section">
+    <div class="prop-section-title">Building Amenities <span style="font-size:11px;font-weight:400;color:var(--text3);letter-spacing:0;">${amenities.length} included</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
+      ${items}
+    </div>
   </div>`;
 }
 
@@ -12077,54 +12077,77 @@ function openProperty(id) {
 
   document.getElementById('property-wrap').innerHTML = `
     <div class="prop-left">
+      <!-- Hero image — clean, no text overlays -->
       <div class="prop-hero">
         ${sceneImg(l.img,"","width:100%;height:100%;object-fit:cover;")}
-        <div class="prop-hero-overlay"></div>
-        <div class="prop-hero-info">
-          <div>
-            <div class="prop-price">$${l.price.toLocaleString()}<span>/mo</span></div>
-            ${l.incentive ? `<div class="incentive-pill" style="margin:4px 0;">🎁 ${l.incentive.text}</div>` : ''}
-            <div class="prop-addr">${l.address} · ${l.hood}</div>
-            <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">
-              <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);background:rgba(0,0,0,0.25);padding:2px 8px;border-radius:5px;">${l.sqft ? `$${(l.price/l.sqft).toFixed(2)}/ft²` : ''}</div>
-              ${l.era ? `<div style="font-size:11.5px;font-weight:700;background:rgba(0,0,0,0.25);padding:2px 9px;border-radius:5px;color:rgba(255,255,255,0.75);">🏗 ${l.era}</div>` : ''}
-              <div id="prop-status-pill-${l.id}">${statusPillHtml(l)}</div>
+      </div>
+
+      <!-- Key Metrics — Apollo-style data strip -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:4px;">
+        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">$${l.price.toLocaleString()}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">per month</div></div>
+        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${l.beds}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Bedrooms</div></div>
+        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${l.baths}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Bathrooms</div></div>
+        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${l.sqft||'—'}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Sq ft</div></div>
+        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:${ll.score>=4.5?'var(--green)':ll.score>=3.5?'var(--yellow)':'var(--red)'};">★ ${ll.score}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Landlord</div></div>
+        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${ll.reviews}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Reviews</div></div>
+      </div>
+      ${l.incentive ? `<div class="prop-section" style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-color:rgba(34,197,94,0.25);background:linear-gradient(90deg,rgba(34,197,94,0.05),transparent);margin-bottom:4px;">
+        <span class="incentive-pill">🎁 ${l.incentive.text}</span>
+        <span style="font-size:12px;color:var(--text2);">Landlord incentive — saves you <strong style="color:var(--green);">$${(l.price*(l.incentive.months||1)).toLocaleString()}</strong></span>
+      </div>` : ''}
+
+      <!-- Property Analytics — 2 column -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <!-- Left: Details + Amenities -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="prop-section">
+            <div class="prop-section-title">Property Details</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              ${[['Neighbourhood',l.hood],['Available',l.avail],['Era',l.era||'—'],['Lease','12 months'],['Deposit','$'+(l.deposit||l.price).toLocaleString()],['Per ft²',l.sqft?'$'+(l.price/l.sqft).toFixed(2):'—']].map(([k,v])=>`
+                <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">${k}</div><div style="font-size:13px;font-weight:700;color:var(--text);">${v}</div></div>`).join('')}
             </div>
           </div>
-          <div class="score-chip ${sc(ll.score)}" style="font-size:13px;padding:6px 13px;">★ ${ll.score} ${sl(ll.score)}</div>
+          ${amenitiesSectionHtml(l.amenities)}
+          ${petPolicyBlockHtml(l)}
+          ${l.parking ? parkingDetailHtml(l.parking) : ''}
+          ${moveInBlockHtml(l)}
         </div>
-      </div>
 
-      <div class="address-badge">
-        <div class="address-badge-icon">📍</div>
-        <div class="address-badge-text">
-          <div class="address-badge-main">${l.address}</div>
-          <div class="address-badge-sub">${l.hood}, Calgary AB · All reviews are permanently tied to this address</div>
-        </div>
-        <div class="address-badge-note">Permanent record</div>
-      </div>
-
-      ${amenitiesSectionHtml(l.amenities)}
-
-      <div class="prop-section">
-        <div class="prop-section-title">Landlord Score <span style="font-size:11px;font-weight:400;color:var(--text3);letter-spacing:0;">${ll.reviews} verified reviews</span></div>
-        <div class="score-big">
-          <div class="score-num ${sn}">${ll.score}</div>
-          <div class="score-detail">
-            <div class="score-label">${sl(ll.score)}</div>
-            <div class="score-meta">${starsStr(ll.score)} · ${ll.reviews} reviews</div>
+        <!-- Right: Landlord + Score breakdown -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <!-- Compact landlord card -->
+          <div class="prop-section">
+            <div class="prop-section-title">Landlord</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:pointer;" onclick="openLandlordProfile(${l.id})">
+              <div class="ll-avatar-lg" style="background:${ll.color}18;color:${ll.color};">${ll.initials}</div>
+              <div style="flex:1;">
+                <div style="font-size:14px;font-weight:700;color:var(--text);">${ll.name} ${ll.verified?'<span style="color:var(--green);font-size:12px;">✓ Verified</span>':''}</div>
+                <div style="font-size:12px;color:var(--text3);">${ll.responseRate} response · Avg ${ll.avgResponse}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              ${[['Maintenance',l.scores.maintenance],['Communication',l.scores.communication],['Deposit',l.scores.deposit],['Privacy',l.scores.privacy]].map(([label,val])=>`
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="font-size:11px;color:var(--text3);width:90px;">${label}</div>
+                  <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;"><div class="score-bar-fill" style="height:100%;width:${(val/5)*100}%;background:${val>=4.5?'var(--green)':val>=3.5?'var(--yellow)':'var(--red)'};border-radius:2px;"></div></div>
+                  <div style="font-size:11px;font-weight:700;color:var(--text);width:24px;text-align:right;">${val}</div>
+                </div>`).join('')}
+            </div>
+            ${claimSection}
+            ${reliabilityBadgeHtml(ll)}
+            ${noShowWarningHtml(ll)}
           </div>
-        </div>
-        <div class="score-bars">
-          ${[['Maintenance',l.scores.maintenance],['Communication',l.scores.communication],['Deposit return',l.scores.deposit],['Privacy',l.scores.privacy]].map(([label,val])=>`
-            <div class="score-bar-row">
-              <div class="score-bar-label">${label}</div>
-              <div class="score-bar-track"><div class="score-bar-fill" style="width:${(val/5)*100}%;background:${val>=4.5?'var(--green)':val>=3.5?'var(--yellow)':'var(--red)'};"></div></div>
-              <div class="score-bar-val">${val}</div>
-            </div>`).join('')}
+
+          ${l.era ? buildingEraBlockHtml(l.era, 'auto') : ''}
+          ${l.renovated ? `<div class="prop-section"><div class="prop-section-title">Renovation History</div>${renoBlockHtml(l.renovated)}</div>` : ''}
+          ${l.flexibleScreening ? `<div class="prop-section">
+            <div class="flex-qual-block-title">🤝 Flexible qualification</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;">This landlord reviews the full picture — income, history, and references weigh equally to credit score.</div>
+          </div>` : ''}
         </div>
       </div>
 
+      <!-- Reviews section -->
       <div class="prop-section">
         <div class="prop-section-title">Tenant Reviews <button class="write-review-btn" style="width:auto;padding:5px 14px;font-size:12px;" onclick="openModal()">+ Write a review</button></div>
         ${reviewsHtml}
