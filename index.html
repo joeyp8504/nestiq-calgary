@@ -650,7 +650,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .back-link { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); cursor: pointer; padding: 11px 22px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; transition: color 0.12s; font-weight: 600; }
 .back-link:hover { color: var(--text); }
 
-.property-wrap { flex: 1; overflow-y: auto; padding: 24px 28px; display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+.property-wrap { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 24px; }
 .prop-left { display: flex; flex-direction: column; gap: 18px; }
 .prop-right { display: flex; flex-direction: column; gap: 14px; }
 
@@ -12131,21 +12131,7 @@ function openProperty(id) {
         ` : ''}
       </div>
 
-      <!-- Key Metrics — Apollo-style data strip -->
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:4px;">
-        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">$${l.price.toLocaleString()}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">per month</div></div>
-        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${l.beds}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Bedrooms</div></div>
-        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${l.baths}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Bathrooms</div></div>
-        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${l.sqft||'—'}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Sq ft</div></div>
-        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">★ ${ll.score}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Landlord</div></div>
-        <div class="prop-section" style="padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--text);">${ll.reviews}</div><div style="font-size:10px;color:var(--text3);font-weight:600;">Reviews</div></div>
-      </div>
-      ${l.incentive ? `<div class="prop-section" style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-color:rgba(34,197,94,0.25);background:linear-gradient(90deg,rgba(34,197,94,0.05),transparent);margin-bottom:4px;">
-        <span class="incentive-pill">🎁 ${l.incentive.text}</span>
-        <span style="font-size:12px;color:var(--text2);">Landlord incentive — saves you <strong style="color:var(--accent);">$${(l.price*(l.incentive.months||1)).toLocaleString()}</strong></span>
-      </div>` : ''}
-
-      <!-- Property info — single column, clean -->
+      <!-- Property info -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div style="display:flex;flex-direction:column;gap:14px;">
           ${amenitiesSectionHtml(l.amenities)}
@@ -12171,7 +12157,7 @@ function openProperty(id) {
       </div>
     </div>
 
-    <div class="prop-right">
+    <div class="prop-right" style="${currentUser?.role !== 'landlord' ? 'display:none;' : ''}">
 
       <div class="ll-tools-panel">
         <div class="ll-tools-header">
@@ -12298,26 +12284,6 @@ function openProperty(id) {
         </div>
       </div>
 
-      <div class="prop-section" style="margin:0;">
-        <div class="prop-section-title">Property details</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-          ${[['Bedrooms',l.beds],['Bathrooms',l.baths],['Size', l.sqft ? l.sqft+' ft²' : '—'],['Available',l.avail],['Neighbourhood',l.hood],['Lease term','12 months']].map(([k,v])=>`
-            <div><div style="font-size:11px;color:var(--text3);margin-bottom:3px;">${k}</div><div style="font-size:13.5px;font-weight:600;">${v}</div></div>`).join('')}
-        </div>
-        ${petPolicyBlockHtml(l)}
-        ${l.parking ? parkingDetailHtml(l.parking) : ''}
-        ${l.era ? buildingEraBlockHtml(l.era, 'auto') : ''}
-        <div>
-          <div class="prop-section-title" style="margin-bottom:10px;">Renovation History</div>
-          ${renoBlockHtml(l.renovated)}
-        </div>
-        ${l.flexibleScreening ? `
-        <div class="flex-qual-block">
-          <div class="flex-qual-block-title">🤝 Flexible qualification</div>
-          <div class="flex-qual-block-body">This landlord reviews the full application picture — steady income, rental history, and references carry equal weight to credit score. A strong application with consistent income may be considered regardless of credit history. Your application is always reviewed privately and with care.</div>
-        </div>` : ''}
-        ${moveInBlockHtml(l)}
-      </div>
     </div>
 
   ${(currentUser?.role === 'landlord') ? heatPanelHtml(l) : ''}
