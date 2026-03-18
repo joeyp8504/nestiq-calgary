@@ -3867,8 +3867,7 @@ body.light-mode #screen-dashboard nav {
 @keyframes svcCardIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .svc-price-tag { font-size: 13px; font-weight: 800; color: var(--text); display: flex; align-items: baseline; gap: 3px; }
 .svc-price-tag .svc-price-from { font-size: 10px; font-weight: 500; color: var(--text3); }
-.svc-booking-panel { border-top: 1px solid var(--border); padding: 16px 20px; background: var(--surface2); animation: svcDropIn 0.2s ease; }
-.svc-card-v2.svc-booking-open { grid-column: 1 / -1; }
+.svc-booking-panel { padding: 0; }
 .svc-pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .svc-pill { padding: 6px 14px; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--text2); transition: all 0.15s; user-select: none; font-family: 'DM Sans', sans-serif; }
 .svc-pill:hover { border-color: var(--text3); color: var(--text); }
@@ -6338,7 +6337,6 @@ function renderServiceCard(s, idx) {
   html += '<button class="cleaner-btn-ghost" style="flex:1;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'message\')">💬 Message</button>';
   html += '<button class="cleaner-btn-primary" style="flex:2;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'book\')">📅 Book Now</button>';
   html += '</div>';
-  html += '<div id="svc-booking-' + s.id + '" style="display:none;"></div>';
   html += '</div>';
   return html;
 }
@@ -6531,44 +6529,38 @@ function getQuickReplies(cat) {
   return [...common, ...(specific[cat] || [])];
 }
 
+var _svcBookingActiveId = null;
 function toggleSvcBooking(id, mode) {
-  const panel = document.getElementById('svc-booking-' + id);
-  if (!panel) return;
-  // Close all other panels and remove span class
-  document.querySelectorAll('[id^="svc-booking-"]').forEach(p => {
-    if (p.id !== 'svc-booking-' + id) {
-      p.style.display = 'none'; p.innerHTML = '';
-      var card = p.closest('.svc-card-v2');
-      if (card) card.classList.remove('svc-booking-open');
-    }
-  });
-  // Toggle same panel
-  if (panel.style.display !== 'none' && svcBookingState[id]?.mode === mode) {
-    panel.style.display = 'none'; panel.innerHTML = ''; delete svcBookingState[id];
-    var card = document.getElementById('svc-card-' + id);
-    if (card) card.classList.remove('svc-booking-open');
+  // If same id+mode is already open in modal, close it
+  if (_svcBookingActiveId === id && svcBookingState[id]?.mode === mode) {
+    closeSvcBooking(id);
     return;
   }
+  // Close any previous
+  if (_svcBookingActiveId) closeSvcBooking(_svcBookingActiveId);
+
   const s = Object.values(serviceData).flat().find(x => x.id === id);
   if (!s) return;
+  _svcBookingActiveId = id;
   svcBookingState[id] = { mode, size: null, date: null, time: null, message: '', quickReplies: [], customDate: '' };
-  panel.style.display = 'block';
-  // Span full row so other cards aren't pushed
-  var card = document.getElementById('svc-card-' + id);
-  if (card) card.classList.add('svc-booking-open');
+
+  // Open in modal overlay
+  const overlay = document.getElementById('svc-quote-overlay');
+  const box = document.getElementById('svc-quote-body');
+  if (overlay) overlay.style.display = 'flex';
   renderBookingPanel(id, s, mode);
 }
 
 function renderBookingPanel(id, s, mode) {
-  const panel = document.getElementById('svc-booking-' + id);
-  if (!panel) return;
+  const box = document.getElementById('svc-quote-body');
+  if (!box) return;
   const state = svcBookingState[id];
   if (!state) return;
   const addr = document.getElementById('svc-address-input')?.value || '42 Scarboro Ave SW, Calgary';
 
   if (state.submitted) {
-    panel.innerHTML = `
-      <div class="svc-booking-panel">
+    box.innerHTML = `
+      <div style="padding:24px;">
         <div class="svc-booking-success">
           <div class="svc-success-icon">${mode === 'book' ? '📅' : '✉️'}</div>
           <div class="svc-success-title">${mode === 'book' ? 'Booking request sent!' : 'Message sent!'}</div>
@@ -6583,6 +6575,17 @@ function renderBookingPanel(id, s, mode) {
     return;
   }
 
+  // Modal header with provider info
+  const headerHtml = `
+    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:${s.color}20;display:flex;align-items:center;justify-content:center;font-size:20px;">${s.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:800;color:var(--text);">${mode === 'book' ? '📅 Book' : '💬 Message'} — ${s.name}</div>
+        <div style="font-size:12px;color:var(--text3);">★ ${s.googleRating} · ${s.distance}${s.claimed ? ' · ✓ Verified' : ''}</div>
+      </div>
+      <button onclick="closeSvcBooking('${id}')" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);padding:4px;">✕</button>
+    </div>`;
+
   if (mode === 'book') {
     const days = getNext7Days();
     const sizes = getSizePills(s.cat);
@@ -6596,13 +6599,9 @@ function renderBookingPanel(id, s, mode) {
         </div>`).join('')}
       </div>` : '';
 
-    panel.innerHTML = `
-      <div class="svc-booking-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="font-size:14px;font-weight:800;color:var(--text);">📅 Quick Book — ${s.name}</div>
-          <button onclick="closeSvcBooking('${id}')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text3);">✕</button>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;">
+    box.innerHTML = headerHtml + `
+      <div style="padding:20px 24px 24px;max-height:60vh;overflow-y:auto;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;">
           📍 <span style="color:var(--text);font-weight:600;">${addr}</span>
         </div>
         ${pkgSection}
@@ -6630,28 +6629,24 @@ function renderBookingPanel(id, s, mode) {
         </div>
         <div class="svc-section-label">Notes (optional)</div>
         <textarea class="svc-inline-msg" rows="2" id="svc-book-notes-${id}" placeholder="Any details about the job…" oninput="svcBookingState['${id}'].message=this.value">${state.message}</textarea>
-        <div class="svc-send-bar" style="margin-top:12px;">
+        <div class="svc-send-bar" style="margin-top:14px;">
           <button class="svc-send-btn ghost" onclick="closeSvcBooking('${id}')">Cancel</button>
           <button class="svc-send-btn" onclick="submitBooking('${id}')" style="flex:1;" ${!state.size || !state.date || !state.time ? 'disabled' : ''}>
-            ${state.size && state.date && state.time ? '📅 Send Booking Request →' : 'Select size, date & time to book'}
+            ${state.size && state.date && state.time ? '📅 Send Booking Request →' : 'Select size, date & time'}
           </button>
         </div>
       </div>`;
   } else {
     const quickReplies = getQuickReplies(s.cat);
-    panel.innerHTML = `
-      <div class="svc-booking-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="font-size:14px;font-weight:800;color:var(--text);">💬 Quick Message — ${s.name}</div>
-          <button onclick="closeSvcBooking('${id}')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text3);">✕</button>
-        </div>
+    box.innerHTML = headerHtml + `
+      <div style="padding:20px 24px 24px;">
         <div class="svc-section-label">Quick questions (tap to add)</div>
         <div class="svc-quick-replies">
           ${quickReplies.map((q, i) => `<div class="svc-quick-chip${state.quickReplies.includes(i) ? ' selected' : ''}" onclick="toggleQuickReply('${id}',${i})">${q.icon} ${q.text}</div>`).join('')}
         </div>
-        <div class="svc-section-label">Or write your own</div>
+        <div class="svc-section-label" style="margin-top:12px;">Or write your own</div>
         <textarea class="svc-inline-msg" rows="3" id="svc-msg-text-${id}" placeholder="Type a message…" oninput="svcBookingState['${id}'].message=this.value">${state.message}</textarea>
-        <div class="svc-send-bar" style="margin-top:10px;">
+        <div class="svc-send-bar" style="margin-top:12px;">
           <button class="svc-send-btn ghost" onclick="closeSvcBooking('${id}')">Cancel</button>
           <button class="svc-send-btn" onclick="submitMessage('${id}')" style="flex:1;">Send Message →</button>
         </div>
@@ -6716,10 +6711,11 @@ function toggleQuickReply(id, index) {
 }
 
 function closeSvcBooking(id) {
-  const panel = document.getElementById('svc-booking-' + id);
-  if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
-  var card = document.getElementById('svc-card-' + id);
-  if (card) card.classList.remove('svc-booking-open');
+  const overlay = document.getElementById('svc-quote-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const box = document.getElementById('svc-quote-body');
+  if (box) box.innerHTML = '';
+  _svcBookingActiveId = null;
   delete svcBookingState[id];
 }
 
@@ -16439,8 +16435,8 @@ function handleWizardPhoto(input) {
 </div>
 
 <!-- ══ SERVICE QUOTE MODAL ══ -->
-<div class="modal-overlay" id="svc-quote-overlay" onclick="if(event.target===this)closeSvcModal()" style="display:none;z-index:1100;">
-  <div class="modal-box" id="svc-quote-box" style="max-width:440px;padding:0;overflow:hidden;">
+<div class="modal-overlay" id="svc-quote-overlay" onclick="if(event.target===this){if(_svcBookingActiveId){closeSvcBooking(_svcBookingActiveId)}else{closeSvcModal()}}" style="display:none;z-index:1100;">
+  <div class="modal-box" id="svc-quote-box" style="max-width:480px;padding:0;overflow:hidden;">
     <div id="svc-quote-body"></div>
   </div>
 </div>
