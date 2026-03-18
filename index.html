@@ -5713,8 +5713,32 @@ function initSceneImgs() {
 }
 
 // ── DATA ──
+// Unsplash photos for demo listings (free, no attribution required)
+const UP = {
+  liv1:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+  liv2:'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+  liv3:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+  liv4:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=800&q=80',
+  kit1:'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+  kit2:'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800&q=80',
+  kit3:'https://images.unsplash.com/photo-1600573472592-401b489a3cdc?w=800&q=80',
+  bed1:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
+  bed2:'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=800&q=80',
+  bed3:'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=800&q=80',
+  bed4:'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80',
+  bath1:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
+  bath2:'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80',
+  ext1:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80',
+  ext2:'https://images.unsplash.com/photo-1600585153490-76fb20a32601?w=800&q=80',
+  open1:'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80',
+  open2:'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80',
+  lux1:'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80',
+  lux2:'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?w=800&q=80',
+  mod1:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&q=80',
+  mod2:'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80'
+};
 const listings = [
-  { id:1, img:"__SCENE__living1", photos:["__SCENE__living1","__SCENE__kitchen1","__SCENE__bedroom1","__SCENE__bath1"], price:1850, beds:1, baths:1, sqft:680, deposit:900, elevatorFee:75, listingStatus:"active", lastConfirmed:"2026-03-04", address:"1204 – 817 15 Ave SW", hood:"Beltline", badges:["verified","new"], incentive:{type:'free-month',months:1,text:'1st month free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:300,depositRefundable:true,notes:null}, avail:"Available now", soon:false, era:"2000s", renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
+  { id:1, img:UP.liv1, photos:[UP.liv1,UP.kit1,UP.bed1,UP.bath1], price:1850, beds:1, baths:1, sqft:680, deposit:900, elevatorFee:75, listingStatus:"active", lastConfirmed:"2026-03-04", address:"1204 – 817 15 Ave SW", hood:"Beltline", badges:["verified","new"], incentive:{type:'free-month',months:1,text:'1st month free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:300,depositRefundable:true,notes:null}, avail:"Available now", soon:false, era:"2000s", renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
     amenities:["city-view","gym-full","concierge","storage-locker","bike-storage"],
     landlord:{ name:"Marcus W.", score:4.9, reviews:34, color:"#22c55e", initials:"MW", verified:true, responseRate:"98%", avgResponse:"2 hrs", reliability:100, noShows:0, progress:{profile:true,response:true,reviews:true},
       availability:[{day:"Saturday",slots:["10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM"]},{day:"Sunday",slots:["11:00 AM","12:00 PM","2:00 PM"]},{day:"Tuesday",slots:["6:00 PM","7:00 PM"]}] },
@@ -5727,7 +5751,7 @@ const listings = [
       { name:"Priya R.", initials:"PR", color:"#a855f7", score:5, date:"Nov 2024", tenancy:"2020–2024", tenancyMonths:48, verified:true, goodTenant:true, tenantRating:{payment:5,condition:5,communication:4,notice:5}, text:"Very professional and always respectful of my space. Gave proper notice before every single entry. Highly recommend.", flags:["Respectful","Great comms"], flagType:["good","good"], landlordResponse:null }
     ]
   },
-  { id:2, img:"__SCENE__bedroom1", photos:["__SCENE__bedroom1","__SCENE__living2","__SCENE__exterior1","__SCENE__living1"], price:2400, beds:2, baths:2, sqft:980, flexibleScreening:true, deposit:2400, listingStatus:"active", lastConfirmed:"2026-01-24", address:"308 – 2220 16a St SW", hood:"Bankview", badges:["hot"], incentive:{type:'free-month',months:2,text:'First 2 months free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:25,deposit:250,depositRefundable:true,notes:"Small breeds only — please confirm with landlord"}, avail:"Jun 1", soon:true, era:"1980s", renovated:{year:2019, scope:"kitchen-bath"}, parking:{spots:1, type:"surface", included:true, cost:0},
+  { id:2, img:UP.bed2, photos:[UP.bed2,UP.liv2,UP.ext1,UP.kit2], price:2400, beds:2, baths:2, sqft:980, flexibleScreening:true, deposit:2400, listingStatus:"active", lastConfirmed:"2026-01-24", address:"308 – 2220 16a St SW", hood:"Bankview", badges:["hot"], incentive:{type:'free-month',months:2,text:'First 2 months free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:25,deposit:250,depositRefundable:true,notes:"Small breeds only — please confirm with landlord"}, avail:"Jun 1", soon:true, era:"1980s", renovated:{year:2019, scope:"kitchen-bath"}, parking:{spots:1, type:"surface", included:true, cost:0},
     amenities:["fitness-room","storage-locker","courtyard"],
     landlord:{ name:"Priya S.", score:4.7, reviews:22, color:"#4f7cff", initials:"PS", verified:false, responseRate:"91%", avgResponse:"5 hrs", reliability:96, noShows:1, progress:{profile:true,response:true,reviews:false},
       availability:[{day:"Saturday",slots:["10:00 AM","12:00 PM","2:00 PM"]},{day:"Wednesday",slots:["5:30 PM","6:30 PM"]}] },
@@ -5738,7 +5762,7 @@ const listings = [
       { name:"Devon K.", initials:"DK", color:"#22c55e", score:5, date:"Jan 2025", tenancy:"2023–2024", tenancyMonths:12, verified:true, goodTenant:true, tenantRating:{payment:5,condition:4,communication:5,notice:5}, text:"Priya was incredibly responsive. Any issue I had she was on top of it within hours. Great apartment and great landlord.", flags:["Quick to respond"], flagType:["good"], landlordResponse:null }
     ]
   },
-  { id:3, img:"__SCENE__bath1", photos:["__SCENE__bath1","__SCENE__living1","__SCENE__open1"], price:1600, beds:1, baths:1, sqft:590, flexibleScreening:true, deposit:800, elevatorFee:50, listingStatus:"processing", lastConfirmed:"2026-02-18", address:"515 – 1111 6 Ave SW", hood:"Downtown West", badges:["verified"], pet:false, petPolicy:{cats:false,dogs:false,largeDogsOk:false,maxWeight:null,deposit:null,depositRefundable:false,notes:"No pets permitted — building policy"}, avail:"Available now", soon:false, era:"2010s", renovated:{year:2023, scope:"cosmetic"}, parking:{spots:0, type:"street", included:true, cost:0},
+  { id:3, img:UP.lux1, photos:[UP.lux1,UP.liv3,UP.open1], price:1600, beds:1, baths:1, sqft:590, flexibleScreening:true, deposit:800, elevatorFee:50, listingStatus:"processing", lastConfirmed:"2026-02-18", address:"515 – 1111 6 Ave SW", hood:"Downtown West", badges:["verified"], pet:false, petPolicy:{cats:false,dogs:false,largeDogsOk:false,maxWeight:null,deposit:null,depositRefundable:false,notes:"No pets permitted — building policy"}, avail:"Available now", soon:false, era:"2010s", renovated:{year:2023, scope:"cosmetic"}, parking:{spots:0, type:"street", included:true, cost:0},
     amenities:["city-view","rooftop-terrace","gym-full","hot-tub","amenity-room"],
     landlord:{ name:"Tanya R.", score:4.2, reviews:11, color:"#f59e0b", initials:"TR", verified:true, responseRate:"76%", avgResponse:"2 days", reliability:88, noShows:2, progress:{profile:true,response:true,reviews:true},
       availability:[{day:"Saturday",slots:["1:00 PM","3:00 PM"]},{day:"Sunday",slots:["2:00 PM"]}] },
@@ -5750,7 +5774,7 @@ const listings = [
         landlordResponse:{ text:"Thanks for the honest feedback Alex. We're working on improving our maintenance response times. I do want to note that several requests came in without proper notice periods.", date:"Feb 2025" } }
     ]
   },
-  { id:4, img:"__SCENE__exterior1", photos:["__SCENE__exterior1","__SCENE__kitchen1","__SCENE__bedroom1","__SCENE__living2"], price:3100, beds:3, baths:2, sqft:1240, deposit:3100, listingStatus:"occupied", lastConfirmed:"2025-09-01", address:"42 Scarboro Ave SW", hood:"Scarboro", badges:["verified","pet"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:null,depositRefundable:false,notes:"Pets welcome — no additional deposit required"}, avail:"May 15", soon:true, era:"1960s", renovated:{year:2017, scope:"full"},
+  { id:4, img:UP.ext2, photos:[UP.ext2,UP.kit3,UP.bed3,UP.liv4], price:3100, beds:3, baths:2, sqft:1240, deposit:3100, listingStatus:"occupied", lastConfirmed:"2025-09-01", address:"42 Scarboro Ave SW", hood:"Scarboro", badges:["verified","pet"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:null,depositRefundable:false,notes:"Pets welcome — no additional deposit required"}, avail:"May 15", soon:true, era:"1960s", renovated:{year:2017, scope:"full"},
     activeLease:{ tenantName:'Sarah Mitchell', tenantInitials:'SM', tenantColor:'#5b8aff', moveIn:'Jul 1, 2025', leaseEnd:'Jun 30, 2026', monthlyRent:3100 },
     parking:{spots:2, type:"underground", included:true, cost:0},
     amenities:["mountain-view","courtyard","storage-locker"],
@@ -5765,7 +5789,7 @@ const listings = [
       { name:"Tom B.", initials:"TB", color:"#06b6d4", score:5, date:"Mar 2024", tenancy:"2021–2024", tenancyMonths:36, verified:true, goodTenant:true, tenantRating:{payment:5,condition:4,communication:5,notice:5}, text:"Best rental experience I have had in Calgary by a wide margin. Highly recommend.", flags:["Respectful","Great comms"], flagType:["good","good"], landlordResponse:null }
     ]
   },
-  { id:5, img:"__SCENE__open1", photos:["__SCENE__open1","__SCENE__bath1","__SCENE__living1"], price:1350, beds:1, baths:1, sqft:510, listingStatus:"active", lastConfirmed:"2026-03-05", address:"204 – 333 Riverfront Ave SE", hood:"East Village", badges:["new"], pet:false, petPolicy:{cats:false,dogs:false,largeDogsOk:false,maxWeight:null,deposit:null,depositRefundable:false,notes:null}, avail:"Available now", soon:false, era:"2020s", renovated:null, parking:{spots:0, type:"street", included:true, cost:0},
+  { id:5, img:UP.open2, photos:[UP.open2,UP.bath2,UP.mod1], price:1350, beds:1, baths:1, sqft:510, listingStatus:"active", lastConfirmed:"2026-03-05", address:"204 – 333 Riverfront Ave SE", hood:"East Village", badges:["new"], pet:false, petPolicy:{cats:false,dogs:false,largeDogsOk:false,maxWeight:null,deposit:null,depositRefundable:false,notes:null}, avail:"Available now", soon:false, era:"2020s", renovated:null, parking:{spots:0, type:"street", included:true, cost:0},
     amenities:["city-view","rooftop-terrace","pool","hot-tub","gym-full","concierge","bike-storage","dog-wash","amenity-room"],
     landlord:{ name:"Olga B.", score:2.8, reviews:8, color:"#ef4444", initials:"OB", verified:false, responseRate:"31%", avgResponse:"> 1 week", reliability:61, noShows:5, progress:{profile:false,response:false,reviews:true},
       availability:[] },
@@ -5780,7 +5804,7 @@ const listings = [
       { name:"Maya D.", initials:"MD", color:"#ef4444", score:2, date:"Nov 2024", tenancy:"2022–2024", tenancyMonths:24, id:"md1", verified:true, goodTenant:false, retaliationHold:true, holdDaysLeft:4, disputeStatus:'held', tenantRating:{payment:3,condition:2,communication:2,notice:2}, text:"Repairs took months or never happened. Communication is basically nonexistent unless she wants something. Avoid if you can.", flags:["Ignored repairs","Poor communication"], flagType:["bad","bad"], landlordResponse:null }
     ]
   },
-  { id:6, img:"__SCENE__kitchen1", photos:["__SCENE__kitchen1","__SCENE__exterior1","__SCENE__bedroom1","__SCENE__living1"], price:2750, beds:2, baths:2, sqft:1050, deposit:1500, elevatorFee:100, listingStatus:"active", lastConfirmed:"2026-02-29", address:"101 – 2208 Kensington Rd NW", hood:"Kensington", badges:["verified","hot"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:50,deposit:300,depositRefundable:true,notes:"Breed confirmation required with building management"}, avail:"Jul 1", soon:true, era:"1990s", renovated:{year:2016, scope:"kitchen-bath"}, parking:{spots:1, type:"underground", included:false, cost:125},
+  { id:6, img:UP.kit1, photos:[UP.kit1,UP.ext1,UP.bed4,UP.lux2], price:2750, beds:2, baths:2, sqft:1050, deposit:1500, elevatorFee:100, listingStatus:"active", lastConfirmed:"2026-02-29", address:"101 – 2208 Kensington Rd NW", hood:"Kensington", badges:["verified","hot"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:50,deposit:300,depositRefundable:true,notes:"Breed confirmation required with building management"}, avail:"Jul 1", soon:true, era:"1990s", renovated:{year:2016, scope:"kitchen-bath"}, parking:{spots:1, type:"underground", included:false, cost:125},
     amenities:["fitness-room","storage-locker","bike-storage"],
     landlord:{ name:"James L.", score:4.6, reviews:29, color:"#06b6d4", initials:"JL", verified:true, responseRate:"95%", avgResponse:"3 hrs", reliability:98, noShows:0, progress:{profile:true,response:true,reviews:true},
       availability:[{day:"Saturday",slots:["10:00 AM","11:00 AM","1:00 PM","2:00 PM"]},{day:"Thursday",slots:["6:00 PM","7:00 PM"]}] },
@@ -5792,7 +5816,7 @@ const listings = [
         landlordResponse:{ text:"Riley was fantastic — paid on time every month for 3 years and left the unit spotless. Would welcome them back anytime.", date:"Mar 2025" } }
     ]
   },
-  { id:7, img:"__SCENE__living2", photos:["__SCENE__living2","__SCENE__open1","__SCENE__kitchen1"], price:1975, beds:2, baths:1, sqft:870, flexibleScreening:true, deposit:1975, listingStatus:"active", lastConfirmed:"2026-02-09", address:"402 – 535 10 Ave SW", hood:"Beltline", badges:["owner-managed","verified"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:null,depositRefundable:false,notes:"Pets very welcome — owner is a dog owner"}, avail:"Available now", soon:false, era:"1990s", renovated:null, parking:{spots:1, type:"surface", included:true, cost:0},
+  { id:7, img:UP.mod2, photos:[UP.mod2,UP.open1,UP.kit2], price:1975, beds:2, baths:1, sqft:870, flexibleScreening:true, deposit:1975, listingStatus:"active", lastConfirmed:"2026-02-09", address:"402 – 535 10 Ave SW", hood:"Beltline", badges:["owner-managed","verified"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:null,depositRefundable:false,notes:"Pets very welcome — owner is a dog owner"}, avail:"Available now", soon:false, era:"1990s", renovated:null, parking:{spots:1, type:"surface", included:true, cost:0},
     amenities:["courtyard","storage-locker"],
     ownerManaged: true,
     ownerSince: "Feb 2025",
@@ -5807,8 +5831,8 @@ const listings = [
   },
 
   // ── Marcus W. extra units (same landlord, different suites) ──
-  { id:8, img:"__SCENE__exterior1",
-    photos:["__SCENE__exterior1","__SCENE__kitchen1","__SCENE__living1"],
+  { id:8, img:UP.liv3,
+    photos:[UP.liv3,UP.kit3,UP.bed1],
     price:2200, beds:2, baths:1, sqft:890, address:"804 – 817 15 Ave SW", hood:"Beltline",
     badges:["verified"], pet:true, avail:"May 1", soon:true, era:"2000s", elevatorFee:75, renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
     amenities:["city-view","gym-full","concierge","storage-locker","bike-storage"],
@@ -5821,8 +5845,8 @@ const listings = [
       { name:"Preet M.", initials:"PM", color:"#4f7cff", score:5, date:"Feb 2025", tenancy:"2023–2025", text:"Marcus is genuinely one of the best landlords I've had. Always responsive, fixed things same day.", flags:["Fast repairs","Deposit returned"], flagType:["good","good"] },
     ]
   },
-  { id:9, img:"__SCENE__open1",
-    photos:["__SCENE__open1","__SCENE__living1"],
+  { id:9, img:UP.lux2,
+    photos:[UP.lux2,UP.mod1],
     price:2950, beds:2, baths:2, sqft:1080, address:"PH2 – 817 15 Ave SW", hood:"Beltline",
     badges:["verified","hot"], pet:false, avail:"Jun 15", soon:true, era:"2000s", elevatorFee:75, renovated:{year:2022, scope:"full"}, parking:{spots:2, type:"underground", included:true, cost:0},
     amenities:["city-view","mountain-view","rooftop-terrace","gym-full","concierge","hot-tub","storage-locker","bike-storage"],
