@@ -6865,10 +6865,11 @@ function renderDashboard() {
   const statsRow = document.getElementById('dash-stats-row');
   let stats;
   if (isLandlord) {
+    const pendingApps = 3; // demo
     stats = [
       { val: llListings.length || '—', label:'Properties', sub:llListings.filter(l=>l.activeLease).length+' occupied' },
       { val: avgLlScore, label:'Avg Score', sub:'out of 5.0' },
-      { val: totalLlReviews || '—', label:'Reviews', sub:'across all units' },
+      { val: pendingApps, label:'Applicants', sub:'pending review' },
       { val: totalRent ? '$'+totalRent.toLocaleString() : '—', label:'Monthly Revenue', sub:'active leases' }
     ];
   } else {
@@ -6932,6 +6933,19 @@ function renderDashboard() {
     </div>`;
   }
 
+  // ── Tenant Reliability Score computation ──
+  function computeTenantReliability(tenantName) {
+    // Simulated scoring based on demo data
+    const scores = {
+      'Sarah Mitchell': { overall:92, payment:5, condition:4.5, communication:5, notice:4, showings:8, noShows:0, leaseBreaks:0, avgTenancy:'14 months', moves:3, references:2, flags:[] },
+      'Jay Pineau': { overall:95, payment:5, condition:5, communication:5, notice:5, showings:3, noShows:0, leaseBreaks:0, avgTenancy:'24 months', moves:1, references:2, flags:[] },
+      'Mike R.': { overall:68, payment:3, condition:2.5, communication:4, notice:2, showings:5, noShows:2, leaseBreaks:1, avgTenancy:'6 months', moves:5, flags:['Lease break (2024)','2 no-shows','Frequent moves (< 8 mo avg)'] },
+      'Emma T.': { overall:85, payment:4.5, condition:4, communication:4.5, notice:4, showings:4, noShows:0, leaseBreaks:0, avgTenancy:'18 months', moves:2, references:1, flags:[] },
+      'Alex D.': { overall:45, payment:2, condition:1.5, communication:3, notice:1, showings:6, noShows:3, leaseBreaks:2, avgTenancy:'4 months', moves:7, references:0, flags:['2 lease breaks','3 no-shows','No references','Very frequent moves','Deposit dispute (2023)'] }
+    };
+    return scores[tenantName] || scores[u.name] || scores['Sarah Mitchell'];
+  }
+
   if (isLandlord) {
     // LEFT: Property portfolio + Revenue
     leftCol += '<div><div class="dash-section-title">Property Portfolio</div>';
@@ -6970,7 +6984,63 @@ function renderDashboard() {
         </div>
       </div></div>`;
 
-    // RIGHT: Reviews + Activity
+    // RIGHT: Tenant Screening dashboard
+    const screenTenants = [
+      { name:'Sarah Mitchell', initials:'SM', color:'#5b8aff', status:'Active tenant', property:'42 Scarboro Ave SW' },
+      { name:'Mike R.', initials:'MR', color:'#f59e0b', status:'Applied', property:'1204 – 817 15 Ave SW' },
+      { name:'Emma T.', initials:'ET', color:'#22c55e', status:'Viewing booked', property:'1204 – 817 15 Ave SW' },
+      { name:'Alex D.', initials:'AD', color:'#ef4444', status:'Applied', property:'315 – 222 5 St SW' }
+    ];
+    rightCol += '<div><div class="dash-section-title">Tenant Screening</div>';
+    rightCol += screenTenants.map(t => {
+      const rel = computeTenantReliability(t.name);
+      const scoreColor = rel.overall >= 85 ? 'var(--green)' : rel.overall >= 65 ? 'var(--yellow)' : 'var(--red)';
+      const scoreLabel = rel.overall >= 85 ? 'Excellent' : rel.overall >= 65 ? 'Fair' : 'At Risk';
+      const flagCount = rel.flags.length;
+      return `<div class="dash-panel" style="margin-bottom:10px;${flagCount > 0 ? 'border-color:rgba(240,78,78,0.25);' : ''}">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:${flagCount > 0 ? '10' : '0'}px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">${t.initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">${t.name}</div>
+            <div style="font-size:11px;color:var(--text3);">${t.status} · ${t.property}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:${scoreColor};">${rel.overall}</div>
+            <div style="font-size:9px;font-weight:700;color:${scoreColor};text-transform:uppercase;">${scoreLabel}</div>
+          </div>
+        </div>
+        ${flagCount > 0 ? `<div style="background:rgba(240,78,78,0.06);border:1px solid rgba(240,78,78,0.15);border-radius:8px;padding:8px 10px;">
+          <div style="font-size:10px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">🚩 ${flagCount} Red Flag${flagCount!==1?'s':''}</div>
+          ${rel.flags.map(f => `<div style="font-size:11px;color:var(--text2);padding:2px 0;display:flex;align-items:center;gap:6px;"><span style="color:var(--red);">•</span> ${f}</div>`).join('')}
+        </div>` : ''}
+      </div>`;
+    }).join('');
+    rightCol += '</div>';
+
+    // RIGHT: Red Flags Summary
+    const allFlags = screenTenants.map(t => ({ ...t, rel: computeTenantReliability(t.name) })).filter(t => t.rel.flags.length > 0);
+    if (allFlags.length > 0) {
+      rightCol += `<div><div class="dash-section-title">Red Flags Overview</div>
+        <div class="dash-panel" style="border-color:rgba(240,78,78,0.25);background:linear-gradient(135deg,rgba(240,78,78,0.03),rgba(245,166,35,0.02));">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(240,78,78,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;">🛡</div>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--text);">${allFlags.reduce((n,t)=>n+t.rel.flags.length,0)} flags across ${allFlags.length} applicant${allFlags.length!==1?'s':''}</div>
+              <div style="font-size:11px;color:var(--text3);">Review before approving applications</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${allFlags.map(t => `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:6px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:${t.color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;">${t.initials}</div>
+              <div style="flex:1;font-size:11px;font-weight:600;color:var(--text);">${t.name}</div>
+              <div style="font-size:11px;font-weight:700;color:var(--red);">${t.rel.flags.length} flag${t.rel.flags.length!==1?'s':''}</div>
+              <div style="font-size:16px;font-weight:800;color:${t.rel.overall>=85?'var(--green)':t.rel.overall>=65?'var(--yellow)':'var(--red)'};">${t.rel.overall}</div>
+            </div>`).join('')}
+          </div>
+        </div></div>`;
+    }
+
+    // RIGHT: Reviews
     const llReviews = allReviews.filter(r => llListings.some(l => l.id === r.listing.id)).slice(0, 4);
     if (llReviews.length > 0) {
       rightCol += '<div><div class="dash-section-title">Recent Reviews</div>' + llReviews.map(r => reviewCardHtml(r, false)).join('') + '</div>';
@@ -14489,7 +14559,13 @@ function renderFlowCardLandlord(m, c) {
                 <div style="font-size:12px;color:var(--text3);">${d.address} · $${d.price.toLocaleString()}/mo</div>
               </div>
             </div>
-            ${d.hasPreApproval ? `<div style="margin-bottom:8px;"><span class="pre-approval-badge">⚡ NestIQ Ready</span></div>` : ''}
+            ${d.hasPreApproval ? `<div style="margin-bottom:6px;"><span class="pre-approval-badge">⚡ NestIQ Ready</span></div>` : ''}
+            ${(function(){
+              const _tScores = {'Sarah Mitchell':{s:92,l:'Excellent'},'Mike R.':{s:68,l:'Fair'},'Emma T.':{s:85,l:'Excellent'},'Alex D.':{s:45,l:'At Risk'}};
+              const _ts = _tScores[d.tenantName]||{s:80,l:'Good'};
+              const _tc = _ts.s>=85?'var(--green)':_ts.s>=65?'var(--yellow)':'var(--red)';
+              return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:'+(_ts.s<65?'rgba(240,78,78,0.06)':'var(--surface2)')+';border-radius:8px;margin-bottom:10px;border:1px solid '+(_ts.s<65?'rgba(240,78,78,0.15)':'var(--border)')+';"><div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--text3);">Reliability</div><div style="flex:1;"><div style="height:4px;background:var(--surface);border-radius:2px;overflow:hidden;"><div style="height:100%;width:'+_ts.s+'%;background:'+_tc+';border-radius:2px;"></div></div></div><div style="font-size:14px;font-weight:800;color:'+_tc+';">'+_ts.s+'</div><div style="font-size:9px;font-weight:700;color:'+_tc+';text-transform:uppercase;">'+_ts.l+'</div></div>';
+            })()}
             <div class="flow-card-row"><div class="flow-card-label">Move-in</div><div class="flow-card-val">${app.moveIn}</div></div>
             <div class="flow-card-row"><div class="flow-card-label">Employment</div><div class="flow-card-val">${app.employment}</div></div>
             <div class="flow-card-row"><div class="flow-card-label">Income</div><div class="flow-card-val">${app.income}</div></div>
