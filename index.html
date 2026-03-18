@@ -8198,14 +8198,17 @@ function petPolicyBlockHtml(l) {
       </div>`;
 
   const rules = [];
-  if (p.cats) rules.push('🐱 Cats OK');
-  if (p.dogs && p.largeDogsOk) rules.push('🐶 Dogs — any size');
-  else if (p.dogs) rules.push('🐶 Dogs — under ' + (p.maxWeight||25) + 'lbs');
-  const depText = p.deposit ? '$' + p.deposit.toLocaleString() + (p.depositRefundable ? ' refundable' : '') + ' deposit' : 'No pet deposit';
+  if (p.cats) rules.push({ icon:'🐱', label:'Cats', val:'Allowed' });
+  if (p.dogs && p.largeDogsOk) rules.push({ icon:'🐶', label:'Dogs', val:'Any size' });
+  else if (p.dogs) rules.push({ icon:'🐶', label:'Dogs', val:'Under '+(p.maxWeight||25)+'lbs' });
+  else rules.push({ icon:'🐶', label:'Dogs', val:'Not allowed' });
+  if (p.deposit) rules.push({ icon:'💲', label:'Pet deposit', val:'$'+p.deposit.toLocaleString()+(p.depositRefundable?' (refundable)':'') });
+  else rules.push({ icon:'💲', label:'Pet deposit', val:'None required' });
   return `
-    <div style="font-size:12.5px;color:var(--text2);line-height:1.7;">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--green);margin-bottom:4px;">🐾 Pets allowed</div>
-      ${rules.join(' · ')} · ${depText}${p.notes ? '<br><span style="color:var(--text3);font-size:11px;">ℹ️ ' + p.notes + '</span>' : ''}
+    <div class="prop-section">
+      <div class="prop-section-title">🐾 Pet Policy</div>
+      <div style="display:flex;flex-direction:column;gap:0;">${rules.map(function(r){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--text3);">'+r.icon+' '+r.label+'</span><strong style="color:var(--text);">'+r.val+'</strong></div>';}).join('')}</div>
+      ${p.notes ? '<div style="font-size:11px;color:var(--text3);margin-top:6px;">ℹ️ '+p.notes+'</div>' : ''}
     </div>`;
 }
 
@@ -12132,29 +12135,30 @@ function openProperty(id) {
         ` : ''}
       </div>
 
-      <!-- Property info -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          ${amenitiesSectionHtml(l.amenities)}
-          ${l.era ? buildingEraBlockHtml(l.era, 'auto') : ''}
-          ${l.renovated ? `<div class="prop-section"><div class="prop-section-title">Renovation History</div>${renoBlockHtml(l.renovated)}</div>` : ''}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          ${moveInBlockHtml(l)}
-          ${petPolicyBlockHtml(l)}
-          ${l.parking ? parkingDetailHtml(l.parking) : ''}
-          ${l.flexibleScreening ? `<div class="prop-section">
-            <div class="flex-qual-block-title">🤝 Flexible qualification</div>
-            <div style="font-size:12px;color:var(--text2);line-height:1.6;">This landlord reviews the full picture — income, history, and references weigh equally to credit score.</div>
-          </div>` : ''}
-        </div>
+      <!-- Property info — Apollo-style 3-column grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        ${amenitiesSectionHtml(l.amenities)}
+        ${petPolicyBlockHtml(l)}
+        ${moveInBlockHtml(l)}
       </div>
 
-      <!-- Reviews section -->
-      <div class="prop-section">
-        <div class="prop-section-title">Tenant Reviews <button class="write-review-btn" style="width:auto;padding:5px 14px;font-size:12px;" onclick="openModal()">+ Write a review</button></div>
-        ${reviewsHtml}
-        <button class="write-review-btn" onclick="openModal()">✍ Write a review for ${l.address}</button>
+      <!-- Secondary info row -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+        ${l.era ? buildingEraBlockHtml(l.era, 'auto') : ''}
+        ${l.renovated ? `<div class="prop-section"><div class="prop-section-title">Renovation</div>${renoBlockHtml(l.renovated)}</div>` : ''}
+        ${l.parking ? parkingDetailHtml(l.parking) : ''}
+        ${l.flexibleScreening ? `<div class="prop-section">
+          <div class="prop-section-title">🤝 Screening</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.5;">Flexible qualification — income, history, and references weigh equally to credit.</div>
+        </div>` : ''}
+      </div>
+
+      <!-- Reviews — compact with scroll -->
+      <div class="prop-section" style="padding:14px;">
+        <div class="prop-section-title" style="margin-bottom:10px;">Tenant Reviews <span style="font-size:11px;font-weight:400;color:var(--text3);letter-spacing:0;text-transform:none;">${l.reviews.length} review${l.reviews.length!==1?'s':''}</span> <button class="write-review-btn" style="width:auto;padding:4px 12px;font-size:11px;margin-left:auto;" onclick="openModal()">+ Write a review</button></div>
+        <div style="max-height:320px;overflow-y:auto;padding-right:4px;">
+          ${reviewsHtml}
+        </div>
       </div>
     </div>
 
