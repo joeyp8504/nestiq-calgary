@@ -7592,10 +7592,17 @@ var _showScreenBase = function(id) {
 
   // Restore scroll position when returning to listings
   if (id === 'listings') {
+    // Double rAF + setTimeout ensures layout is settled before restoring scroll
     requestAnimationFrame(() => {
-      const wrap = document.getElementById('listings-wrap');
-      if (wrap) wrap.scrollTop = listingsScrollY;
+      requestAnimationFrame(() => {
+        const wrap = document.getElementById('listings-wrap');
+        if (wrap) wrap.scrollTop = listingsScrollY;
+      });
     });
+    setTimeout(() => {
+      const wrap = document.getElementById('listings-wrap');
+      if (wrap && Math.abs(wrap.scrollTop - listingsScrollY) > 10) wrap.scrollTop = listingsScrollY;
+    }, 50);
   }
 };
 function showScreen(id) { _showScreenBase(id); }
