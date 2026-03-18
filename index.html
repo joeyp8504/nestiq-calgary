@@ -595,6 +595,8 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .badge-hot { background:rgba(239,68,68,0.85); color:#fff; }
 .badge-verified { background:rgba(34,197,94,0.85); color:#fff; }
 .badge-pet { background:rgba(168,85,247,0.85); color:#fff; }
+.incentive-pill { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:800; background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(79,124,255,0.08)); color:var(--green); border:1px solid rgba(34,197,94,0.25); letter-spacing:-0.2px; }
+.incentive-pill-sm { font-size:10px; padding:2px 7px; border-radius:6px; }
 .card-fav { position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%; background:rgba(13,15,20,0.65); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.6); font-size:15px; transition:all 0.2s; cursor:pointer; z-index:2; }
 .card-fav:hover { color:#ef4444; border-color:rgba(239,68,68,0.5); background:rgba(239,68,68,0.15); transform:scale(1.1); }
 .card-fav.faved { color:#ef4444; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.15); }
@@ -5682,7 +5684,7 @@ function initSceneImgs() {
 
 // ── DATA ──
 const listings = [
-  { id:1, img:"__SCENE__living1", photos:["__SCENE__living1","__SCENE__kitchen1","__SCENE__bedroom1","__SCENE__bath1"], price:1850, beds:1, baths:1, sqft:680, deposit:900, elevatorFee:75, listingStatus:"active", lastConfirmed:"2026-03-04", address:"1204 – 817 15 Ave SW", hood:"Beltline", badges:["verified","new"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:300,depositRefundable:true,notes:null}, avail:"Available now", soon:false, era:"2000s", renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
+  { id:1, img:"__SCENE__living1", photos:["__SCENE__living1","__SCENE__kitchen1","__SCENE__bedroom1","__SCENE__bath1"], price:1850, beds:1, baths:1, sqft:680, deposit:900, elevatorFee:75, listingStatus:"active", lastConfirmed:"2026-03-04", address:"1204 – 817 15 Ave SW", hood:"Beltline", badges:["verified","new"], incentive:{type:'free-month',months:1,text:'1st month free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:300,depositRefundable:true,notes:null}, avail:"Available now", soon:false, era:"2000s", renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
     amenities:["city-view","gym-full","concierge","storage-locker","bike-storage"],
     landlord:{ name:"Marcus W.", score:4.9, reviews:34, color:"#22c55e", initials:"MW", verified:true, responseRate:"98%", avgResponse:"2 hrs", reliability:100, noShows:0, progress:{profile:true,response:true,reviews:true},
       availability:[{day:"Saturday",slots:["10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM"]},{day:"Sunday",slots:["11:00 AM","12:00 PM","2:00 PM"]},{day:"Tuesday",slots:["6:00 PM","7:00 PM"]}] },
@@ -5695,7 +5697,7 @@ const listings = [
       { name:"Priya R.", initials:"PR", color:"#a855f7", score:5, date:"Nov 2024", tenancy:"2020–2024", tenancyMonths:48, verified:true, goodTenant:true, tenantRating:{payment:5,condition:5,communication:4,notice:5}, text:"Very professional and always respectful of my space. Gave proper notice before every single entry. Highly recommend.", flags:["Respectful","Great comms"], flagType:["good","good"], landlordResponse:null }
     ]
   },
-  { id:2, img:"__SCENE__bedroom1", photos:["__SCENE__bedroom1","__SCENE__living2","__SCENE__exterior1","__SCENE__living1"], price:2400, beds:2, baths:2, sqft:980, flexibleScreening:true, deposit:2400, listingStatus:"active", lastConfirmed:"2026-01-24", address:"308 – 2220 16a St SW", hood:"Bankview", badges:["hot"], pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:25,deposit:250,depositRefundable:true,notes:"Small breeds only — please confirm with landlord"}, avail:"Jun 1", soon:true, era:"1980s", renovated:{year:2019, scope:"kitchen-bath"}, parking:{spots:1, type:"surface", included:true, cost:0},
+  { id:2, img:"__SCENE__bedroom1", photos:["__SCENE__bedroom1","__SCENE__living2","__SCENE__exterior1","__SCENE__living1"], price:2400, beds:2, baths:2, sqft:980, flexibleScreening:true, deposit:2400, listingStatus:"active", lastConfirmed:"2026-01-24", address:"308 – 2220 16a St SW", hood:"Bankview", badges:["hot"], incentive:{type:'free-month',months:2,text:'First 2 months free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:25,deposit:250,depositRefundable:true,notes:"Small breeds only — please confirm with landlord"}, avail:"Jun 1", soon:true, era:"1980s", renovated:{year:2019, scope:"kitchen-bath"}, parking:{spots:1, type:"surface", included:true, cost:0},
     amenities:["fitness-room","storage-locker","courtyard"],
     landlord:{ name:"Priya S.", score:4.7, reviews:22, color:"#4f7cff", initials:"PS", verified:false, responseRate:"91%", avgResponse:"5 hrs", reliability:96, noShows:1, progress:{profile:true,response:true,reviews:false},
       availability:[{day:"Saturday",slots:["10:00 AM","12:00 PM","2:00 PM"]},{day:"Wednesday",slots:["5:30 PM","6:30 PM"]}] },
@@ -8194,10 +8196,15 @@ function moveInBlockHtml(l) {
       ${depositRow}
       ${parkingRow}
       ${elevatorRow}
+      ${l.incentive ? `<div class="movein-row" style="background:linear-gradient(90deg,rgba(34,197,94,0.06),transparent);border-radius:6px;padding:4px 0;">
+        <div class="movein-label" style="color:var(--green);font-weight:700;">🎁 ${l.incentive.text}</div>
+        <div class="movein-val movein-green">−$${(l.price * (l.incentive.months||1)).toLocaleString()}</div>
+      </div>` : ''}
       <div class="movein-total-row">
         <div class="movein-total-label">Total to move in</div>
-        <div class="movein-total-val">$${total.toLocaleString()}</div>
+        <div class="movein-total-val">$${(l.incentive ? Math.max(0, total - l.price * (l.incentive.months||1)) : total).toLocaleString()}</div>
       </div>
+      ${l.incentive ? `<div class="movein-note">🎁 Landlord incentive: <strong style="color:var(--green);">${l.incentive.text}</strong> — saves you <strong style="color:var(--green);">$${(l.price * (l.incentive.months||1)).toLocaleString()}</strong> on move-in.</div>` : ''}
       ${savingsNote}
     </div>`;
 }
@@ -8320,6 +8327,7 @@ function renderCard(l, i) {
         <div class="card-price">$${l.price.toLocaleString()}<span>/mo</span></div>
         ${scoreDisplay}
       </div>
+      ${l.incentive ? `<div class="incentive-pill">🎁 ${l.incentive.text}</div>` : ''}
       <div class="card-address">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         ${l.address} · <span style="color:var(--text3)">${l.hood}</span>
@@ -12017,6 +12025,7 @@ function openProperty(id) {
         <div class="prop-hero-info">
           <div>
             <div class="prop-price">$${l.price.toLocaleString()}<span>/mo</span></div>
+            ${l.incentive ? `<div class="incentive-pill" style="margin:4px 0;">🎁 ${l.incentive.text}</div>` : ''}
             <div class="prop-addr">${l.address} · ${l.hood}</div>
             <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;">
               <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);background:rgba(0,0,0,0.25);padding:2px 8px;border-radius:5px;">${l.sqft ? `$${(l.price/l.sqft).toFixed(2)}/ft²` : ''}</div>
@@ -12270,18 +12279,29 @@ function renderOtherUnitsStrip(currentListing) {
     return ll.name === currentLl.name;
   });
 
-  if (!others.length) return '';
+  // Also find similar listings in the same building/hood (different landlord)
+  const sameBuilding = listings.filter(l => {
+    if (l.id === currentListing.id) return false;
+    if (others.some(o => o.id === l.id)) return false;
+    // Same building = same street address base (before unit number)
+    const base = currentListing.address.replace(/^[\d\s–]+/, '').trim();
+    return l.address.includes(base) || (l.hood === currentListing.hood && Math.abs(l.price - currentListing.price) < 500);
+  }).slice(0, 3);
 
-  const cards = others.map(l => {
+  if (!others.length && !sameBuilding.length) return '';
+
+  function unitCard(l, label) {
     const ll = l.ownerManaged ? l.owner : l.landlord;
     const availColor = l.soon ? 'var(--yellow)' : 'var(--green)';
+    const imgHtml = l.img.startsWith('__SCENE__') ? sceneImg(l.img,'','width:100%;height:100%;object-fit:cover;') : `<img src="${l.img}" style="width:100%;height:100%;object-fit:cover;">`;
     return `
       <div class="other-unit-card" onclick="openProperty(${l.id})">
-        <div class="other-unit-img" style="background-image:url('${l.img}')">
-          <div class="other-unit-img-overlay"></div>
-        </div>
+        <div class="other-unit-img">${imgHtml}</div>
         <div class="other-unit-body">
-          <div class="other-unit-price">$${l.price.toLocaleString()}<span>/mo</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+            <div class="other-unit-price">$${l.price.toLocaleString()}<span>/mo</span></div>
+            ${l.incentive ? `<span class="incentive-pill incentive-pill-sm">🎁 ${l.incentive.text}</span>` : ''}
+          </div>
           <div class="other-unit-meta">
             <span><strong>${l.beds}</strong> bd</span>
             <span><strong>${l.baths}</strong> ba</span>
@@ -12293,19 +12313,33 @@ function renderOtherUnitsStrip(currentListing) {
             <div style="width:6px;height:6px;border-radius:50%;background:${availColor};flex-shrink:0;"></div>
             ${l.avail}
           </div>
+          ${label ? `<div style="font-size:10px;color:var(--text3);margin-top:3px;">${label}</div>` : ''}
         </div>
       </div>`;
-  }).join('');
+  }
 
-  return `
-    <div class="other-units-strip">
-      <div class="other-units-title">
-        <div class="ll-avatar" style="background:${currentLl.color}18;color:${currentLl.color};width:26px;height:26px;font-size:11px;">${currentLl.initials}</div>
-        More units by ${currentLl.name}
-        <span style="font-size:12px;font-weight:500;color:var(--text3);">${others.length} other listing${others.length > 1 ? 's' : ''}</span>
-      </div>
-      <div class="other-units-grid">${cards}</div>
-    </div>`;
+  let html = '<div class="other-units-strip">';
+
+  if (others.length) {
+    html += `<div class="other-units-title">
+      <div class="ll-avatar" style="background:${currentLl.color}18;color:${currentLl.color};width:26px;height:26px;font-size:11px;">${currentLl.initials}</div>
+      More units by ${currentLl.name}
+      <span style="font-size:12px;font-weight:500;color:var(--text3);">${others.length} other listing${others.length > 1 ? 's' : ''}</span>
+    </div>
+    <div class="other-units-grid">${others.map(l => unitCard(l, null)).join('')}</div>`;
+  }
+
+  if (sameBuilding.length) {
+    html += `<div class="other-units-title" style="${others.length ? 'margin-top:20px;' : ''}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Similar nearby in ${currentListing.hood}
+      <span style="font-size:12px;font-weight:500;color:var(--text3);">${sameBuilding.length} match${sameBuilding.length > 1 ? 'es' : ''}</span>
+    </div>
+    <div class="other-units-grid">${sameBuilding.map(l => { const ll = l.ownerManaged ? l.owner : l.landlord; return unitCard(l, 'by ' + ll.name); }).join('')}</div>`;
+  }
+
+  html += '</div>';
+  return html;
 }
 
 // ── OWNER-MANAGED PROPERTY ──
