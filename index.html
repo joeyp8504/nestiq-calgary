@@ -4483,84 +4483,139 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 </div><!-- screen-listings -->
 
 <!-- ══ DASHBOARD ══ -->
-<div id="screen-dashboard" class="screen" style="flex-direction:column;overflow-y:auto;background:var(--bg);">
-  <!-- Nav bar -->
-  <nav style="flex-shrink:0;">
+<div id="screen-dashboard" class="screen" style="flex-direction:column;">
+  <!-- Full nav bar (matches listings) -->
+  <nav>
     <div class="nav-logo" onclick="showScreen('listings')" style="cursor:pointer;">
       <div class="nav-logo-icon">🏠</div> <span style="letter-spacing:-1px">Nest<span style="color:#4f7cff">IQ</span></span>
     </div>
+    <div class="nav-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search addresses, neighbourhoods..." readonly onfocus="showScreen('listings');document.getElementById('nav-search-input')?.focus();">
+    </div>
     <div class="nav-right">
-      <button class="btn btn-ghost" onclick="showScreen('listings')" style="font-size:13px;">← Back to listings</button>
-      <div class="user-pill" id="dash-nav-pill" style="cursor:default;">
-        <div class="user-avatar" id="dash-avatar"></div>
-        <span class="user-name" id="dash-name"></span>
+      <div style="position:relative;display:inline-block;">
+        <button class="svc-nav-btn" onclick="toggleSvcDropdown()">
+          <span class="svc-nav-icon">⚡</span>
+          <span>Services</span>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="opacity:0.5;"><path d="M2 4l3 3 3-3"/></svg>
+        </button>
+      </div>
+      <div class="inbox-bell-btn" onclick="openInbox()" title="Messages">
+        ✉️<div class="inbox-unread-badge" id="inbox-badge-dash">2</div>
+      </div>
+      <div class="notif-bell has-unread" onclick="toggleNotifPanel(event)" title="Notifications">
+        🔔<div class="notif-badge" id="notif-badge-dash">3</div>
+      </div>
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</div>
+      <div style="position:relative;display:inline-block;" id="user-dropdown-wrap-dash">
+        <div class="user-pill" style="cursor:pointer;" onclick="toggleUserDropdown()">
+          <div class="user-avatar" id="dash-avatar"></div>
+          <span class="user-name" id="dash-name"></span>
+          <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+        </div>
       </div>
     </div>
   </nav>
 
-  <!-- Dashboard content -->
-  <div id="dash-content" style="flex:1;max-width:780px;width:100%;margin:0 auto;padding:32px 20px 60px;">
-
-    <!-- Profile header -->
-    <div id="dash-profile-header" style="display:flex;align-items:center;gap:24px;margin-bottom:32px;flex-wrap:wrap;">
-      <div id="dash-profile-avatar" style="width:88px;height:88px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:3px solid var(--border2);"></div>
-      <div style="flex:1;min-width:200px;">
-        <div id="dash-profile-name" style="font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px;"></div>
-        <div id="dash-profile-email" style="font-size:13.5px;color:var(--text3);margin-bottom:8px;"></div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div id="dash-role-badge" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;"></div>
-          <div id="dash-member-since" style="font-size:12px;color:var(--text3);"></div>
+  <!-- Sidebar + Main layout -->
+  <div class="app-body">
+    <!-- Left sidebar -->
+    <aside id="dash-sidebar">
+      <!-- Profile card -->
+      <div class="sidebar-section" style="padding-bottom:16px;">
+        <div style="text-align:center;margin-bottom:12px;">
+          <div id="dash-profile-avatar" style="width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 10px;overflow:hidden;border:3px solid var(--border2);"></div>
+          <div id="dash-profile-name" style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px;"></div>
+          <div id="dash-profile-email" style="font-size:11.5px;color:var(--text3);margin-bottom:6px;"></div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+            <div id="dash-role-badge" style="display:inline-block;padding:3px 10px;border-radius:16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;"></div>
+            <div id="dash-member-since" style="font-size:10.5px;color:var(--text3);"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Quick stats row -->
-    <div id="dash-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;"></div>
-
-    <!-- Account completion -->
-    <div id="dash-completion" style="margin-bottom:28px;"></div>
-
-    <!-- Dynamic sections (role-specific) -->
-    <div id="dash-dynamic" style="display:flex;flex-direction:column;gap:28px;margin-bottom:28px;"></div>
-
-    <!-- Account section -->
-    <div style="margin-bottom:28px;">
-      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px;">Account</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;">
-        <div class="dash-card" onclick="openProfileSettings()">
-          <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">👤</div><div class="dash-card-title">Profile Settings</div></div>
-          <div class="dash-card-desc">Edit your name, change your password, and update your profile photo.</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">🔔</div><div class="dash-card-title">Notification Preferences</div></div>
-          <div class="dash-card-desc">Manage email alerts, push notifications, and review reminders.</div>
-        </div>
-        <div class="dash-card" onclick="showScreen('listings')">
-          <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(34,197,94,0.1);">♥</div><div class="dash-card-title">Saved Listings</div></div>
-          <div class="dash-card-desc">View and manage listings you have bookmarked for later.</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(245,166,35,0.1);">💬</div><div class="dash-card-title">Your Reviews</div></div>
-          <div class="dash-card-desc">See reviews you have written and responses from landlords.</div>
+      <!-- Navigation -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">Navigation</div>
+        <div class="filter-group">
+          <div class="filter-item active" id="dash-nav-overview" onclick="setDashNav('overview')"><div class="filter-dot" style="background:#4f7cff"></div>Overview</div>
+          <div class="filter-item" id="dash-nav-activity" onclick="setDashNav('activity')"><div class="filter-dot" style="background:#f5a623"></div>Activity</div>
+          <div class="filter-item" id="dash-nav-reviews" onclick="setDashNav('reviews')"><div class="filter-dot" style="background:#22c55e"></div>Reviews</div>
+          <div class="filter-item" id="dash-nav-settings" onclick="setDashNav('settings')"><div class="filter-dot" style="background:#8b5cf6"></div>Settings</div>
         </div>
       </div>
-    </div>
 
-    <!-- Danger zone -->
-    <div style="margin-bottom:32px;">
-      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px;">Danger Zone</div>
-      <div style="background:var(--surface);border:1.5px solid rgba(240,78,78,0.25);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+      <!-- Quick links -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">Quick Links</div>
+        <div class="filter-group">
+          <div class="filter-item" onclick="showScreen('listings')" style="cursor:pointer;">🏠 Browse Listings</div>
+          <div class="filter-item" onclick="showScreen('services')" style="cursor:pointer;">⚡ Find Services</div>
+          <div class="filter-item" onclick="openInbox()" style="cursor:pointer;">✉️ Messages <span class="filter-count" style="background:var(--red);color:#fff;border-radius:8px;padding:0 6px;font-size:9px;">2</span></div>
+        </div>
+      </div>
+
+      <!-- Account completion sidebar -->
+      <div class="sidebar-section" id="dash-sidebar-completion"></div>
+
+      <!-- Danger zone (compact) -->
+      <div class="sidebar-section" style="padding-bottom:8px;">
+        <button onclick="doSupabaseSignOut()" style="width:100%;padding:9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main>
+      <div class="toolbar">
+        <span class="result-count" id="dash-toolbar-title"><strong>Profile Overview</strong></span>
+      </div>
+      <div class="listings-wrap" style="padding:20px;">
+        <!-- Quick stats row -->
+        <div id="dash-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;"></div>
+
+        <!-- Account completion -->
+        <div id="dash-completion" style="margin-bottom:24px;"></div>
+
+        <!-- Dynamic sections (role-specific) -->
+        <div id="dash-dynamic" style="display:flex;flex-direction:column;gap:24px;margin-bottom:24px;"></div>
+
+        <!-- Account section -->
+        <div style="margin-bottom:24px;">
+          <div class="dash-section-title">Account</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+            <div class="dash-card" onclick="openProfileSettings()">
+              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">👤</div><div class="dash-card-title">Profile Settings</div></div>
+              <div class="dash-card-desc">Edit your name, change your password, and update your profile photo.</div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">🔔</div><div class="dash-card-title">Notifications</div></div>
+              <div class="dash-card-desc">Manage email alerts, push notifications, and review reminders.</div>
+            </div>
+            <div class="dash-card" onclick="showScreen('listings')">
+              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(34,197,94,0.1);">♥</div><div class="dash-card-title">Saved Listings</div></div>
+              <div class="dash-card-desc">View and manage your bookmarked listings.</div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(245,166,35,0.1);">💬</div><div class="dash-card-title">Your Reviews</div></div>
+              <div class="dash-card-desc">Reviews you have written and responses from landlords.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger zone -->
         <div>
-          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Sign out or delete your account</div>
-          <div style="font-size:12.5px;color:var(--text3);">Signing out will return you to the login screen. Account deletion is permanent.</div>
-        </div>
-        <div style="display:flex;gap:10px;flex-shrink:0;">
-          <button onclick="doSupabaseSignOut()" style="padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;background:var(--surface2);color:var(--text);border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;transition:all 0.15s;">Sign out</button>
-          <button onclick="alert('Account deletion is not yet available. Contact support@nestiq.ca.')" style="padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;background:rgba(240,78,78,0.1);color:var(--red);border:1.5px solid rgba(240,78,78,0.25);cursor:pointer;font-family:inherit;transition:all 0.15s;">Delete account</button>
+          <div class="dash-section-title">Danger Zone</div>
+          <div style="background:var(--surface);border:1.5px solid rgba(240,78,78,0.25);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Delete your account</div>
+              <div style="font-size:12.5px;color:var(--text3);">This action is permanent and cannot be undone.</div>
+            </div>
+            <button onclick="alert('Account deletion is not yet available. Contact support@nestiq.ca.')" style="padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;background:rgba(240,78,78,0.1);color:var(--red);border:1.5px solid rgba(240,78,78,0.25);cursor:pointer;font-family:inherit;transition:all 0.15s;">Delete account</button>
+          </div>
         </div>
       </div>
-    </div>
-
+    </main>
   </div>
 </div><!-- /screen-dashboard -->
 
@@ -7044,6 +7099,61 @@ function renderDashboard() {
   sections += '</div></div>';
 
   dynamicEl.innerHTML = sections;
+
+  // Sidebar completion
+  const sidebarComp = document.getElementById('dash-sidebar-completion');
+  if (sidebarComp && pct < 100) {
+    sidebarComp.innerHTML = `
+      <div class="sidebar-label">Profile Completion</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div class="dash-completion-bar" style="flex:1;"><div class="dash-completion-fill" style="width:${pct}%;"></div></div>
+        <span style="font-size:12px;font-weight:800;color:var(--accent);">${pct}%</span>
+      </div>
+      <div class="filter-group">
+        ${checks.map(c => `<div style="font-size:11.5px;padding:4px 0;color:${c.done?'var(--green)':'var(--text3)'};">${c.done?'✓':'○'} ${c.label}</div>`).join('')}
+      </div>`;
+  } else if (sidebarComp) {
+    sidebarComp.innerHTML = '';
+  }
+}
+
+let dashNavSection = 'overview';
+function setDashNav(section) {
+  dashNavSection = section;
+  document.querySelectorAll('#dash-sidebar .filter-item[id^="dash-nav-"]').forEach(el => el.classList.remove('active'));
+  var el = document.getElementById('dash-nav-' + section);
+  if (el) el.classList.add('active');
+  var titleEl = document.getElementById('dash-toolbar-title');
+  var titles = { overview:'Profile Overview', activity:'Recent Activity', reviews:'Your Reviews', settings:'Account Settings' };
+  if (titleEl) titleEl.innerHTML = '<strong>' + (titles[section]||'Profile') + '</strong>';
+
+  // Show/hide sections based on nav
+  var mainWrap = document.querySelector('#screen-dashboard .listings-wrap');
+  if (!mainWrap) return;
+  var statsRow = document.getElementById('dash-stats-row');
+  var completion = document.getElementById('dash-completion');
+  var dynamic = document.getElementById('dash-dynamic');
+  var acctSection = mainWrap.children[3]; // Account cards
+  var dangerSection = mainWrap.children[4]; // Danger zone
+
+  // Show all by default, then hide based on section
+  [statsRow, completion, dynamic, acctSection, dangerSection].forEach(el => { if (el) el.style.display = ''; });
+
+  if (section === 'activity') {
+    if (statsRow) statsRow.style.display = 'none';
+    if (completion) completion.style.display = 'none';
+    if (acctSection) acctSection.style.display = 'none';
+    if (dangerSection) dangerSection.style.display = 'none';
+  } else if (section === 'reviews') {
+    if (statsRow) statsRow.style.display = 'none';
+    if (completion) completion.style.display = 'none';
+    if (acctSection) acctSection.style.display = 'none';
+    if (dangerSection) dangerSection.style.display = 'none';
+  } else if (section === 'settings') {
+    if (statsRow) statsRow.style.display = 'none';
+    if (completion) completion.style.display = 'none';
+    if (dynamic) dynamic.style.display = 'none';
+  }
 }
 
 // Keep setDashTab as a no-op for any lingering references
