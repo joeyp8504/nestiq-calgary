@@ -3973,8 +3973,76 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .screen { scroll-behavior: smooth; }
 
 /* Services uses listings grid */
-#screen-services .listings-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+#screen-services .listings-grid { grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); }
 #screen-services aside { min-width: 200px; }
+
+/* ── Service Card V2 ── */
+.svc-card-v2 { cursor:default; border-radius:16px; overflow:hidden; }
+.svc-card-v2.svc-top-pick { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 4px 24px rgba(79,124,255,0.15); }
+.svc-card-v2.svc-claimed { border-left:3px solid var(--green); }
+
+/* Hero */
+.svc-hero { display:flex; align-items:center; gap:14px; padding:16px 18px 14px; position:relative; }
+.svc-hero-emoji { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; }
+.svc-hero-info { flex:1; min-width:0; }
+.svc-hero-name { font-size:16px; font-weight:800; letter-spacing:-0.3px; line-height:1.3; margin-bottom:5px; }
+.svc-hero-badges { display:flex; flex-wrap:wrap; gap:5px; }
+.svc-verified-badge { font-size:10px; font-weight:700; color:var(--green); background:rgba(45,211,111,0.1); padding:2px 8px; border-radius:6px; }
+.svc-top-badge { font-size:9px; font-weight:800; color:var(--accent); background:var(--accent-glow); padding:2px 8px; border-radius:6px; text-transform:uppercase; letter-spacing:0.04em; }
+.svc-avail-badge { font-size:10px; font-weight:700; color:#22c55e; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:6px; }
+
+/* Fav button */
+.svc-fav { position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:rgba(13,15,20,0.45); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.5); font-size:15px; cursor:pointer; transition:all 0.2s; z-index:2; }
+.svc-fav:hover { color:#ef4444; border-color:rgba(239,68,68,0.5); background:rgba(239,68,68,0.15); transform:scale(1.1); }
+.svc-fav.faved { color:#ef4444; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.15); }
+.svc-fav.pop { animation:heartPop 0.3s cubic-bezier(0.34,1.8,0.64,1); }
+
+/* Body */
+.svc-card-body { padding:0 18px 6px; }
+
+/* Ratings */
+.svc-ratings-row { display:flex; align-items:center; gap:0; margin-bottom:8px; background:var(--surface2); border-radius:10px; padding:8px 12px; }
+.svc-rating-block { flex:1; }
+.svc-rating-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); margin-bottom:2px; }
+.svc-rating-label.svc-rating-nestiq { color:var(--accent); }
+.svc-rating-val { font-size:13.5px; font-weight:700; }
+.svc-rating-count { font-size:11px; font-weight:400; color:var(--text3); }
+.svc-rating-divider { width:1px; height:28px; background:var(--border2); margin:0 12px; flex-shrink:0; }
+.svc-star { color:#f5c842; }
+
+/* Meta */
+.svc-meta-row { display:flex; flex-wrap:wrap; gap:10px; font-size:11.5px; color:var(--text3); margin:8px 0 4px; }
+.svc-response-time { font-size:11px; font-weight:700; color:var(--accent); margin:2px 0 6px; }
+
+/* Tags */
+.svc-tags { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0; }
+.svc-tag { display:inline-block; padding:3px 9px; border-radius:6px; font-size:10.5px; font-weight:600; background:var(--surface2); color:var(--text3); }
+
+/* Bio */
+.svc-bio { font-size:12.5px; color:var(--text2); line-height:1.6; margin:6px 0 10px; }
+
+/* Review snippet */
+.svc-review-snippet { background:var(--surface2); border-radius:10px; padding:10px 14px; margin:0 0 10px; border-left:3px solid var(--accent); }
+.svc-review-quote { font-size:12px; color:var(--text2); line-height:1.55; font-style:italic; }
+.svc-review-author { font-size:11px; color:var(--text3); font-weight:600; margin-top:4px; }
+
+/* Packages */
+.svc-packages { margin:0 0 10px; }
+.svc-packages-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); margin-bottom:6px; }
+.svc-packages-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); gap:6px; }
+.svc-pkg { background:var(--surface2); border-radius:8px; padding:8px 10px; text-align:center; border:1px solid var(--border); transition:border-color 0.15s; }
+.svc-pkg:hover { border-color:var(--accent); }
+.svc-pkg-name { font-size:11px; font-weight:700; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.svc-pkg-price { font-size:14px; font-weight:800; color:var(--text); letter-spacing:-0.3px; }
+.svc-pkg-note { font-size:10px; color:var(--text3); margin-top:2px; }
+
+/* Contact row */
+.svc-contact-row { display:flex; gap:6px; margin:0 0 8px; }
+.svc-contact-btn { width:34px; height:34px; border-radius:9px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; transition:all 0.15s; text-decoration:none; }
+.svc-contact-btn:hover { border-color:var(--accent); background:var(--accent-glow); transform:translateY(-1px); }
+
+/* Actions */
+.svc-actions { display:flex; gap:8px; padding:8px 18px 16px; }
 
 </style>
 </head>
@@ -5697,6 +5765,13 @@ const listings = [
 let currentUser = { name: 'Sarah Mitchell', email: 'sarah.mitchell@gmail.com', role: 'tenant', initials: 'SM', photo: '__SCENE____sarah' };
 
 // ── SERVICES DATA ──
+const svcFavourites = new Set();
+function toggleSvcFav(id, evt) {
+  if (evt) evt.stopPropagation();
+  const btn = document.querySelector('#svc-card-' + id + ' .svc-fav');
+  if (svcFavourites.has(id)) { svcFavourites.delete(id); if (btn) btn.classList.remove('faved'); }
+  else { svcFavourites.add(id); if (btn) { btn.classList.add('faved','pop'); setTimeout(() => btn.classList.remove('pop'), 300); } }
+}
 const serviceData = {
   cleaning: [
     { id:'c1', claimed:true,  cat:'cleaning', name:'Mission Maids Canada',           emoji:'🧹', color:'#4f7cff', address:'788 12 Ave SW',           distance:'0.8 km',
@@ -5704,34 +5779,49 @@ const serviceData = {
       phone:'+1 587-609-8200', website:'missionmaids.ca',            email:'book@missionmaids.ca',            hours:'Mon–Sat 8 AM–5 PM',
       tags:['Move-Out Specialist','Deep Clean','Appliances'],
       bio:"Calgary's top-rated move-out team. Full documentation for deposit recovery.",
+      responseTime:'< 1 hour', availableToday:true,
+      reviewSnippet:{text:'Got our full damage deposit back thanks to their documentation. Absolutely worth it.', author:'Priya K.'},
       packages:[{name:'Standard Move-Out',price:'$280–$380',note:'1–2 bed'},{name:'Deep Move-Out',price:'$380–$520',note:'2–3 bed + appliances'},{name:'Premium Package',price:'$520–$700',note:'3+ bed + carpet'}] },
     { id:'c2', claimed:true,  cat:'cleaning', name:'Wild Rose Cleaning Services',    emoji:'🌹', color:'#f43f5e', address:'300 5 Ave SW',             distance:'1.2 km',
       googleRating:4.9, googleReviewCount:117,  nestiqRating:4.9, nestiqReviewCount:31, reliabilityScore:98, reliabilityJobs:53,
       phone:'+1 403-389-1293', website:'wildrosecleaning.ca',         email:'info@wildrosecleaning.ca',        hours:'Open 24 hours',
       tags:['Move-Out Specialist','Carpet Cleaning','Available 24/7'],
       bio:'Full-service move-out and carpet specialists. Available around the clock for last-minute cleans.',
+      responseTime:'< 30 min', availableToday:true,
+      reviewSnippet:{text:'Called at 10 PM for next-day move-out. They showed up at 7 AM and the place was spotless by noon.', author:'Marcus T.'},
       packages:[{name:'Move-Out Basic',price:'$240–$320',note:'Studio–1 bed'},{name:'Move-Out + Carpets',price:'$390–$550',note:'Includes steam clean'},{name:'Landlord Package',price:'$500–$750',note:'Full unit + carpets + windows'}] },
     { id:'c3', claimed:true,  cat:'cleaning', name:'Calgary Cleaning Pro Standards',  emoji:'⭐', color:'#f5a623', address:'500 4 Ave SW',             distance:'1.0 km',
       googleRating:5.0, googleReviewCount:46,   nestiqRating:5.0, nestiqReviewCount:8,  reliabilityScore:100, reliabilityJobs:8,
       phone:'+1 825-747-5558', website:'calgaryprostandards.ca',      email:'contact@calgaryprostandards.ca', hours:'Open 24 hours',
       tags:['Steam Cleaning','Move-Out Specialist','No Harsh Chemicals'],
       bio:'Steam-clean specialists. Zero harsh chemicals, strong on ovens and end-of-tenancy deep cleans.',
+      responseTime:'< 2 hours', availableToday:true,
+      reviewSnippet:{text:'The oven looked brand new. My landlord actually complimented me on the way out.', author:'Dana L.'},
       packages:[{name:'Steam Deep Clean',price:'$320–$420',note:'1–2 bed, eco-safe'},{name:'Full Move-Out',price:'$420–$580',note:'2–3 bed + oven'},{name:'Landlord Turnover',price:'$550–$800',note:'3+ bed + docs'}] },
     { id:'c4', claimed:false, cat:'cleaning', name:'Maids in Pink',                   emoji:'💗', color:'#ec4899', address:'918 16 Ave NW',           distance:'2.4 km',
       googleRating:4.7, googleReviewCount:594,  nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-879-7383', website:'maidsinpink.ca',              email:null,                              hours:'Mon–Fri 7 AM–8 PM · Sat–Sun 8 AM–8 PM',
       tags:['Move-Out','Eco-Friendly','Large Team'],
-      bio:"One of Calgary's most-reviewed cleaning services. Eco-friendly products, large team roster.", packages:null },
+      bio:"One of Calgary's most-reviewed cleaning services. Eco-friendly products, large team roster.",
+      responseTime:'< 4 hours', availableToday:false,
+      reviewSnippet:{text:'Eco-friendly and thorough. Used them three times now — always consistent quality.', author:'Alex R.'},
+      packages:null },
     { id:'c5', claimed:false, cat:'cleaning', name:'Hellamaid Cleaning Services',     emoji:'💪', color:'#8b5cf6', address:'999 8 St SW',             distance:'0.6 km',
       googleRating:4.8, googleReviewCount:206,  nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 587-287-6243', website:'hellamaid.ca',                email:null,                              hours:'Mon–Fri 8 AM–6 PM · Sat–Sun 9 AM–5 PM',
       tags:['Move-Out','Online Booking','Detail-Oriented'],
-      bio:'Flexible booking, consistently high ratings. Multiple teams — several reviews mention full deposit recovery.', packages:null },
+      bio:'Flexible booking, consistently high ratings. Multiple teams — several reviews mention full deposit recovery.',
+      responseTime:'< 3 hours', availableToday:true,
+      reviewSnippet:{text:'Full deposit returned. The property manager said it was the cleanest unit she had seen.', author:'Jordan W.'},
+      packages:null },
     { id:'c6', claimed:false, cat:'cleaning', name:'Dang Good Carpet & Furnace',      emoji:'🏆', color:'#f59e0b', address:'1935 30 Ave NE',          distance:'5.1 km',
       googleRating:5.0, googleReviewCount:2751, nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-984-3680', website:'danggood.ca',                 email:null,                              hours:'Mon–Fri 8 AM–6 PM · Sat 8 AM–4 PM',
       tags:['Carpet Cleaning','Furnace Cleaning','Most Reviewed in YYC'],
-      bio:"Calgary's most-reviewed home service with 2,751 reviews. Carpet + furnace specialists — ideal add-on to any move-out clean.", packages:null },
+      bio:"Calgary's most-reviewed home service with 2,751 reviews. Carpet + furnace specialists — ideal add-on to any move-out clean.",
+      responseTime:'Same day', availableToday:false,
+      reviewSnippet:{text:'2,700+ reviews for a reason. Carpets look factory-new. Furnace runs quieter too.', author:'Sam B.'},
+      packages:null },
   ],
   handymen: [
     { id:'h1', claimed:true,  cat:'handymen', name:'My Home Handyman',                emoji:'🔧', color:'#4f7cff', address:'4407 116 Ave SE',         distance:'4.2 km',
@@ -5739,28 +5829,41 @@ const serviceData = {
       phone:'+1 587-600-0602', website:'myhomehandyman.ca',           email:'info@myhomehandyman.ca',          hours:'Mon–Fri 8:30 AM–5 PM',
       tags:['Repairs','Drywall','Painting','Installations'],
       bio:'Full-service handyman company with 900+ reviews. Handles minor repairs to bathroom renos. Quick scheduling, transparent pricing.',
+      responseTime:'< 1 hour', availableToday:true,
+      reviewSnippet:{text:'Fixed 12 items on my move-out punch list in a single afternoon. Saved my deposit for sure.', author:'Tyler M.'},
       packages:[{name:'Hourly Rate',price:'$85–$110/hr',note:'2 hr minimum'},{name:'Half Day',price:'$320–$380',note:'4 hrs, parts extra'},{name:'Full Day',price:'$580–$680',note:'8 hrs, parts extra'}] },
     { id:'h2', claimed:true,  cat:'handymen', name:'Custom Carpentry & Handyman',     emoji:'🪵', color:'#f5a623', address:'1111 Maggie St SE',         distance:'1.8 km',
       googleRating:5.0, googleReviewCount:24,   nestiqRating:5.0, nestiqReviewCount:9,  reliabilityScore:100, reliabilityJobs:9,
       phone:'+1 403-466-1882', website:'customcarpentrycalgary.ca',   email:'pavel@customcarpentrycalgary.ca', hours:'Mon–Fri 8:30 AM–8 PM · Sat–Sun 9 AM–8 PM',
       tags:['Carpentry','Door Repairs','Custom Builds','Finish Work'],
       bio:'Pavel and team — five-star rated for precision carpentry, door repairs, and custom builds. Meticulous finish work at fair prices.',
+      responseTime:'< 2 hours', availableToday:true,
+      reviewSnippet:{text:'Pavel repaired three doors that wouldn\'t close properly. Precision work — you\'d never know they were damaged.', author:'Erin S.'},
       packages:[{name:'Minor Repairs',price:'$70–$100/hr',note:'Door, cabinet, trim'},{name:'Carpentry Project',price:'Quote required',note:'Custom builds, decks'},{name:'Pre-Move Fixes',price:'$280–$450',note:'Patch list before handover'}] },
     { id:'h3', claimed:false, cat:'handymen', name:'Mr. Handyman of West Calgary',    emoji:'🏠', color:'#10b981', address:'2961 Peacekeepers Way SW',  distance:'3.5 km',
       googleRating:4.8, googleReviewCount:443,  nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-800-3243', website:'mrhandyman.com/calgary-west', email:null,                              hours:'Open 24 hours',
       tags:['Full Home Repairs','Electrical','Roofing','Drywall'],
-      bio:'Franchise service with 440+ reviews. Handles electrical, roofing, and general home repairs across west Calgary.', packages:null },
+      bio:'Franchise service with 440+ reviews. Handles electrical, roofing, and general home repairs across west Calgary.',
+      responseTime:'< 4 hours', availableToday:false,
+      reviewSnippet:{text:'Handled electrical and drywall in one visit. Professional crew, showed up exactly on time.', author:'Keith D.'},
+      packages:null },
     { id:'h4', claimed:false, cat:'handymen', name:'Handyman Calgary NW',              emoji:'🛠', color:'#8b5cf6', address:'175 Arbour Butte Rd NW',   distance:'8.6 km',
       googleRating:4.8, googleReviewCount:110,  nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-891-6380', website:'handymancalgarynw.ca',         email:null,                              hours:'Mon–Fri 8 AM–9 PM',
       tags:['Renovations','Drywall','Baseboards','Painting'],
-      bio:'Cam and team — prep-for-listing specialists. Laundry rooms, drywall, paint, and baseboards done fast and clean.', packages:null },
+      bio:'Cam and team — prep-for-listing specialists. Laundry rooms, drywall, paint, and baseboards done fast and clean.',
+      responseTime:'Same day', availableToday:false,
+      reviewSnippet:{text:'Cam prepped my rental for re-listing in two days. Baseboards, paint, drywall patches — all perfect.', author:'Nina P.'},
+      packages:null },
     { id:'h5', claimed:false, cat:'handymen', name:'Handy Calgary',                    emoji:'⚡', color:'#f43f5e', address:'11501 Buffalo Run Blvd',   distance:'6.3 km',
       googleRating:5.0, googleReviewCount:14,   nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 548-708-6619', website:'handycalgary.ca',              email:null,                              hours:'Open 24 hours',
       tags:['Electrical','Appliances','TV Mounting','Affordable'],
-      bio:'Skilled multi-trade team. Electrical, appliance installs, and general repairs. Competitive pricing across Calgary SW.', packages:null },
+      bio:'Skilled multi-trade team. Electrical, appliance installs, and general repairs. Competitive pricing across Calgary SW.',
+      responseTime:'< 1 hour', availableToday:true,
+      reviewSnippet:{text:'Mounted three TVs and installed a dishwasher in under two hours. Great price too.', author:'Omar J.'},
+      packages:null },
   ],
   junk: [
     { id:'j1', claimed:true,  cat:'junk', name:'The Junk Man Inc.',                   emoji:'🗑', color:'#4f7cff', address:'81 Kentish Dr SW',         distance:'3.2 km',
@@ -5768,18 +5871,25 @@ const serviceData = {
       phone:'+1 403-797-7145', website:'thejunkmancalgary.ca',        email:'jesse@thejunkmancalgary.ca',     hours:'Open 24 hours',
       tags:['Same-Day Available','Furniture Removal','Appliances'],
       bio:"Jesse and crew — same-day service, upfront pricing, no-nonsense removal. One of Calgary's highest-rated junk outfits.",
+      responseTime:'< 30 min', availableToday:true,
+      reviewSnippet:{text:'Jesse showed up within the hour. Old couch, fridge, and 12 boxes gone in 20 minutes. Fair price, no haggling.', author:'Chris V.'},
       packages:[{name:'Small Load',price:'$100–$160',note:'Up to 1/4 truck'},{name:'Medium Load',price:'$180–$280',note:'Up to 1/2 truck'},{name:'Full Truckload',price:'$300–$450',note:'Full truck, all items'}] },
     { id:'j2', claimed:true,  cat:'junk', name:'Junk King Calgary South',             emoji:'👑', color:'#f5a623', address:'6026 5 St SE',             distance:'2.9 km',
       googleRating:5.0, googleReviewCount:1012, nestiqRating:5.0, nestiqReviewCount:78, reliabilityScore:95, reliabilityJobs:112,
       phone:'+1 587-210-2448', website:'junk-king.com/calgary',        email:'calgary@junk-king.com',          hours:'Mon–Fri 4:30 AM–8 PM · Sat 4:30–7:30 PM · Sun 7 AM–6 PM',
       tags:['1,000+ Reviews','Donate & Recycle First','Move-Out Ready'],
       bio:"1,000+ Google reviews at a perfect 5 stars. Items sorted for donation and recycling before disposal.",
+      responseTime:'< 2 hours', availableToday:true,
+      reviewSnippet:{text:'They sorted everything for donation first. Felt good knowing usable stuff wasn\'t going to landfill.', author:'Lisa H.'},
       packages:[{name:'Minimum Charge',price:'$90–$130',note:'1–2 items'},{name:'1/4 Truck',price:'$140–$200',note:'Several items'},{name:'Full Truck',price:'$350–$500',note:'Full clearout + eco sort'}] },
     { id:'j3', claimed:false, cat:'junk', name:'All In Junk',                         emoji:'💪', color:'#10b981', address:'2801b 12 Ave SE',          distance:'3.8 km',
       googleRating:4.9, googleReviewCount:201,  nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-402-6030', website:'allinjunk.ca',                email:null,                              hours:'Mon–Sun 6 AM–10 PM',
       tags:['Junk Removal','7 Days a Week','Reasonable Pricing'],
-      bio:'Nam and Pak — versatile removal team with extended hours, 7 days a week. Also does landscaping.', packages:null },
+      bio:'Nam and Pak — versatile removal team with extended hours, 7 days a week. Also does landscaping.',
+      responseTime:'< 3 hours', availableToday:true,
+      reviewSnippet:{text:'Available on a Sunday evening. Cleared out a full garage in under an hour. Very reasonable price.', author:'Derek N.'},
+      packages:null },
   ],
   movers: [
     { id:'m1', claimed:true,  cat:'movers', name:"Let's Get Moving Calgary",           emoji:'🚛', color:'#4f7cff', address:'1122 40 Ave NE',           distance:'3.6 km',
@@ -5787,28 +5897,41 @@ const serviceData = {
       phone:'+1 587-430-3006', website:'letsgetmoving.ca',            email:'calgary@letsgetmoving.ca',       hours:'Mon–Fri 6 AM–9 PM · Sat 7 AM–7 PM · Sun 8 AM–5 PM',
       tags:['Highly Rated','Furniture Wrapping','Same-Day Available'],
       bio:"587 reviews at 4.9 stars. Wraps all furniture to prevent damage — you'll still have energy to unpack on move day.",
+      responseTime:'< 1 hour', availableToday:true,
+      reviewSnippet:{text:'Every single piece of furniture was wrapped. Not a scratch on anything. Worth every penny.', author:'Hannah G.'},
       packages:[{name:'2 Movers + Truck',price:'$120–$150/hr',note:'2 hr minimum'},{name:'3 Movers + Truck',price:'$160–$195/hr',note:'Recommended for 2+ bed'},{name:'Full Pack & Move',price:'Custom quote',note:'Includes packing supplies'}] },
     { id:'m2', claimed:true,  cat:'movers', name:'Calgary Professional Movers',        emoji:'📦', color:'#10b981', address:'918 16 Ave NW',             distance:'2.4 km',
       googleRating:4.8, googleReviewCount:1132, nestiqRating:4.7, nestiqReviewCount:63, reliabilityScore:93, reliabilityJobs:91,
       phone:'+1 587-602-9631', website:'calgaryprofessionalmovers.ca', email:'info@calgaryprofessionalmovers.ca', hours:'Open 24 hours',
       tags:['1,100+ Reviews','Piano & Safe Moving','Storage Available'],
       bio:'1,100+ reviews, storage available, 24/7. Handled pianos and 650-lb safes — nothing too awkward for this crew.',
+      responseTime:'< 2 hours', availableToday:true,
+      reviewSnippet:{text:'Moved a 650-lb safe down a curved staircase without a mark. These guys know what they\'re doing.', author:'Ray K.'},
       packages:[{name:'2 Movers',price:'$110–$140/hr',note:'Standard move'},{name:'3 Movers',price:'$150–$185/hr',note:'Larger homes'},{name:'Storage + Move',price:'Custom quote',note:'Includes secure storage'}] },
     { id:'m3', claimed:false, cat:'movers', name:'Calgary Movers Pro',                 emoji:'⚡', color:'#8b5cf6', address:'330 5 Ave SW',               distance:'1.0 km',
       googleRating:4.8, googleReviewCount:1269, nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 587-741-9000', website:'calgarymovers.pro',           email:null,                              hours:'Open 24 hours',
       tags:['Heavy Items','Safe & Piano Moving','TV Mounting'],
-      bio:'1,269 reviews. Moved a 650-lb safe down a curved staircase. TV mounting included. On time and on budget even in -25°C.', packages:null },
+      bio:'1,269 reviews. Moved a 650-lb safe down a curved staircase. TV mounting included. On time and on budget even in -25°C.',
+      responseTime:'< 1 hour', availableToday:true,
+      reviewSnippet:{text:'Showed up in -25 and still finished ahead of schedule. TV mounting was a nice bonus.', author:'Jenna F.'},
+      packages:null },
     { id:'m4', claimed:false, cat:'movers', name:'Two Small Men with Big Hearts',      emoji:'🤝', color:'#f43f5e', address:'610 70 Ave SE',              distance:'4.4 km',
       googleRating:4.5, googleReviewCount:1117, nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-879-1915', website:'twosmallmen.com/calgary',    email:null,                              hours:'Mon–Fri 7 AM–7 PM · Sat–Sun 8 AM–5:30 PM',
       tags:['National Brand','Furniture Wrap','Last-Minute OK'],
-      bio:'National franchise with 1,100+ Calgary reviews. Great for last-minute booking changes — flexible, professional, affordable.', packages:null },
+      bio:'National franchise with 1,100+ Calgary reviews. Great for last-minute booking changes — flexible, professional, affordable.',
+      responseTime:'< 4 hours', availableToday:false,
+      reviewSnippet:{text:'Changed my move date twice and they handled it with zero hassle. Friendly crew, fair price.', author:'Brianna C.'},
+      packages:null },
     { id:'m5', claimed:false, cat:'movers', name:'Calgary Movers ABPro',               emoji:'💼', color:'#f5a623', address:'1118 12 Ave SW',             distance:'0.9 km',
       googleRating:4.8, googleReviewCount:245,  nestiqRating:null, nestiqReviewCount:0, reliabilityScore:null, reliabilityJobs:0,
       phone:'+1 403-910-1414', website:'calgarymoversabpro.ca',       email:null,                              hours:'Open 24 hours',
       tags:['Affordable','Same-Week Booking','Small Moves OK'],
-      bio:'Fast response, competitive pricing. Responds same day even for small moves. Kevin and Jamie praised consistently for care and efficiency.', packages:null },
+      bio:'Fast response, competitive pricing. Responds same day even for small moves. Kevin and Jamie praised consistently for care and efficiency.',
+      responseTime:'Same day', availableToday:true,
+      reviewSnippet:{text:'Kevin and Jamie moved my studio in 90 minutes. Cheapest quote I got and the best service. Go figure.', author:'Amir Z.'},
+      packages:null },
   ]
 };
 
@@ -5979,38 +6102,95 @@ function svcReliabilityHtml(s) {
 }
 
 function renderServiceCard(s, idx) {
-  var verifiedBadge = s.claimed ? '<span style="color:var(--green);font-size:11px;font-weight:700;"> ✓ Verified</span>' : '';
-  var tagHtml = s.tags.slice(0, 3).map(function(t) { return '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;background:var(--surface2);color:var(--text3);margin-right:4px;">' + t + '</span>'; }).join('');
+  var isTopPick = idx === 0;
+  var isFaved = svcFavourites.has(s.id);
   var gRating = s.googleRating != null ? s.googleRating : '—';
   var gCount = (s.googleReviewCount || 0).toLocaleString();
   var nRating = s.nestiqRating;
   var nCount = s.nestiqReviewCount || 0;
-  var reliabilityHtml = svcReliabilityHtml(s);
-  var isTopPick = idx === 0;
-  var priceLine = '';
-  if (s.packages && s.packages.length > 0) {
-    priceLine = '<div style="font-size:18px;font-weight:800;letter-spacing:-0.5px;">' + s.packages[0].price + '<span style="font-size:11px;font-weight:400;color:var(--text3);"> starting</span></div>';
-  }
-  var nestiqLine = nRating ? '<span style="margin-left:8px;"><span style="background:var(--accent-glow);color:var(--accent);padding:1px 6px;border-radius:10px;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;">NestIQ</span> ★ ' + nRating + ' <span style="color:var(--text3)">(' + nCount + ')</span></span>' : '';
-  var topBadge = isTopPick ? '<span style="font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-glow);padding:3px 8px;border-radius:6px;text-transform:uppercase;">Top Pick</span>' : '';
 
-  var html = '<div class="card" style="border-radius:14px;overflow:hidden;cursor:default;" id="svc-card-' + s.id + '">';
-  html += '<div style="height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;background:' + s.color + '15;">' + s.emoji + '</div>';
-  html += '<div style="padding:14px 16px 10px;">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">';
-  html += '<div style="font-size:15px;font-weight:800;letter-spacing:-0.3px;">' + s.name + verifiedBadge + '</div>';
-  html += topBadge;
+  // --- Hero header ---
+  var topBadge = isTopPick ? '<span class="svc-top-badge">Top Pick</span>' : '';
+  var verifiedBadge = s.claimed ? '<span class="svc-verified-badge">✓ NestIQ Verified</span>' : '';
+  var availBadge = s.availableToday ? '<span class="svc-avail-badge">Available today</span>' : '';
+
+  var html = '<div class="card svc-card-v2' + (isTopPick ? ' svc-top-pick' : '') + (s.claimed ? ' svc-claimed' : '') + '" id="svc-card-' + s.id + '">';
+
+  // Hero
+  html += '<div class="svc-hero" style="background:' + s.color + '12;">';
+  html += '<div class="svc-hero-emoji" style="background:' + s.color + '20;">' + s.emoji + '</div>';
+  html += '<div class="svc-hero-info">';
+  html += '<div class="svc-hero-name">' + s.name + '</div>';
+  html += '<div class="svc-hero-badges">' + verifiedBadge + topBadge + availBadge + '</div>';
   html += '</div>';
-  html += '<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">';
-  html += '<span style="color:#f5c842;">★</span> <strong>' + gRating + '</strong> <span style="color:var(--text3)">(' + gCount + ' Google)</span>' + nestiqLine;
+  html += '<div class="svc-fav' + (isFaved ? ' faved' : '') + '" onclick="toggleSvcFav(\'' + s.id + '\',event)" title="Save provider">♥</div>';
   html += '</div>';
-  html += reliabilityHtml;
-  html += '<div style="font-size:11.5px;color:var(--text3);margin:4px 0 6px;">📍 ' + s.distance + ' · ⏰ ' + s.hours + '</div>';
-  html += '<div style="margin-bottom:8px;">' + tagHtml + '</div>';
-  html += '<div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:10px;">' + s.bio + '</div>';
-  html += priceLine;
+
+  // Body
+  html += '<div class="svc-card-body">';
+
+  // Ratings row — Google and NestIQ side by side
+  html += '<div class="svc-ratings-row">';
+  html += '<div class="svc-rating-block"><div class="svc-rating-label">Google</div><div class="svc-rating-val"><span class="svc-star">★</span> ' + gRating + ' <span class="svc-rating-count">(' + gCount + ')</span></div></div>';
+  if (nRating) {
+    html += '<div class="svc-rating-divider"></div>';
+    html += '<div class="svc-rating-block"><div class="svc-rating-label svc-rating-nestiq">NestIQ</div><div class="svc-rating-val"><span class="svc-star" style="color:var(--accent);">★</span> ' + nRating + ' <span class="svc-rating-count">(' + nCount + ')</span></div></div>';
+  }
   html += '</div>';
-  html += '<div style="display:flex;gap:8px;padding:0 16px 14px;">';
+
+  // Reliability
+  html += svcReliabilityHtml(s);
+
+  // Location + hours + response time
+  html += '<div class="svc-meta-row">';
+  html += '<span>📍 ' + s.distance + '</span>';
+  html += '<span>⏰ ' + s.hours + '</span>';
+  html += '</div>';
+  if (s.responseTime) {
+    html += '<div class="svc-response-time">⚡ Responds ' + s.responseTime + '</div>';
+  }
+
+  // Tags
+  var tagHtml = s.tags.slice(0, 4).map(function(t) { return '<span class="svc-tag">' + t + '</span>'; }).join('');
+  html += '<div class="svc-tags">' + tagHtml + '</div>';
+
+  // Bio
+  html += '<div class="svc-bio">' + s.bio + '</div>';
+
+  // Review snippet
+  if (s.reviewSnippet) {
+    html += '<div class="svc-review-snippet">';
+    html += '<div class="svc-review-quote">"' + s.reviewSnippet.text + '"</div>';
+    html += '<div class="svc-review-author">— ' + s.reviewSnippet.author + '</div>';
+    html += '</div>';
+  }
+
+  // Packages
+  if (s.packages && s.packages.length > 0) {
+    html += '<div class="svc-packages">';
+    html += '<div class="svc-packages-label">Packages</div>';
+    html += '<div class="svc-packages-grid">';
+    s.packages.forEach(function(pkg) {
+      html += '<div class="svc-pkg">';
+      html += '<div class="svc-pkg-name">' + pkg.name + '</div>';
+      html += '<div class="svc-pkg-price">' + pkg.price + '</div>';
+      html += '<div class="svc-pkg-note">' + pkg.note + '</div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  // Contact quick-actions
+  html += '<div class="svc-contact-row">';
+  if (s.phone) html += '<a class="svc-contact-btn" href="tel:' + s.phone + '" onclick="event.stopPropagation()" title="Call">📞</a>';
+  if (s.website) html += '<a class="svc-contact-btn" href="https://' + s.website + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Website">🌐</a>';
+  if (s.email) html += '<a class="svc-contact-btn" href="mailto:' + s.email + '" onclick="event.stopPropagation()" title="Email">✉️</a>';
+  html += '</div>';
+
+  html += '</div>'; // end svc-card-body
+
+  // Action buttons
+  html += '<div class="svc-actions">';
   html += '<button class="cleaner-btn-ghost" style="flex:1;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'message\')">💬 Message</button>';
   html += '<button class="cleaner-btn-primary" style="flex:2;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'book\')">📅 Book Now</button>';
   html += '</div>';
