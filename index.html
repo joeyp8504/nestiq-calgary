@@ -4888,8 +4888,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   <div class="booking-modal" style="max-width:420px;">
     <div class="booking-header">
       <div>
-        <div class="booking-header-title">⚡ Get pre-approved</div>
-        <div class="booking-header-sub">One-time check · valid 90 days · reusable on every application</div>
+        <div class="booking-header-title">⚡ Get NestIQ Ready</div>
+        <div class="booking-header-sub">One-time credit + background check · valid 90 days · reusable on every application</div>
       </div>
       <div class="booking-close" onclick="closePreApproval()">✕</div>
     </div>
@@ -4927,7 +4927,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:8px;">Confirm your identity</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div style="grid-column:1/-1;">
-            <input type="text" placeholder="Legal full name" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:11px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;box-sizing:border-box;outline:none;" value="Sarah Mitchell">
+            <input type="text" id="pre-approval-name" placeholder="Legal full name" style="width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:11px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;box-sizing:border-box;outline:none;" value="">
           </div>
           <input type="text" placeholder="Date of birth" style="background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:11px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" value="Jun 12, 1994">
           <input type="text" placeholder="Current postal code" style="background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:11px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" value="T2S 1X3">
@@ -4952,7 +4952,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     </div>
     <div class="booking-footer">
       <button class="btn btn-ghost" style="flex:1" onclick="closePreApproval()">Cancel</button>
-      <button class="flow-btn flow-btn-green" style="flex:2" onclick="submitPreApproval()">Pay $19 and get verified →</button>
+      <button class="flow-btn flow-btn-green" style="flex:2" onclick="submitPreApproval()">Pay $19 — Get NestIQ Ready →</button>
     </div>
   </div>
 </div>
@@ -7016,15 +7016,75 @@ function renderDashboard() {
       leftCol += '</div>';
     }
 
-    // Verification
-    leftCol += `<div><div class="dash-section-title">Renter Verification</div>
-      <div class="dash-panel" style="border-color:rgba(34,197,94,0.25);">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;font-size:17px;">⚡</div>
-          <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Verified Renter</div><div style="font-size:11.5px;color:var(--text3);margin-top:1px;">Credit 742 · Background clear · ID confirmed</div></div>
-          <div style="padding:4px 10px;border-radius:14px;font-size:10px;font-weight:700;background:rgba(34,197,94,0.1);color:var(--green);">✓ Verified</div>
-        </div>
-      </div></div>`;
+    // Verification — dynamic based on preApproved state
+    if (u.preApproved) {
+      // Verified: show full report summary
+      const expDate = new Date(); expDate.setDate(expDate.getDate() + 74);
+      const expStr = expDate.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+      leftCol += `<div><div class="dash-section-title">NestIQ Ready</div>
+        <div class="dash-panel" style="border-color:rgba(34,197,94,0.25);background:linear-gradient(135deg,rgba(34,197,94,0.04),rgba(79,124,255,0.03));">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(79,124,255,0.1));display:flex;align-items:center;justify-content:center;font-size:20px;">⚡</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:800;color:var(--green);">NestIQ Ready</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px;">Valid until ${expStr} · Soft pull only</div>
+            </div>
+            <div style="padding:4px 12px;border-radius:14px;font-size:10px;font-weight:700;background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.25);">✓ Active</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:var(--text);">${u.creditScore || 742}</div>
+              <div style="font-size:10px;color:var(--text3);font-weight:600;">Credit Score</div>
+              <div style="font-size:9px;color:var(--green);font-weight:700;">Excellent</div>
+            </div>
+            <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:var(--green);">✓</div>
+              <div style="font-size:10px;color:var(--text3);font-weight:600;">Background</div>
+              <div style="font-size:9px;color:var(--green);font-weight:700;">Clear</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);"><span style="color:var(--green);">✓</span> Identity confirmed via government ID</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);"><span style="color:var(--green);">✓</span> No collections or liens found</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);"><span style="color:var(--green);">✓</span> Employment verified — stable income</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);"><span style="color:var(--green);">✓</span> Badge visible on all applications</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="showToast('Report shared with clipboard link')" style="flex:1;padding:7px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--text2);">Share report</button>
+            <button onclick="showToast('Renewal available from ${expStr}')" style="flex:1;padding:7px;background:rgba(79,124,255,0.1);border:1px solid rgba(79,124,255,0.25);border-radius:8px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--accent);">Renew ($9)</button>
+          </div>
+        </div></div>`;
+    } else {
+      // Not verified: show CTA wizard
+      leftCol += `<div><div class="dash-section-title">Get NestIQ Ready</div>
+        <div class="dash-panel" style="border:1.5px dashed rgba(79,124,255,0.3);background:linear-gradient(135deg,rgba(79,124,255,0.04),rgba(168,85,247,0.03));">
+          <div style="text-align:center;padding:8px 0 12px;">
+            <div style="font-size:32px;margin-bottom:8px;">⚡</div>
+            <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Stand out to landlords</div>
+            <div style="font-size:12.5px;color:var(--text3);line-height:1.6;max-width:280px;margin:0 auto 16px;">Pull your credit, get background-checked, and earn the <strong style="color:var(--green);">NestIQ Ready</strong> badge. Landlords see it on every message and application.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+            <div style="background:var(--surface2);border-radius:8px;padding:10px 8px;text-align:center;">
+              <div style="font-size:16px;margin-bottom:4px;">📊</div>
+              <div style="font-size:10px;font-weight:700;color:var(--text3);">Credit Score</div>
+            </div>
+            <div style="background:var(--surface2);border-radius:8px;padding:10px 8px;text-align:center;">
+              <div style="font-size:16px;margin-bottom:4px;">🔍</div>
+              <div style="font-size:10px;font-weight:700;color:var(--text3);">Background</div>
+            </div>
+            <div style="background:var(--surface2);border-radius:8px;padding:10px 8px;text-align:center;">
+              <div style="font-size:16px;margin-bottom:4px;">🪪</div>
+              <div style="font-size:10px;font-weight:700;color:var(--text3);">ID Verify</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div><span style="font-size:20px;font-weight:900;color:var(--green);">$19</span> <span style="font-size:11px;color:var(--text3);">one-time</span></div>
+            <div style="font-size:11px;color:var(--text3);">Valid 90 days · Renew $9</div>
+          </div>
+          <button onclick="openPreApprovalModal()" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),#7c3aed);border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:800;color:#fff;transition:opacity 0.15s;">Get NestIQ Ready →</button>
+          <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text3);">Soft pull · Does not affect your credit score</div>
+        </div></div>`;
+    }
 
     // RIGHT: Reviews
     if (myReviews.length > 0) {
@@ -7701,6 +7761,8 @@ function declineCreditCheck(convoId, msgId) {
 // Pre-approval modal
 function openPreApprovalModal() {
   document.getElementById('pre-approval-overlay').classList.add('open');
+  var nameInput = document.getElementById('pre-approval-name');
+  if (nameInput && currentUser) nameInput.value = currentUser.name || '';
 }
 
 function closePreApproval(e) {
@@ -7710,9 +7772,17 @@ function closePreApproval(e) {
 
 function submitPreApproval() {
   closePreApproval();
-  // Mark tenant as pre-approved
-  if (currentUser) { currentUser.preApproved = true; currentUser.creditScore = 742; }
-  showToast('✓ Pre-approval complete — Verified Renter badge added to your profile');
+  // Mark tenant as pre-approved with full verification data
+  if (currentUser) {
+    currentUser.preApproved = true;
+    currentUser.creditScore = 742;
+    currentUser.backgroundClear = true;
+    currentUser.idConfirmed = true;
+    currentUser.verifiedDate = new Date().toISOString().split('T')[0];
+  }
+  showToast('⚡ NestIQ Ready! Your badge is now visible on all messages and applications.');
+  // Re-render dashboard if visible
+  if (document.querySelector('#screen-dashboard.active')) renderDashboard();
   // Re-render inbox to show badge state
   setTimeout(() => {
     const convo = conversations.find(c => c.id === 1);
@@ -8525,6 +8595,7 @@ function renderMsgStep3(l, ll, first) {
       <div class="thread-intro-row"><div class="thread-intro-key">Employment</div><div class="thread-intro-val">${empLabels[msgEmpStatus]||msgEmpStatus}</div></div>
       ${selfEmpSection}
       <div class="thread-intro-row"><div class="thread-intro-key">NestIQ status</div><div class="thread-intro-val" style="color:var(--green);">✓ Good Tenant badge</div></div>
+      ${currentUser?.preApproved ? '<div class="thread-intro-row"><div class="thread-intro-key">Verification</div><div class="thread-intro-val" style="color:var(--green);font-weight:700;">⚡ NestIQ Ready · Credit ' + (currentUser.creditScore||742) + ' · Background clear</div></div>' : '<div class="thread-intro-row"><div class="thread-intro-key">Verification</div><div class="thread-intro-val" style="color:var(--text3);">Not yet verified — <span style="color:var(--accent);cursor:pointer;" onclick="openPreApprovalModal()">Get NestIQ Ready</span></div></div>'}
     </div>
 
     ${screeningPreview ? `<div style="padding:13px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:11px;"><div class="thread-intro-card-title">Pre-screening answers</div>${screeningPreview}</div>` : ''}
@@ -8634,7 +8705,7 @@ function sendMessage() {
       with: ll, subject: `${typeLabel} — ${l.address}`,
       messages: [
         { from:'me', text: msgText, time: 'Just now', read: true,
-          introCard: { moveIn: state.moveIn||'Jun 1', occupants: state.occupants||'1 person', pets: state.pets||'No pets', lease: state.lease||'12 months', employment: empLabels[msgEmpStatus], selfEmpDocs: msgSelfEmpDocs, slots: msgSelectedSlots },
+          introCard: { moveIn: state.moveIn||'Jun 1', occupants: state.occupants||'1 person', pets: state.pets||'No pets', lease: state.lease||'12 months', employment: empLabels[msgEmpStatus], selfEmpDocs: msgSelfEmpDocs, slots: msgSelectedSlots, preApproved: currentUser?.preApproved||false, creditScore: currentUser?.creditScore||null },
           readReceipt: null
         }
       ],
@@ -9514,7 +9585,7 @@ function renderFlowCard(m, c) {
             <div class="credit-card" style="border-color:rgba(34,197,94,0.2);background:rgba(34,197,94,0.03);">
               <div class="credit-card-header" style="background:rgba(34,197,94,0.08);">
                 <div class="credit-card-icon">⚡</div>
-                <div><div class="credit-card-title" style="color:var(--green);">Stand out — get pre-approved</div><div class="credit-card-sub">Verified Renter badge shown to all landlords you apply to</div></div>
+                <div><div class="credit-card-title" style="color:var(--green);">Stand out — get NestIQ Ready</div><div class="credit-card-sub">NestIQ Ready badge shown to all landlords you apply to</div></div>
               </div>
               <div class="credit-card-body">
                 <div class="credit-card-row"><div class="credit-card-row-label">What's included</div><div class="credit-card-row-val">Credit score + background</div></div>
@@ -9567,7 +9638,7 @@ function renderFlowCard(m, c) {
           <div class="credit-card" style="border-color:rgba(34,197,94,0.2);">
             <div class="credit-card-header" style="background:rgba(34,197,94,0.08);">
               <div class="credit-card-icon">✅</div>
-              <div><div class="credit-card-title" style="color:var(--green);">Pre-approved tenant</div><div class="credit-card-sub">${d.tenantName} has a Verified Renter badge</div></div>
+              <div><div class="credit-card-title" style="color:var(--green);">NestIQ Ready tenant</div><div class="credit-card-sub">${d.tenantName} is NestIQ Ready — pre-screened and verified</div></div>
             </div>
             <div class="credit-card-body">
               <div style="font-size:12px;color:var(--text2);">This tenant has already completed a credit and background check. Request access to their report — free of charge.</div>
@@ -9636,7 +9707,7 @@ function renderFlowCard(m, c) {
         <div style="display:flex;justify-content:center;margin:6px 0;">
           <div class="flow-card" style="max-width:320px;width:100%;">
             <div class="flow-card-title" style="color:var(--accent);">📄 Application submitted</div>
-            ${isVerified ? `<div style="margin-bottom:8px;"><span class="pre-approval-badge">⚡ Verified Renter included</span></div>` : ''}
+            ${isVerified ? `<div style="margin-bottom:8px;"><span class="pre-approval-badge">⚡ NestIQ Ready included</span></div>` : ''}
             <div class="flow-card-row"><div class="flow-card-label">Move-in</div><div class="flow-card-val">${app.moveIn}</div></div>
             <div class="flow-card-row"><div class="flow-card-label">Employment</div><div class="flow-card-val">${app.employment}</div></div>
             <div class="flow-card-row"><div class="flow-card-label">Income</div><div class="flow-card-val">${app.income}</div></div>
@@ -13017,7 +13088,7 @@ function openTenantProfile(reviewer, fromListingId) {
         <div class="tenant-badge-row">
           ${hasGoodTenant ? '<div class="tenant-good-badge">⭐ Good Tenant</div>' : ''}
           ${reviewer.verified ? '<div class="tenant-verified-pill">✓ Verified Tenant</div>' : ''}
-          ${reviewer.preApproved || (reviewer.name === 'Sarah Mitchell' && currentUser?.preApproved) ? `<div class="pre-approval-badge" onclick="event.stopPropagation();showToast('Verified Renter — credit score 742, background clear')">⚡ Verified Renter</div>` : ''}
+          ${reviewer.preApproved || (reviewer.name === 'Sarah Mitchell' && currentUser?.preApproved) ? `<div class="pre-approval-badge" onclick="event.stopPropagation();showToast('NestIQ Ready — Credit ${currentUser?.creditScore||742} · Background clear · ID verified')">⚡ NestIQ Ready</div>` : ''}
           <div class="tenant-member-pill">Member since 2021</div>
         </div>
       </div>
@@ -13927,6 +13998,7 @@ function renderMessages(c) {
           <div class="thread-intro-row"><div class="thread-intro-key">Employment</div><div class="thread-intro-val">${empLabel}</div></div>
           ${selfEmpRow}
           <div class="thread-intro-row"><div class="thread-intro-key">NestIQ</div><div class="thread-intro-val" style="color:var(--green);">✓ Good Tenant</div></div>
+          ${ic.preApproved || currentUser?.preApproved ? '<div class="thread-intro-row" style="background:linear-gradient(90deg,rgba(34,197,94,0.06),transparent);border-radius:6px;padding:4px 0;"><div class="thread-intro-key" style="color:var(--green);font-weight:800;">⚡ NestIQ Ready</div><div class="thread-intro-val" style="color:var(--green);font-weight:700;">Credit ' + (currentUser?.creditScore||742) + ' · Background clear · ID verified</div></div>' : ''}
         </div>${slotsHtml}`;
     }
 
@@ -14354,7 +14426,7 @@ function renderFlowCardLandlord(m, c) {
                 <div style="font-size:12px;color:var(--text3);">${d.address} · $${d.price.toLocaleString()}/mo</div>
               </div>
             </div>
-            ${d.hasPreApproval ? `<div style="margin-bottom:8px;"><span class="pre-approval-badge">⚡ Verified Renter</span></div>` : ''}
+            ${d.hasPreApproval ? `<div style="margin-bottom:8px;"><span class="pre-approval-badge">⚡ NestIQ Ready</span></div>` : ''}
             <div class="flow-card-row"><div class="flow-card-label">Move-in</div><div class="flow-card-val">${app.moveIn}</div></div>
             <div class="flow-card-row"><div class="flow-card-label">Employment</div><div class="flow-card-val">${app.employment}</div></div>
             <div class="flow-card-row"><div class="flow-card-label">Income</div><div class="flow-card-val">${app.income}</div></div>
