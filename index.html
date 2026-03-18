@@ -6656,8 +6656,8 @@ setUserAvatar('nav-avatar', currentUser);
 document.getElementById('nav-name').textContent = currentUser.name;
 setUserAvatar('prop-avatar', currentUser);
 document.getElementById('prop-name').textContent = currentUser.name;
-setUserAvatar('nav-avatar-svc', currentUser);
-document.getElementById('nav-name-svc').textContent = currentUser.name;
+var _navNameSvc = document.getElementById('nav-name-svc');
+if (_navNameSvc) { setUserAvatar('nav-avatar-svc', currentUser); _navNameSvc.textContent = currentUser.name; }
 
 // ── RENDER DASHBOARD ──
 function renderDashboard() {
