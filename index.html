@@ -3977,7 +3977,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #screen-services aside { min-width: 200px; }
 
 /* ── Service Card V2 ── */
-.svc-card-v2 { cursor:default; border-radius:16px; overflow:hidden; }
+.svc-card-v2 { cursor:default; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
 .svc-card-v2.svc-top-pick { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 4px 24px rgba(79,124,255,0.15); }
 .svc-card-v2.svc-claimed { border-left:3px solid var(--green); }
 
@@ -3998,7 +3998,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .svc-fav.pop { animation:heartPop 0.3s cubic-bezier(0.34,1.8,0.64,1); }
 
 /* Body */
-.svc-card-body { padding:0 18px 6px; }
+.svc-card-body { padding:0 18px 6px; flex:1; display:flex; flex-direction:column; }
 
 /* Ratings */
 .svc-ratings-row { display:flex; align-items:center; gap:0; margin-bottom:8px; background:var(--surface2); border-radius:10px; padding:8px 12px; }
@@ -4036,10 +4036,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .svc-pkg-price { font-size:14px; font-weight:800; color:var(--text); letter-spacing:-0.3px; }
 .svc-pkg-note { font-size:10px; color:var(--text3); margin-top:2px; }
 
+/* Quote prompt (for providers without packages) */
+.svc-quote-prompt { background:var(--surface2); border:1px dashed var(--border2); border-radius:10px; padding:14px 16px; margin:0 0 10px; cursor:pointer; text-align:center; transition:all 0.15s; }
+.svc-quote-prompt:hover { border-color:var(--accent); background:var(--accent-glow); }
+.svc-quote-prompt-icon { font-size:20px; margin-bottom:4px; }
+.svc-quote-prompt-text { font-size:13px; font-weight:700; color:var(--text); }
+.svc-quote-prompt-sub { font-size:11px; color:var(--text3); margin-top:2px; }
+
 /* Contact row */
-.svc-contact-row { display:flex; gap:6px; margin:0 0 8px; }
-.svc-contact-btn { width:34px; height:34px; border-radius:9px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; transition:all 0.15s; text-decoration:none; }
+.svc-contact-row { display:flex; gap:6px; margin:auto 0 8px; padding-top:8px; align-items:center; }
+.svc-contact-btn { width:34px; height:34px; border-radius:9px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; transition:all 0.15s; text-decoration:none; flex-shrink:0; }
 .svc-contact-btn:hover { border-color:var(--accent); background:var(--accent-glow); transform:translateY(-1px); }
+.svc-contact-addr { font-size:11px; color:var(--text3); margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* Actions */
 .svc-actions { display:flex; gap:8px; padding:8px 18px 16px; }
@@ -5937,7 +5945,14 @@ const serviceData = {
 
 let svcCategory = 'cleaning';
 let svcFilter   = 'all';
+let svcSort     = 'rating';
 let svcQuoteState = {};
+let svcMinRating = 'any';
+let svcMaxDist = 'any';
+let svcMinReviews = 'any';
+let svcAvailToday = false;
+let svcHasPackages = false;
+let svcShowSaved = false;
 
 function toggleSvcDropdown() {
   var dd = document.getElementById('svc-dropdown');
@@ -6049,7 +6064,62 @@ function setSvcFilter(f) {
   renderServices();
 }
 
-let svcSort = 'rating';
+function setSvcRating(el, val) {
+  svcMinRating = val;
+  document.querySelectorAll('[data-svc-rating]').forEach(function(e) { e.classList.remove('active'); });
+  el.classList.add('active');
+  renderServices();
+}
+
+function setSvcDist(el, val) {
+  svcMaxDist = val;
+  document.querySelectorAll('[data-svc-dist]').forEach(function(e) { e.classList.remove('active'); });
+  el.classList.add('active');
+  renderServices();
+}
+
+function setSvcReviews(el, val) {
+  svcMinReviews = val;
+  document.querySelectorAll('[data-svc-reviews]').forEach(function(e) { e.classList.remove('active'); });
+  el.classList.add('active');
+  renderServices();
+}
+
+function toggleSvcAvailToday() {
+  svcAvailToday = !svcAvailToday;
+  var el = document.getElementById('sf-avail-today');
+  if (el) { var cb = el.querySelector('.cb'); if (cb) { if (svcAvailToday) { cb.classList.add('checked'); cb.textContent = '✓'; } else { cb.classList.remove('checked'); cb.textContent = ''; } } }
+  renderServices();
+}
+
+function toggleSvcHasPackages() {
+  svcHasPackages = !svcHasPackages;
+  var el = document.getElementById('sf-has-packages');
+  if (el) { var cb = el.querySelector('.cb'); if (cb) { if (svcHasPackages) { cb.classList.add('checked'); cb.textContent = '✓'; } else { cb.classList.remove('checked'); cb.textContent = ''; } } }
+  renderServices();
+}
+
+function toggleSvcSavedView() {
+  svcShowSaved = !svcShowSaved;
+  renderServices();
+}
+
+function resetSvcFilters() {
+  svcFilter = 'all'; svcMinRating = 'any'; svcMaxDist = 'any'; svcMinReviews = 'any';
+  svcAvailToday = false; svcHasPackages = false; svcShowSaved = false;
+  // Reset UI
+  document.querySelectorAll('[data-svc-rating]').forEach(function(e) { e.classList.remove('active'); });
+  var anyRating = document.querySelector('[data-svc-rating="any"]'); if (anyRating) anyRating.classList.add('active');
+  document.querySelectorAll('[data-svc-dist]').forEach(function(e) { e.classList.remove('active'); });
+  var anyDist = document.querySelector('[data-svc-dist="any"]'); if (anyDist) anyDist.classList.add('active');
+  document.querySelectorAll('[data-svc-reviews]').forEach(function(e) { e.classList.remove('active'); });
+  var anyRev = document.querySelector('[data-svc-reviews="any"]'); if (anyRev) anyRev.classList.add('active');
+  ['sf-all','sf-claimed','sf-avail-today','sf-has-packages'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { var cb = el.querySelector('.cb'); if (cb) { if (id === 'sf-all') { cb.classList.add('checked'); cb.textContent = '✓'; } else { cb.classList.remove('checked'); cb.textContent = ''; } } }
+  });
+  renderServices();
+}
 
 function renderServices() {
   // Sync nav user info from currentUser
@@ -6059,27 +6129,59 @@ function renderServices() {
   }
   var container = document.getElementById('svc-results');
   if (!container) return;
-  var list = serviceData[svcCategory] || [];
+
+  // Saved view: show all favourited providers across categories
+  var list;
+  if (svcShowSaved) {
+    list = Object.values(serviceData).flat().filter(function(s) { return svcFavourites.has(s.id); });
+  } else {
+    list = serviceData[svcCategory] || [];
+  }
+
+  // Apply filters
   if (svcFilter === 'claimed') list = list.filter(function(s) { return s.claimed; });
+  if (svcMinRating !== 'any') list = list.filter(function(s) { return (s.googleRating || 0) >= parseFloat(svcMinRating); });
+  if (svcMaxDist !== 'any') list = list.filter(function(s) { return parseFloat(s.distance) <= parseFloat(svcMaxDist); });
+  if (svcMinReviews !== 'any') list = list.filter(function(s) { return (s.googleReviewCount || 0) >= parseInt(svcMinReviews); });
+  if (svcAvailToday) list = list.filter(function(s) { return s.availableToday; });
+  if (svcHasPackages) list = list.filter(function(s) { return s.packages && s.packages.length > 0; });
+
   list = [...list];
   if (svcSort === 'rating') list.sort(function(a,b) { return (b.googleRating??0)-(a.googleRating??0); });
   else if (svcSort === 'distance') list.sort(function(a,b) { return parseFloat(a.distance)-parseFloat(b.distance); });
   else if (svcSort === 'reviews') list.sort(function(a,b) { return (b.googleReviewCount??0)-(a.googleReviewCount??0); });
   else if (svcSort === 'nestiq') list.sort(function(a,b) { return (b.nestiqRating??0)-(a.nestiqRating??0); });
+
   var catLabels = { cleaning:'cleaners', handymen:'handymen', junk:'junk removal', movers:'movers' };
   Object.keys(serviceData).forEach(function(cat) {
     var countEl = document.getElementById('svc-count-' + cat);
     if (countEl) countEl.textContent = serviceData[cat].length;
   });
+
+  // Update saved badge
+  var savedBadge = document.getElementById('svc-saved-badge');
+  if (savedBadge) {
+    if (svcFavourites.size > 0) { savedBadge.style.display = ''; savedBadge.textContent = svcFavourites.size; }
+    else savedBadge.style.display = 'none';
+  }
+  var savedTab = document.getElementById('svc-saved-tab');
+  if (savedTab) savedTab.style.color = svcShowSaved ? 'var(--red)' : 'var(--text2)';
+
   if (!list.length) {
-    container.innerHTML = '<div style="text-align:center;color:var(--text3);padding:48px 20px;font-size:13px;">No providers match your filters.</div>';
+    container.innerHTML = svcShowSaved
+      ? '<div style="text-align:center;color:var(--text3);padding:48px 20px;"><div style="font-size:36px;margin-bottom:12px;">♡</div><div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px;">No saved providers yet</div><div style="font-size:13px;">Tap the ♥ heart on any provider to save them here.</div></div>'
+      : '<div style="text-align:center;color:var(--text3);padding:48px 20px;"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px;">No providers match your filters</div><div style="font-size:13px;">Try widening your search or <span style="color:var(--accent);cursor:pointer;font-weight:600;" onclick="resetSvcFilters()">reset all filters</span>.</div></div>';
     return;
   }
   container.innerHTML = list.map(function(s, i) { return renderServiceCard(s, i); }).join('');
   var countBar = document.getElementById('svc-toolbar-count');
   if (countBar) {
     var addr = document.getElementById('svc-address-input');
-    countBar.innerHTML = '<strong>' + list.length + '</strong> ' + (catLabels[svcCategory]||'providers') + ' near ' + (addr?addr.value:'Calgary');
+    if (svcShowSaved) {
+      countBar.innerHTML = '<strong>' + list.length + '</strong> saved provider' + (list.length !== 1 ? 's' : '');
+    } else {
+      countBar.innerHTML = '<strong>' + list.length + '</strong> ' + (catLabels[svcCategory]||'providers') + ' near ' + (addr?addr.value:'Calgary');
+    }
   }
 }
 function starsHtml(r) {
@@ -6165,7 +6267,7 @@ function renderServiceCard(s, idx) {
     html += '</div>';
   }
 
-  // Packages
+  // Packages or quote prompt
   if (s.packages && s.packages.length > 0) {
     html += '<div class="svc-packages">';
     html += '<div class="svc-packages-label">Packages</div>';
@@ -6178,18 +6280,25 @@ function renderServiceCard(s, idx) {
       html += '</div>';
     });
     html += '</div></div>';
+  } else {
+    html += '<div class="svc-quote-prompt" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'message\')">';
+    html += '<div class="svc-quote-prompt-icon">💬</div>';
+    html += '<div class="svc-quote-prompt-text">Request a quote for pricing</div>';
+    html += '<div class="svc-quote-prompt-sub">This provider offers custom quotes based on your needs</div>';
+    html += '</div>';
   }
 
-  // Contact quick-actions
+  // Contact quick-actions + details
   html += '<div class="svc-contact-row">';
   if (s.phone) html += '<a class="svc-contact-btn" href="tel:' + s.phone + '" onclick="event.stopPropagation()" title="Call">📞</a>';
   if (s.website) html += '<a class="svc-contact-btn" href="https://' + s.website + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Website">🌐</a>';
   if (s.email) html += '<a class="svc-contact-btn" href="mailto:' + s.email + '" onclick="event.stopPropagation()" title="Email">✉️</a>';
+  html += '<span class="svc-contact-addr">📍 ' + s.address + '</span>';
   html += '</div>';
 
   html += '</div>'; // end svc-card-body
 
-  // Action buttons
+  // Action buttons (pinned to bottom)
   html += '<div class="svc-actions">';
   html += '<button class="cleaner-btn-ghost" style="flex:1;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'message\')">💬 Message</button>';
   html += '<button class="cleaner-btn-primary" style="flex:2;" onclick="event.stopPropagation();toggleSvcBooking(\'' + s.id + '\',\'book\')">📅 Book Now</button>';
@@ -15967,6 +16076,15 @@ function handleWizardPhoto(input) {
   <div class="app-body">
     <aside>
       <div class="sidebar-section">
+        <div class="filter-group">
+          <div class="filter-item" id="svc-saved-tab" onclick="toggleSvcSavedView()" style="color:var(--text2);">
+            <span style="font-size:15px;">♥</span> Saved providers
+            <span class="saved-count-badge" id="svc-saved-badge" style="display:none;">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
         <div class="sidebar-label">Service Type</div>
         <div class="filter-group">
           <div class="filter-item active" id="sct-cleaning" onclick="setSvcCat('cleaning')"><div class="filter-dot" style="background:#4f7cff"></div>🧹 Cleaning<span class="filter-count" id="svc-count-cleaning">6</span></div>
@@ -15975,12 +16093,55 @@ function handleWizardPhoto(input) {
           <div class="filter-item" id="sct-movers" onclick="setSvcCat('movers')"><div class="filter-dot" style="background:#22c55e"></div>🚛 Movers<span class="filter-count" id="svc-count-movers">5</span></div>
         </div>
       </div>
+
       <div class="sidebar-section">
         <div class="sidebar-label">Verification</div>
         <div class="filter-group">
           <div class="checkbox-item" id="sf-all" onclick="setSvcFilter('all')"><div class="cb checked">✓</div>Show all providers</div>
           <div class="checkbox-item" id="sf-claimed" onclick="setSvcFilter('claimed')"><div class="cb"></div>NestIQ Verified only</div>
         </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Minimum Rating</div>
+        <div class="filter-group">
+          <div class="filter-item active" data-svc-rating="any" onclick="setSvcRating(this,'any')">Any</div>
+          <div class="filter-item" data-svc-rating="4.5" onclick="setSvcRating(this,'4.5')"><span class="svc-star">★</span> 4.5+</div>
+          <div class="filter-item" data-svc-rating="4.8" onclick="setSvcRating(this,'4.8')"><span class="svc-star">★</span> 4.8+</div>
+          <div class="filter-item" data-svc-rating="5.0" onclick="setSvcRating(this,'5.0')"><span class="svc-star">★</span> 5.0</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Max Distance</div>
+        <div class="filter-group">
+          <div class="filter-item active" data-svc-dist="any" onclick="setSvcDist(this,'any')">Any</div>
+          <div class="filter-item" data-svc-dist="2" onclick="setSvcDist(this,'2')">Under 2 km</div>
+          <div class="filter-item" data-svc-dist="5" onclick="setSvcDist(this,'5')">Under 5 km</div>
+          <div class="filter-item" data-svc-dist="10" onclick="setSvcDist(this,'10')">Under 10 km</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Availability</div>
+        <div class="filter-group">
+          <div class="checkbox-item" id="sf-avail-today" onclick="toggleSvcAvailToday()"><div class="cb"></div>Available today</div>
+          <div class="checkbox-item" id="sf-has-packages" onclick="toggleSvcHasPackages()"><div class="cb"></div>Has pricing listed</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Reviews</div>
+        <div class="filter-group">
+          <div class="filter-item active" data-svc-reviews="any" onclick="setSvcReviews(this,'any')">Any</div>
+          <div class="filter-item" data-svc-reviews="100" onclick="setSvcReviews(this,'100')">100+</div>
+          <div class="filter-item" data-svc-reviews="500" onclick="setSvcReviews(this,'500')">500+</div>
+          <div class="filter-item" data-svc-reviews="1000" onclick="setSvcReviews(this,'1000')">1,000+</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section" style="padding-bottom:8px;">
+        <button onclick="resetSvcFilters()" style="width:100%;padding:9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">Reset all filters</button>
       </div>
     </aside>
 
