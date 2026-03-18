@@ -3918,25 +3918,6 @@ body.light-mode #screen-dashboard nav {
 .app-content-padded { padding: 0 24px; }
 @media (max-width: 768px) { .app-content-padded { padding: 0 12px; } }
 
-/* Constrain all screen content */
-#screen-listings > div:not(nav), 
-#screen-dashboard > div:not(nav),
-#screen-property > div:not(nav),
-#screen-inbox > div:not(nav),
-#screen-tenant > div:not(nav),
-#screen-landlord > div:not(nav) {
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Full-width navs get subtle bottom border */
-.screen > nav { 
-  max-width: 100%; 
-  padding-left: max(20px, calc((100% - 1200px) / 2 + 20px)) !important;
-  padding-right: max(20px, calc((100% - 1200px) / 2 + 20px)) !important;
-}
-
 /* ── DESIGN TOKENS ── */
 :root {
   --radius-sm: 6px;
@@ -4237,7 +4218,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       oninput="onSearchInput(this.value)" onkeydown="onSearchKey(event)" onfocus="openSearchDropdown()" placeholder="Search by address or neighbourhood…">
     <div class="mobile-filter-btn" id="mobile-filter-btn" onclick="openFilterDrawer()">⚙️</div>
   </div>
-    <div class="app-body" style="max-width:1200px;margin:0 auto;">
+    <div class="app-body">
     <aside>
       <div class="sidebar-section">
         <div class="filter-group">
@@ -5010,7 +4991,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     </div>
   </nav>
   <div class="back-link" onclick="showScreen('listings')">← Back to listings</div>
-  <div class="property-wrap" id="property-wrap" style="max-width:1200px;margin:0 auto;"></div>
+  <div class="property-wrap" id="property-wrap"></div>
 </div>
 
 <!-- ══ NOTIFICATIONS PANEL ══ -->
