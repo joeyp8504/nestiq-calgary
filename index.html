@@ -12142,28 +12142,47 @@ function openProperty(id) {
         ` : ''}
       </div>
 
-      <!-- Property info — Apollo-style 3-column grid -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-        ${amenitiesSectionHtml(l.amenities)}
-        ${petPolicyBlockHtml(l)}
-        ${moveInBlockHtml(l)}
+      <!-- 2-column: Property Details + Move-in -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;">
+
+        <!-- LEFT: Combined property overview -->
+        <div class="prop-section" style="padding:16px 18px;">
+          <div class="prop-section-title">Property Overview</div>
+
+          <!-- Amenities -->
+          ${l.amenities?.length ? `<div style="margin-bottom:14px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:6px;">Amenities</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${l.amenities.map(a => { const d = AMENITY_DEFS[a]||{icon:'✓',label:a,tier:''}; const c = d.tier==='premium'?'var(--accent)':d.tier==='highlight'?'var(--green)':'var(--text3)'; return '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-weight:600;"><span style="color:'+c+';">'+d.icon+'</span> '+d.label+'</span>'; }).join('')}
+            </div>
+          </div>` : ''}
+
+          <!-- Key details grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;">
+            ${[
+              ['🐾 Pets', l.pet ? (l.petPolicy?.dogs && l.petPolicy?.largeDogsOk ? 'Dogs & cats OK' : l.petPolicy?.dogs ? 'Small dogs & cats' : l.petPolicy?.cats ? 'Cats only' : 'Allowed') : 'Not allowed', l.pet ? 'var(--green)' : 'var(--red)'],
+              ['💲 Pet deposit', l.petPolicy?.deposit ? '$'+l.petPolicy.deposit+(l.petPolicy.depositRefundable?' ref.':'') : 'None', 'var(--text)'],
+              ['🅿 Parking', l.parking ? (l.parking.included ? 'Included' : l.parking.spots+' stall · $'+l.parking.cost+'/mo') : 'Street only', l.parking?.included ? 'var(--accent)' : 'var(--text)'],
+              ['🏗 Built', l.era || '—', 'var(--text)'],
+              ['🔨 Renovated', l.renovated ? l.renovated.year + ' · ' + ({full:'Full',['kitchen-bath']:'Kitchen & bath',cosmetic:'Cosmetic'}[l.renovated.scope]||l.renovated.scope) : 'Original', l.renovated ? 'var(--accent)' : 'var(--text3)'],
+              l.flexibleScreening ? ['🤝 Screening', 'Flexible', 'var(--accent)'] : null
+            ].filter(Boolean).map((r,i) => '<div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:11.5px;border-bottom:1px solid var(--border);'+(i%3===0?'border-left:none;':'')+'"><span style="color:var(--text3);">'+r[0]+'</span><strong style="color:'+r[2]+';">'+r[1]+'</strong></div>').join('')}
+          </div>
+
+          ${l.petPolicy?.notes ? '<div style="font-size:11px;color:var(--text3);margin-bottom:10px;padding:6px 10px;background:var(--surface2);border-radius:6px;">ℹ️ '+l.petPolicy.notes+'</div>' : ''}
+          ${l.era && eraLabels[l.era] ? '<div style="font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:4px;">'+eraLabels[l.era].desc+'</div>' : ''}
+        </div>
+
+        <!-- RIGHT: Move-in costs -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          ${moveInBlockHtml(l)}
+        </div>
       </div>
 
-      <!-- Secondary info row -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-        ${l.era ? buildingEraBlockHtml(l.era, 'auto') : ''}
-        ${l.renovated ? `<div class="prop-section"><div class="prop-section-title">Renovation</div>${renoBlockHtml(l.renovated)}</div>` : ''}
-        ${l.parking ? parkingDetailHtml(l.parking) : ''}
-        ${l.flexibleScreening ? `<div class="prop-section">
-          <div class="prop-section-title">🤝 Screening</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.5;">Flexible qualification — income, history, and references weigh equally to credit.</div>
-        </div>` : ''}
-      </div>
-
-      <!-- Reviews — compact with scroll -->
-      <div class="prop-section" style="padding:14px;">
-        <div class="prop-section-title" style="margin-bottom:10px;">Tenant Reviews <span style="font-size:11px;font-weight:400;color:var(--text3);letter-spacing:0;text-transform:none;">${l.reviews.length} review${l.reviews.length!==1?'s':''}</span> <button class="write-review-btn" style="width:auto;padding:4px 12px;font-size:11px;margin-left:auto;" onclick="openModal()">+ Write a review</button></div>
-        <div style="max-height:320px;overflow-y:auto;padding-right:4px;">
+      <!-- Reviews — compact 2-column with scroll -->
+      <div class="prop-section" style="padding:14px 18px;">
+        <div class="prop-section-title" style="margin-bottom:8px;">Tenant Reviews <span style="font-size:11px;font-weight:400;color:var(--text3);letter-spacing:0;text-transform:none;">${l.reviews.length} review${l.reviews.length!==1?'s':''}</span> <button class="write-review-btn" style="width:auto;padding:4px 12px;font-size:11px;margin-left:auto;" onclick="openModal()">+ Write</button></div>
+        <div style="max-height:280px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-right:4px;">
           ${reviewsHtml}
         </div>
       </div>
