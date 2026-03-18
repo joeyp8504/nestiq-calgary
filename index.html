@@ -12395,23 +12395,44 @@ function openProperty(id) {
     const scoreColor = ll.score >= 4.5 ? 'var(--green)' : ll.score >= 3.5 ? 'var(--yellow)' : 'var(--red)';
     const availColor = l.soon ? 'var(--yellow)' : 'var(--green)';
     const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address + ', Calgary, AB');
-    const avgHoodPrice = listings.filter(x=>x.hood===l.hood&&x.id!==l.id).reduce((s,x,_,a)=>s+x.price/a.length,0);
-    const priceDiff = avgHoodPrice > 0 ? Math.round(((l.price - avgHoodPrice)/avgHoodPrice)*100) : 0;
-    const priceDiffLabel = priceDiff > 0 ? priceDiff+'% above avg' : priceDiff < 0 ? Math.abs(priceDiff)+'% below avg' : 'At avg';
-    const priceDiffColor = priceDiff > 5 ? 'var(--red)' : priceDiff < -5 ? 'var(--green)' : 'var(--text3)';
     const totalMoveIn = l.price + (l.deposit||l.price) + (l.parking&&!l.parking.included?l.parking.cost:0) + (l.elevatorFee||0) - (l.incentive?l.price*(l.incentive.months||1):0);
+
+    // Market context — same bed count in same hood
+    const bedLabel = l.beds === 0 ? 'studios' : l.beds === 1 ? '1-beds' : l.beds === 2 ? '2-beds' : l.beds+'+ beds';
+    const comps = listings.filter(x => x.hood === l.hood && x.beds === l.beds && x.id !== l.id);
+    const allComps = listings.filter(x => x.beds === l.beds && x.id !== l.id);
+    const hoodComps = comps.length > 0 ? comps : allComps;
+    const compPrices = hoodComps.map(x => x.price).sort((a,b) => a-b);
+    const compMin = compPrices.length > 0 ? compPrices[0] : null;
+    const compMax = compPrices.length > 0 ? compPrices[compPrices.length-1] : null;
+    const compAvg = compPrices.length > 0 ? Math.round(compPrices.reduce((a,b)=>a+b,0)/compPrices.length) : null;
+    const thisPsf = l.sqft ? (l.price / l.sqft) : null;
+    const compPsfs = hoodComps.filter(x=>x.sqft).map(x => x.price/x.sqft);
+    const avgPsf = compPsfs.length > 0 ? (compPsfs.reduce((a,b)=>a+b,0)/compPsfs.length) : null;
+    const compSource = comps.length > 0 ? l.hood : 'Calgary';
 
     sidebarEl.innerHTML = `
       <!-- Price header -->
       <div class="sidebar-section" style="text-align:center;padding-bottom:14px;">
         <div style="font-size:30px;font-weight:900;color:var(--text);letter-spacing:-1px;">$${l.price.toLocaleString()}<span style="font-size:13px;font-weight:400;color:var(--text3);">/mo</span></div>
         ${l.incentive ? `<div class="incentive-pill" style="margin-top:6px;">🎁 ${l.incentive.text}</div>` : ''}
-        <div style="font-size:11px;color:${priceDiffColor};font-weight:600;margin-top:4px;">${priceDiffLabel} for ${l.hood}</div>
+        ${thisPsf ? `<div style="font-size:12px;color:var(--text3);margin-top:4px;">$${thisPsf.toFixed(2)}/ft²</div>` : ''}
         <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;">
           <div style="width:7px;height:7px;border-radius:50%;background:${availColor};"></div>
           <span style="font-size:12px;font-weight:600;color:${availColor};">${l.avail}</span>
         </div>
       </div>
+
+      <!-- Market context -->
+      ${compPrices.length > 0 ? `<div class="sidebar-section">
+        <div class="sidebar-label">${bedLabel} in ${compSource}</div>
+        <div class="filter-group">
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Range</span><strong>$${compMin.toLocaleString()} – $${compMax.toLocaleString()}</strong></div>
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Average</span><strong>$${compAvg.toLocaleString()}/mo</strong></div>
+          ${avgPsf ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Avg $/ft²</span><strong>$${avgPsf.toFixed(2)}</strong></div>` : ''}
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Comparables</span><strong>${hoodComps.length} listing${hoodComps.length!==1?'s':''}</strong></div>
+        </div>
+      </div>` : ''}
 
       <!-- Actions -->
       <div class="sidebar-section">
