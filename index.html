@@ -12145,50 +12145,17 @@ function openProperty(id) {
         <span style="font-size:12px;color:var(--text2);">Landlord incentive — saves you <strong style="color:var(--accent);">$${(l.price*(l.incentive.months||1)).toLocaleString()}</strong></span>
       </div>` : ''}
 
-      <!-- Property Analytics — 2 column -->
+      <!-- Property info — single column, clean -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <!-- Left: Details + Amenities -->
         <div style="display:flex;flex-direction:column;gap:14px;">
-          <div class="prop-section">
-            <div class="prop-section-title">Property Details</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-              ${[['Neighbourhood',l.hood],['Available',l.avail],['Era',l.era||'—'],['Lease','12 months'],['Deposit','$'+(l.deposit||l.price).toLocaleString()],['Per ft²',l.sqft?'$'+(l.price/l.sqft).toFixed(2):'—']].map(([k,v])=>`
-                <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">${k}</div><div style="font-size:13px;font-weight:700;color:var(--text);">${v}</div></div>`).join('')}
-            </div>
-          </div>
           ${amenitiesSectionHtml(l.amenities)}
-          ${petPolicyBlockHtml(l)}
-          ${l.parking ? parkingDetailHtml(l.parking) : ''}
-          ${moveInBlockHtml(l)}
-        </div>
-
-        <!-- Right: Landlord + Score breakdown -->
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <!-- Compact landlord card -->
-          <div class="prop-section">
-            <div class="prop-section-title">Landlord</div>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:pointer;" onclick="openLandlordProfile(${l.id})">
-              <div class="ll-avatar-lg" style="background:${ll.color}18;color:${ll.color};">${ll.initials}</div>
-              <div style="flex:1;">
-                <div style="font-size:14px;font-weight:700;color:var(--text);">${ll.name} ${ll.verified?'<span style="color:var(--green);font-size:12px;">✓ Verified</span>':''}</div>
-                <div style="font-size:12px;color:var(--text3);">${ll.responseRate} response · Avg ${ll.avgResponse}</div>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              ${[['Maintenance',l.scores.maintenance],['Communication',l.scores.communication],['Deposit',l.scores.deposit],['Privacy',l.scores.privacy]].map(([label,val])=>`
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div style="font-size:11px;color:var(--text3);width:90px;">${label}</div>
-                  <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;"><div class="score-bar-fill" style="height:100%;width:${(val/5)*100}%;background:${val>=4.5?'var(--green)':val>=3.5?'var(--yellow)':'var(--red)'};border-radius:2px;"></div></div>
-                  <div style="font-size:11px;font-weight:700;color:var(--text);width:24px;text-align:right;">${val}</div>
-                </div>`).join('')}
-            </div>
-            ${claimSection}
-            ${reliabilityBadgeHtml(ll)}
-            ${noShowWarningHtml(ll)}
-          </div>
-
           ${l.era ? buildingEraBlockHtml(l.era, 'auto') : ''}
           ${l.renovated ? `<div class="prop-section"><div class="prop-section-title">Renovation History</div>${renoBlockHtml(l.renovated)}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          ${moveInBlockHtml(l)}
+          ${petPolicyBlockHtml(l)}
+          ${l.parking ? parkingDetailHtml(l.parking) : ''}
           ${l.flexibleScreening ? `<div class="prop-section">
             <div class="flex-qual-block-title">🤝 Flexible qualification</div>
             <div style="font-size:12px;color:var(--text2);line-height:1.6;">This landlord reviews the full picture — income, history, and references weigh equally to credit score.</div>
@@ -12205,38 +12172,6 @@ function openProperty(id) {
     </div>
 
     <div class="prop-right">
-      <div class="landlord-panel">
-        <div class="landlord-panel-header">
-          <div class="ll-avatar-lg" style="background:${ll.color}18;color:${ll.color};">${ll.initials}</div>
-          <div>
-            <div class="ll-panel-name ll-name-link" onclick="openLandlordProfile(${l.id})">${ll.name}</div>
-            <div class="ll-panel-sub">${ll.reviews} reviews · ${ll.responseRate} response rate</div>
-            ${ll.verified
-              ? '<div class="verified-badge">✓ Verified Landlord</div>'
-              : '<div class="unverified-badge">○ Not yet verified</div>'}
-          </div>
-        </div>
-        <div class="landlord-stats">
-          <div class="ll-stat"><div class="ll-stat-val" style="color:${ll.score>=4.5?'var(--green)':ll.score>=3.5?'var(--yellow)':'var(--red)'}">${ll.score}</div><div class="ll-stat-label">Score</div></div>
-          <div class="ll-stat"><div class="ll-stat-val">${ll.reviews}</div><div class="ll-stat-label">Reviews</div></div>
-          <div class="ll-stat"><div class="ll-stat-val">${ll.responseRate}</div><div class="ll-stat-label">Response rate</div></div>
-          <div class="ll-stat"><div class="ll-stat-val" style="font-size:13px;">${ll.avgResponse}</div><div class="ll-stat-label">Avg response</div></div>
-        </div>
-        <div class="landlord-panel-body">${claimSection}</div>
-        ${reliabilityBadgeHtml(ll)}
-        ${noShowWarningHtml(ll)}
-        ${ll.elevatorFeeMismatch ? `
-        <div class="elev-mismatch-warning">
-          <div class="elev-mismatch-icon">🛗</div>
-          <div class="elev-mismatch-body">
-            <div class="elev-mismatch-label">Elevator fee mismatch on record</div>
-            <div class="elev-mismatch-desc">A tenant reported that the elevator booking fee charged at move-in did not match the amount disclosed on a listing by this landlord${ll.elevatorFeeMismatchDate ? ' (' + ll.elevatorFeeMismatchDate + ')' : ''}. Landlords are penalized for inaccurate fee disclosures.</div>
-            <span class="elev-mismatch-score-hit">− Score impact applied</span>
-          </div>
-        </div>` : ''}
-        <button class="book-viewing-btn" onclick="openBookingModal(${l.id})">📅 Book a Viewing</button>
-        <button class="msg-landlord-btn" onclick="openMsgModal(${l.id})">✉ Message ${ll.name.split(' ')[0]}</button>
-      </div>
 
       <div class="ll-tools-panel">
         <div class="ll-tools-header">
