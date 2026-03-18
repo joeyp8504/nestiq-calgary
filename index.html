@@ -4075,6 +4075,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dash-prop-row { display:flex; gap:14px; padding:14px; background:var(--surface2); border-radius:12px; align-items:center; cursor:pointer; transition:all 0.15s; }
 .dash-prop-row:hover { background:var(--surface3,var(--surface2)); transform:translateX(2px); }
 .dash-prop-thumb { width:50px; height:50px; border-radius:10px; overflow:hidden; flex-shrink:0; background:var(--surface); }
+.dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:900px) { .dash-grid { grid-template-columns:1fr; } }
+.dash-col { display:flex; flex-direction:column; gap:20px; }
 
 </style>
 </head>
@@ -4570,49 +4573,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       <div class="toolbar">
         <span class="result-count" id="dash-toolbar-title"><strong>Profile Overview</strong></span>
       </div>
-      <div class="listings-wrap" style="padding:20px;">
-        <!-- Quick stats row -->
-        <div id="dash-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;"></div>
+      <div class="listings-wrap" style="padding:24px;">
+        <!-- Stats row (full width) -->
+        <div id="dash-stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
 
-        <!-- Account completion -->
-        <div id="dash-completion" style="margin-bottom:24px;"></div>
+        <!-- Account completion (full width) -->
+        <div id="dash-completion" style="margin-bottom:20px;"></div>
 
-        <!-- Dynamic sections (role-specific) -->
-        <div id="dash-dynamic" style="display:flex;flex-direction:column;gap:24px;margin-bottom:24px;"></div>
-
-        <!-- Account section -->
-        <div style="margin-bottom:24px;">
-          <div class="dash-section-title">Account</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
-            <div class="dash-card" onclick="openProfileSettings()">
-              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">👤</div><div class="dash-card-title">Profile Settings</div></div>
-              <div class="dash-card-desc">Edit your name, change your password, and update your profile photo.</div>
-            </div>
-            <div class="dash-card">
-              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">🔔</div><div class="dash-card-title">Notifications</div></div>
-              <div class="dash-card-desc">Manage email alerts, push notifications, and review reminders.</div>
-            </div>
-            <div class="dash-card" onclick="showScreen('listings')">
-              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(34,197,94,0.1);">♥</div><div class="dash-card-title">Saved Listings</div></div>
-              <div class="dash-card-desc">View and manage your bookmarked listings.</div>
-            </div>
-            <div class="dash-card">
-              <div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(245,166,35,0.1);">💬</div><div class="dash-card-title">Your Reviews</div></div>
-              <div class="dash-card-desc">Reviews you have written and responses from landlords.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Danger zone -->
-        <div>
-          <div class="dash-section-title">Danger Zone</div>
-          <div style="background:var(--surface);border:1.5px solid rgba(240,78,78,0.25);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
-            <div>
-              <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Delete your account</div>
-              <div style="font-size:12.5px;color:var(--text3);">This action is permanent and cannot be undone.</div>
-            </div>
-            <button onclick="alert('Account deletion is not yet available. Contact support@nestiq.ca.')" style="padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;background:rgba(240,78,78,0.1);color:var(--red);border:1.5px solid rgba(240,78,78,0.25);cursor:pointer;font-family:inherit;transition:all 0.15s;">Delete account</button>
-          </div>
+        <!-- 2-column dashboard grid -->
+        <div class="dash-grid">
+          <div class="dash-col" id="dash-col-left"></div>
+          <div class="dash-col" id="dash-col-right"></div>
         </div>
       </div>
     </main>
@@ -6931,174 +6902,147 @@ function renderDashboard() {
     completionEl.innerHTML = '';
   }
 
-  // Dynamic sections
-  const dynamicEl = document.getElementById('dash-dynamic');
-  let sections = '';
+  // Build 2-column layout
+  let leftCol = '';
+  let rightCol = '';
+
+  // Helper for review card
+  function reviewCardHtml(r, showAddr) {
+    const sc = (r.score||0) >= 4.5 ? 'var(--green)' : (r.score||0) >= 3.5 ? 'var(--yellow)' : 'var(--red)';
+    return `<div class="dash-panel" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div><div style="font-size:13px;font-weight:700;color:var(--text);">${showAddr ? r.listing.address : r.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${r.date||''} ${r.tenancy?'· '+r.tenancy:''}</div></div>
+        <div style="font-size:16px;font-weight:800;color:${sc};">★ ${r.score}</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--text2);line-height:1.55;font-style:italic;">"${r.text}"</div>
+    </div>`;
+  }
 
   if (isLandlord) {
-    // ── LANDLORD SECTIONS ──
-
-    // Property portfolio
-    sections += '<div><div class="dash-section-title">Property Portfolio</div>';
+    // LEFT: Property portfolio + Revenue
+    leftCol += '<div><div class="dash-section-title">Property Portfolio</div>';
     if (llListings.length > 0) {
-      sections += llListings.map(l => {
+      leftCol += llListings.map(l => {
         const ll = l.ownerManaged ? l.owner : l.landlord;
         const lease = l.activeLease;
-        const statusColor = lease ? 'var(--green)' : 'var(--yellow)';
-        const statusText = lease ? 'Occupied' : 'Vacant';
+        const stColor = lease ? 'var(--green)' : 'var(--yellow)';
+        const stText = lease ? 'Occupied' : 'Vacant';
         return `<div class="dash-prop-row" onclick="openProperty(${l.id})" style="margin-bottom:8px;">
           <div class="dash-prop-thumb">${sceneImg(l.img,'','width:100%;height:100%;object-fit:cover;')}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:700;color:var(--text);">${l.address}</div>
-            <div style="font-size:12px;color:var(--text3);">${l.hood} · ${l.beds} bed · $${l.price.toLocaleString()}/mo</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${statusColor};margin-bottom:2px;">${statusText}</div>
-            <div style="font-size:18px;font-weight:800;color:var(--text);">★ ${ll.score||'—'}</div>
-            <div style="font-size:10px;color:var(--text3);">${(l.reviews||[]).length} reviews</div>
-          </div>
+          <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--text);">${l.address}</div><div style="font-size:12px;color:var(--text3);">${l.hood} · ${l.beds} bed · $${l.price.toLocaleString()}/mo</div></div>
+          <div style="text-align:center;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${stColor};margin-bottom:2px;">${stText}</div><div style="font-size:18px;font-weight:800;color:var(--text);">★ ${ll.score||'—'}</div><div style="font-size:10px;color:var(--text3);">${(l.reviews||[]).length} reviews</div></div>
         </div>`;
       }).join('');
     } else {
-      sections += '<div class="dash-panel" style="text-align:center;padding:32px;color:var(--text3);">No properties listed yet. <span style="color:var(--accent);cursor:pointer;font-weight:600;" onclick="showScreen(\'listings\')">Browse listings →</span></div>';
+      leftCol += '<div class="dash-panel" style="text-align:center;padding:32px;color:var(--text3);">No properties listed yet.</div>';
     }
-    sections += '</div>';
+    leftCol += '</div>';
 
-    // Revenue overview
     if (totalRent > 0) {
-      sections += `<div><div class="dash-section-title">Revenue Overview</div>
-        <div class="dash-panel">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <div style="font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Monthly Rental Income</div>
-              <div style="font-size:32px;font-weight:800;color:var(--green);">$${totalRent.toLocaleString()}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Annual Projection</div>
-              <div style="font-size:22px;font-weight:800;color:var(--text);">$${(totalRent*12).toLocaleString()}</div>
-            </div>
-          </div>
-        </div></div>`;
+      leftCol += `<div><div class="dash-section-title">Revenue</div><div class="dash-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Monthly Income</div><div style="font-size:28px;font-weight:800;color:var(--green);">$${totalRent.toLocaleString()}</div></div>
+          <div style="text-align:right;"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Annual</div><div style="font-size:20px;font-weight:800;color:var(--text);">$${(totalRent*12).toLocaleString()}</div></div>
+        </div></div></div>`;
     }
 
-    // Pro subscription
-    sections += `<div><div class="dash-section-title">Subscription</div>
+    // LEFT: Pro subscription
+    leftCol += `<div><div class="dash-section-title">Subscription</div>
       <div class="dash-panel" style="border-color:rgba(79,124,255,0.3);background:linear-gradient(135deg,rgba(79,124,255,0.05),rgba(168,85,247,0.03));">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:800;">⚡</div>
-          <div style="flex:1;min-width:180px;">
-            <div style="font-size:15px;font-weight:800;color:var(--text);">NestIQ Pro</div>
-            <div style="font-size:12.5px;color:var(--text3);margin-top:2px;">${u.pro?'Active — tenant screening, priority support, analytics':'Unlock tenant screening, priority support, and analytics'}</div>
-          </div>
-          <button style="padding:8px 20px;border-radius:10px;font-size:12px;font-weight:700;background:${u.pro?'var(--surface2)':'var(--accent)'};color:${u.pro?'var(--text3)':'#fff'};border:1.5px solid ${u.pro?'var(--border2)':'var(--accent)'};cursor:pointer;font-family:inherit;">${u.pro?'Manage plan':'Upgrade to Pro'}</button>
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:800;">⚡</div>
+          <div style="flex:1;min-width:140px;"><div style="font-size:14px;font-weight:800;color:var(--text);">NestIQ Pro</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${u.pro?'Active':'Unlock screening & analytics'}</div></div>
+          <button style="padding:7px 16px;border-radius:8px;font-size:11px;font-weight:700;background:${u.pro?'var(--surface2)':'var(--accent)'};color:${u.pro?'var(--text3)':'#fff'};border:1.5px solid ${u.pro?'var(--border2)':'var(--accent)'};cursor:pointer;font-family:inherit;">${u.pro?'Manage':'Upgrade'}</button>
         </div>
       </div></div>`;
 
-  } else {
-    // ── TENANT SECTIONS ──
+    // RIGHT: Reviews + Activity
+    const llReviews = allReviews.filter(r => llListings.some(l => l.id === r.listing.id)).slice(0, 4);
+    if (llReviews.length > 0) {
+      rightCol += '<div><div class="dash-section-title">Recent Reviews</div>' + llReviews.map(r => reviewCardHtml(r, false)).join('') + '</div>';
+    }
 
-    // Active lease
+  } else {
+    // TENANT LEFT: Active lease + Saved listings + Verification
     if (myLease) {
       const ll = myLease.ownerManaged ? myLease.owner : myLease.landlord;
       const lease = myLease.activeLease;
       const leaseEnd = new Date(lease.leaseEnd);
-      const now = new Date();
-      const daysLeft = Math.ceil((leaseEnd - now) / (1000*60*60*24));
-      sections += `<div><div class="dash-section-title">Active Lease</div>
-        <div class="dash-panel" style="border-color:rgba(34,197,94,0.3);" onclick="openProperty(${myLease.id})">
-          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;cursor:pointer;">
+      const daysLeft = Math.ceil((leaseEnd - new Date()) / (1000*60*60*24));
+      leftCol += `<div><div class="dash-section-title">Active Lease</div>
+        <div class="dash-panel" style="border-color:rgba(34,197,94,0.3);cursor:pointer;" onclick="openProperty(${myLease.id})">
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;">
             <div class="dash-prop-thumb">${sceneImg(myLease.img,'','width:100%;height:100%;object-fit:cover;')}</div>
-            <div style="flex:1;min-width:180px;">
-              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-                <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;"></span> Current residence
-              </div>
-              <div style="font-size:16px;font-weight:800;color:var(--text);">${myLease.address}</div>
-              <div style="font-size:12.5px;color:var(--text3);margin-top:3px;">${myLease.hood} · Managed by ${ll.name}</div>
+            <div style="flex:1;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:3px;display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;"></span> Current residence</div>
+              <div style="font-size:15px;font-weight:800;color:var(--text);">${myLease.address}</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:2px;">${myLease.hood} · ${ll.name}</div>
             </div>
-            <div style="text-align:right;">
-              <div style="font-size:22px;font-weight:800;color:var(--text);">$${lease.monthlyRent.toLocaleString()}<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
-              <div style="font-size:11px;color:${daysLeft<60?'var(--red)':'var(--text3)'};font-weight:600;margin-top:4px;">${daysLeft > 0 ? daysLeft+' days remaining' : 'Lease expired'}</div>
-              <div style="font-size:11px;color:var(--text3);">${lease.moveIn} — ${lease.leaseEnd}</div>
-            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;border-top:1px solid var(--border);padding-top:12px;">
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--text);">$${lease.monthlyRent.toLocaleString()}</div><div style="font-size:10px;color:var(--text3);">per month</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:${daysLeft<60?'var(--red)':'var(--text)'}">${daysLeft > 0 ? daysLeft : 0}</div><div style="font-size:10px;color:var(--text3);">days left</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--text);">★ ${ll.score||'—'}</div><div style="font-size:10px;color:var(--text3);">landlord</div></div>
           </div>
         </div></div>`;
     }
 
-    // Saved listings preview
     if (savedCount > 0) {
-      const savedListings = listings.filter(l => savedIds.has(l.id)).slice(0, 3);
-      sections += '<div><div class="dash-section-title">Saved Listings</div>';
-      sections += savedListings.map(l => {
+      const savedListings = listings.filter(l => savedIds.has(l.id)).slice(0, 4);
+      leftCol += '<div><div class="dash-section-title">Saved Listings</div>';
+      leftCol += savedListings.map(l => {
         const ll = l.ownerManaged ? l.owner : l.landlord;
         return `<div class="dash-prop-row" onclick="openProperty(${l.id})" style="margin-bottom:8px;">
           <div class="dash-prop-thumb">${sceneImg(l.img,'','width:100%;height:100%;object-fit:cover;')}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:700;color:var(--text);">${l.address}</div>
-            <div style="font-size:12px;color:var(--text3);">${l.hood} · ${l.beds} bed · $${l.price.toLocaleString()}/mo</div>
-          </div>
-          <div style="font-size:16px;font-weight:800;color:var(--text);">★ ${ll.score||'—'}</div>
+          <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:var(--text);">${l.address}</div><div style="font-size:11px;color:var(--text3);">${l.hood} · $${l.price.toLocaleString()}/mo</div></div>
+          <div style="font-size:15px;font-weight:800;color:var(--text);">★ ${ll.score||'—'}</div>
         </div>`;
       }).join('');
-      if (savedCount > 3) sections += `<div style="text-align:center;padding:8px;"><span style="color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;" onclick="showScreen('listings')">View all ${savedCount} saved →</span></div>`;
-      sections += '</div>';
+      if (savedCount > 4) leftCol += `<div style="text-align:center;padding:6px;"><span style="color:var(--accent);cursor:pointer;font-size:12px;font-weight:600;" onclick="showScreen('listings')">View all ${savedCount} →</span></div>`;
+      leftCol += '</div>';
     }
 
-    // Renter verification
-    sections += `<div><div class="dash-section-title">Renter Verification</div>
-      <div class="dash-panel" style="border-color:rgba(79,124,255,0.3);">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;">⚡</div>
-          <div style="flex:1;min-width:180px;">
-            <div style="font-size:15px;font-weight:800;color:var(--text);">Verified Renter</div>
-            <div style="font-size:12.5px;color:var(--text3);margin-top:2px;">Credit score 742 · Background clear · Identity confirmed</div>
-          </div>
-          <div style="padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25);">✓ Verified</div>
+    // Verification
+    leftCol += `<div><div class="dash-section-title">Renter Verification</div>
+      <div class="dash-panel" style="border-color:rgba(34,197,94,0.25);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;font-size:17px;">⚡</div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Verified Renter</div><div style="font-size:11.5px;color:var(--text3);margin-top:1px;">Credit 742 · Background clear · ID confirmed</div></div>
+          <div style="padding:4px 10px;border-radius:14px;font-size:10px;font-weight:700;background:rgba(34,197,94,0.1);color:var(--green);">✓ Verified</div>
         </div>
       </div></div>`;
+
+    // RIGHT: Reviews
+    if (myReviews.length > 0) {
+      rightCol += '<div><div class="dash-section-title">Your Reviews</div>' + myReviews.slice(0,4).map(r => reviewCardHtml(r, true)).join('') + '</div>';
+    }
   }
 
-  // ── SHARED: Recent reviews ──
-  const recentReviews = isLandlord
-    ? allReviews.filter(r => llListings.some(l => l.id === r.listing.id)).slice(0, 3)
-    : myReviews.slice(0, 3);
-
-  if (recentReviews.length > 0) {
-    sections += '<div><div class="dash-section-title">' + (isLandlord ? 'Recent Reviews Received' : 'Your Recent Reviews') + '</div>';
-    sections += recentReviews.map(r => {
-      const scoreColor = (r.score||0) >= 4.5 ? 'var(--green)' : (r.score||0) >= 3.5 ? 'var(--yellow)' : 'var(--red)';
-      return `<div class="dash-panel" style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text);">${isLandlord ? r.name : r.listing.address}</div>
-            <div style="font-size:11px;color:var(--text3);">${r.date || ''} ${r.tenancy ? '· '+r.tenancy : ''}</div>
-          </div>
-          <div style="font-size:18px;font-weight:800;color:${scoreColor};">★ ${r.score}</div>
-        </div>
-        <div style="font-size:12.5px;color:var(--text2);line-height:1.55;font-style:italic;">"${r.text}"</div>
-      </div>`;
-    }).join('');
-    sections += '</div>';
-  }
-
-  // ── SHARED: Recent activity feed ──
+  // RIGHT: Activity feed (shared)
   const activities = [
-    { icon:'🔔', bg:'rgba(79,124,255,0.1)', text: isLandlord ? 'New tenant screening request for '+((llListings[0]||{}).address||'your property') : 'Viewing confirmed for Saturday at 10 AM', time:'2 hours ago' },
-    { icon:'💬', bg:'rgba(245,166,35,0.1)', text: isLandlord ? 'New message from tenant about maintenance' : 'New message from Marcus W. about 42 Scarboro Ave', time:'Yesterday' },
-    { icon:'⭐', bg:'rgba(34,197,94,0.1)', text: isLandlord ? 'New 5-star review received on your Beltline property' : 'Your review of Marcus W. was published', time:'3 days ago' },
-    { icon:'📋', bg:'rgba(168,85,247,0.1)', text: isLandlord ? 'Lease renewal reminder: unit at 42 Scarboro Ave expires in 90 days' : 'Lease document uploaded — review and sign by March 25', time:'1 week ago' }
+    { icon:'🔔', bg:'rgba(79,124,255,0.1)', text: isLandlord ? 'Tenant screening request for '+((llListings[0]||{}).address||'your property') : 'Viewing confirmed for Saturday at 10 AM', time:'2 hours ago' },
+    { icon:'💬', bg:'rgba(245,166,35,0.1)', text: isLandlord ? 'Message from tenant about maintenance' : 'Message from Marcus W. about 42 Scarboro Ave', time:'Yesterday' },
+    { icon:'⭐', bg:'rgba(34,197,94,0.1)', text: isLandlord ? '5-star review on your Beltline property' : 'Your review of Marcus W. was published', time:'3 days ago' },
+    { icon:'📋', bg:'rgba(168,85,247,0.1)', text: isLandlord ? 'Lease renewal: 42 Scarboro expires in 90 days' : 'Lease doc uploaded — sign by March 25', time:'1 week ago' },
+    { icon:'🏠', bg:'rgba(6,182,212,0.1)', text: isLandlord ? 'New listing view: 817 15 Ave SW' : 'Price drop on saved listing in Beltline', time:'1 week ago' }
   ];
-  sections += '<div><div class="dash-section-title">Recent Activity</div><div class="dash-panel">';
-  sections += activities.map(a => `
-    <div class="dash-activity-item">
-      <div class="dash-activity-icon" style="background:${a.bg};">${a.icon}</div>
-      <div style="flex:1;">
-        <div class="dash-activity-text">${a.text}</div>
-        <div class="dash-activity-time">${a.time}</div>
-      </div>
-    </div>`).join('');
-  sections += '</div></div>';
+  rightCol += '<div><div class="dash-section-title">Recent Activity</div><div class="dash-panel">';
+  rightCol += activities.map(a => `<div class="dash-activity-item"><div class="dash-activity-icon" style="background:${a.bg};">${a.icon}</div><div style="flex:1;"><div class="dash-activity-text">${a.text}</div><div class="dash-activity-time">${a.time}</div></div></div>`).join('');
+  rightCol += '</div></div>';
 
-  dynamicEl.innerHTML = sections;
+  // RIGHT: Account cards
+  rightCol += `<div><div class="dash-section-title">Account</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="dash-card" onclick="openProfileSettings()"><div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">👤</div><div class="dash-card-title">Settings</div></div><div class="dash-card-desc">Edit name, password, photo</div></div>
+      <div class="dash-card"><div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(79,124,255,0.1);">🔔</div><div class="dash-card-title">Alerts</div></div><div class="dash-card-desc">Email, push, reminders</div></div>
+      <div class="dash-card" onclick="showScreen('listings')"><div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(34,197,94,0.1);">♥</div><div class="dash-card-title">Saved</div></div><div class="dash-card-desc">Bookmarked listings</div></div>
+      <div class="dash-card" onclick="showScreen('services')"><div class="dash-card-head"><div class="dash-card-icon" style="background:rgba(245,166,35,0.1);">⚡</div><div class="dash-card-title">Services</div></div><div class="dash-card-desc">Cleaners, movers, repairs</div></div>
+    </div></div>`;
+
+  // Output
+  document.getElementById('dash-col-left').innerHTML = leftCol;
+  document.getElementById('dash-col-right').innerHTML = rightCol;
 
   // Sidebar completion
   const sidebarComp = document.getElementById('dash-sidebar-completion');
@@ -7126,34 +7070,8 @@ function setDashNav(section) {
   var titleEl = document.getElementById('dash-toolbar-title');
   var titles = { overview:'Profile Overview', activity:'Recent Activity', reviews:'Your Reviews', settings:'Account Settings' };
   if (titleEl) titleEl.innerHTML = '<strong>' + (titles[section]||'Profile') + '</strong>';
-
-  // Show/hide sections based on nav
-  var mainWrap = document.querySelector('#screen-dashboard .listings-wrap');
-  if (!mainWrap) return;
-  var statsRow = document.getElementById('dash-stats-row');
-  var completion = document.getElementById('dash-completion');
-  var dynamic = document.getElementById('dash-dynamic');
-  var acctSection = mainWrap.children[3]; // Account cards
-  var dangerSection = mainWrap.children[4]; // Danger zone
-
-  // Show all by default, then hide based on section
-  [statsRow, completion, dynamic, acctSection, dangerSection].forEach(el => { if (el) el.style.display = ''; });
-
-  if (section === 'activity') {
-    if (statsRow) statsRow.style.display = 'none';
-    if (completion) completion.style.display = 'none';
-    if (acctSection) acctSection.style.display = 'none';
-    if (dangerSection) dangerSection.style.display = 'none';
-  } else if (section === 'reviews') {
-    if (statsRow) statsRow.style.display = 'none';
-    if (completion) completion.style.display = 'none';
-    if (acctSection) acctSection.style.display = 'none';
-    if (dangerSection) dangerSection.style.display = 'none';
-  } else if (section === 'settings') {
-    if (statsRow) statsRow.style.display = 'none';
-    if (completion) completion.style.display = 'none';
-    if (dynamic) dynamic.style.display = 'none';
-  }
+  // Re-render dashboard to show relevant content
+  renderDashboard();
 }
 
 // Keep setDashTab as a no-op for any lingering references
