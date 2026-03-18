@@ -3867,7 +3867,8 @@ body.light-mode #screen-dashboard nav {
 @keyframes svcCardIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .svc-price-tag { font-size: 13px; font-weight: 800; color: var(--text); display: flex; align-items: baseline; gap: 3px; }
 .svc-price-tag .svc-price-from { font-size: 10px; font-weight: 500; color: var(--text3); }
-.svc-booking-panel { border-top: 1px solid var(--border); padding: 16px 20px 16px 84px; background: var(--surface2); animation: svcDropIn 0.2s ease; }
+.svc-booking-panel { border-top: 1px solid var(--border); padding: 16px 20px; background: var(--surface2); animation: svcDropIn 0.2s ease; }
+.svc-card-v2.svc-booking-open { grid-column: 1 / -1; }
 .svc-pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .svc-pill { padding: 6px 14px; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--text2); transition: all 0.15s; user-select: none; font-family: 'DM Sans', sans-serif; }
 .svc-pill:hover { border-color: var(--text3); color: var(--text); }
@@ -3909,7 +3910,6 @@ body.light-mode #screen-dashboard nav {
   .svc-card-inner { flex-direction: column; gap: 10px; }
   .svc-card-actions { flex-direction: row; }
   .cleaner-body { padding: 0 20px 12px; }
-  .svc-booking-panel { padding: 16px 20px; }
 }
 
 
@@ -6534,16 +6534,28 @@ function getQuickReplies(cat) {
 function toggleSvcBooking(id, mode) {
   const panel = document.getElementById('svc-booking-' + id);
   if (!panel) return;
+  // Close all other panels and remove span class
   document.querySelectorAll('[id^="svc-booking-"]').forEach(p => {
-    if (p.id !== 'svc-booking-' + id) { p.style.display = 'none'; p.innerHTML = ''; }
+    if (p.id !== 'svc-booking-' + id) {
+      p.style.display = 'none'; p.innerHTML = '';
+      var card = p.closest('.svc-card-v2');
+      if (card) card.classList.remove('svc-booking-open');
+    }
   });
+  // Toggle same panel
   if (panel.style.display !== 'none' && svcBookingState[id]?.mode === mode) {
-    panel.style.display = 'none'; panel.innerHTML = ''; delete svcBookingState[id]; return;
+    panel.style.display = 'none'; panel.innerHTML = ''; delete svcBookingState[id];
+    var card = document.getElementById('svc-card-' + id);
+    if (card) card.classList.remove('svc-booking-open');
+    return;
   }
   const s = Object.values(serviceData).flat().find(x => x.id === id);
   if (!s) return;
   svcBookingState[id] = { mode, size: null, date: null, time: null, message: '', quickReplies: [], customDate: '' };
   panel.style.display = 'block';
+  // Span full row so other cards aren't pushed
+  var card = document.getElementById('svc-card-' + id);
+  if (card) card.classList.add('svc-booking-open');
   renderBookingPanel(id, s, mode);
 }
 
@@ -6706,6 +6718,8 @@ function toggleQuickReply(id, index) {
 function closeSvcBooking(id) {
   const panel = document.getElementById('svc-booking-' + id);
   if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+  var card = document.getElementById('svc-card-' + id);
+  if (card) card.classList.remove('svc-booking-open');
   delete svcBookingState[id];
 }
 
