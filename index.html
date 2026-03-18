@@ -655,7 +655,7 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .prop-left { display: flex; flex-direction: column; gap: 18px; }
 .prop-right { display: flex; flex-direction: column; gap: 14px; }
 
-.prop-hero { border-radius: 16px; overflow: hidden; height: 280px; position: relative; }
+.prop-hero { border-radius: 16px; overflow: hidden; height: 400px; position: relative; }
 .prop-hero img { width: 100%; height: 100%; object-fit: cover; }
 .prop-hero-overlay { display:none; }
 .prop-hero-info { display:none; }
@@ -11943,7 +11943,22 @@ let mapMarkers = [];
 let activeMarkerEl = null;
 
 
+var _propCarouselIdx = 0;
+function stepPropCarousel(dir) {
+  const track = document.getElementById('prop-ctrack');
+  if (!track) return;
+  const total = track.children.length;
+  _propCarouselIdx = (_propCarouselIdx + dir + total) % total;
+  track.style.transform = 'translateX(-' + (_propCarouselIdx * 100) + '%)';
+  // Update dots
+  document.querySelectorAll('.prop-cdot').forEach((d,i) => d.style.background = i === _propCarouselIdx ? '#fff' : 'rgba(255,255,255,0.4)');
+  // Update counter
+  const counter = track.parentElement.querySelector('[style*="top:12px;right:12px"]');
+  if (counter) counter.textContent = (_propCarouselIdx + 1) + ' / ' + total;
+}
+
 function openProperty(id) {
+  _propCarouselIdx = 0;
   currentListing = listings.find(l => l.id === id);
   if (!currentListing) return;
   window._currentPropertyId = id;
@@ -12101,9 +12116,21 @@ function openProperty(id) {
 
   document.getElementById('property-wrap').innerHTML = `
     <div class="prop-left">
-      <!-- Hero image — clean, no text overlays -->
-      <div class="prop-hero">
-        ${sceneImg(l.img,"","width:100%;height:100%;object-fit:cover;")}
+      <!-- Photo carousel -->
+      <div class="prop-hero" id="prop-hero-carousel">
+        <div class="carousel-track" id="prop-ctrack" style="display:flex;width:100%;height:100%;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);">
+          ${(l.photos||[l.img]).map((p,pi) => `<div style="min-width:100%;height:100%;flex-shrink:0;overflow:hidden;position:relative;">
+            <img src="${p}" alt="Photo ${pi+1}" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>`).join('')}
+        </div>
+        ${(l.photos||[]).length > 1 ? `
+          <div class="carousel-arrow carousel-arrow-prev" onclick="stepPropCarousel(-1)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;z-index:3;">‹</div>
+          <div class="carousel-arrow carousel-arrow-next" onclick="stepPropCarousel(1)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;z-index:3;">›</div>
+          <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3;">
+            ${(l.photos||[]).map((_,pi) => `<div class="prop-cdot${pi===0?' active':''}" style="width:8px;height:8px;border-radius:50%;background:${pi===0?'#fff':'rgba(255,255,255,0.4)'};transition:background 0.2s;"></div>`).join('')}
+          </div>
+          <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;z-index:3;">1 / ${(l.photos||[]).length}</div>
+        ` : ''}
       </div>
 
       <!-- Key Metrics — Apollo-style data strip -->
@@ -12370,29 +12397,69 @@ function openProperty(id) {
     const scoreColor = ll.score >= 4.5 ? 'var(--green)' : ll.score >= 3.5 ? 'var(--yellow)' : 'var(--red)';
     const availColor = l.soon ? 'var(--yellow)' : 'var(--green)';
     const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address + ', Calgary, AB');
+    const avgHoodPrice = listings.filter(x=>x.hood===l.hood&&x.id!==l.id).reduce((s,x,_,a)=>s+x.price/a.length,0);
+    const priceDiff = avgHoodPrice > 0 ? Math.round(((l.price - avgHoodPrice)/avgHoodPrice)*100) : 0;
+    const priceDiffLabel = priceDiff > 0 ? priceDiff+'% above avg' : priceDiff < 0 ? Math.abs(priceDiff)+'% below avg' : 'At avg';
+    const priceDiffColor = priceDiff > 5 ? 'var(--red)' : priceDiff < -5 ? 'var(--green)' : 'var(--text3)';
+    const totalMoveIn = l.price + (l.deposit||l.price) + (l.parking&&!l.parking.included?l.parking.cost:0) + (l.elevatorFee||0) - (l.incentive?l.price*(l.incentive.months||1):0);
+
     sidebarEl.innerHTML = `
-      <!-- Price + incentive -->
+      <!-- Price header -->
       <div class="sidebar-section" style="text-align:center;padding-bottom:14px;">
-        <div style="font-size:28px;font-weight:900;color:var(--text);letter-spacing:-1px;">$${l.price.toLocaleString()}<span style="font-size:14px;font-weight:400;color:var(--text3);">/mo</span></div>
+        <div style="font-size:30px;font-weight:900;color:var(--text);letter-spacing:-1px;">$${l.price.toLocaleString()}<span style="font-size:13px;font-weight:400;color:var(--text3);">/mo</span></div>
         ${l.incentive ? `<div class="incentive-pill" style="margin-top:6px;">🎁 ${l.incentive.text}</div>` : ''}
-        <div style="font-size:12px;color:var(--text3);margin-top:6px;">${l.address}</div>
+        <div style="font-size:11px;color:${priceDiffColor};font-weight:600;margin-top:4px;">${priceDiffLabel} for ${l.hood}</div>
         <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;">
           <div style="width:7px;height:7px;border-radius:50%;background:${availColor};"></div>
           <span style="font-size:12px;font-weight:600;color:${availColor};">${l.avail}</span>
         </div>
       </div>
 
-      <!-- Quick specs -->
+      <!-- Actions -->
       <div class="sidebar-section">
-        <div class="sidebar-label">Quick Specs</div>
+        <button onclick="openBookingModal(${l.id})" style="width:100%;padding:11px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;">📅 Book a Viewing</button>
+        <button onclick="openMsgModal(${l.id})" style="width:100%;padding:10px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;">✉ Message ${ll.name.split(' ')[0]}</button>
+      </div>
+
+      <!-- Property Analytics -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">Property Analytics</div>
         <div class="filter-group">
           <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🛏 Bedrooms</span><strong>${l.beds}</strong></div>
           <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🛁 Bathrooms</span><strong>${l.baths}</strong></div>
           <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>📐 Size</span><strong>${l.sqft ? l.sqft.toLocaleString()+' ft²' : '—'}</strong></div>
-          ${l.sqft ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>💲 Per ft²</span><strong>$${(l.price/l.sqft).toFixed(2)}</strong></div>` : ''}
-          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🏗 Era</span><strong>${l.era || '—'}</strong></div>
-          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🐾 Pets</span><strong style="color:${l.pet ? 'var(--green)' : 'var(--red)'};">${l.pet ? 'Allowed' : 'No'}</strong></div>
-          ${l.parking ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🅿 Parking</span><strong>${l.parking.included ? 'Included' : '$'+l.parking.cost+'/mo'}</strong></div>` : ''}
+          ${l.sqft ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>💲 Price/ft²</span><strong>$${(l.price/l.sqft).toFixed(2)}</strong></div>` : ''}
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🏗 Built</span><strong>${l.era || '—'}</strong></div>
+          ${l.renovated ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🔨 Renovated</span><strong>${l.renovated.year}</strong></div>` : ''}
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>📋 Lease</span><strong>12 months</strong></div>
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>📍 Hood</span><strong>${l.hood}</strong></div>
+        </div>
+      </div>
+
+      <!-- Cost Breakdown -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">Cost Breakdown</div>
+        <div class="filter-group">
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Rent</span><strong>$${l.price.toLocaleString()}</strong></div>
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Deposit</span><strong>${l.deposit && l.deposit < l.price ? '<span style=color:var(--green)>$'+l.deposit.toLocaleString()+' ↓</span>' : '$'+(l.deposit||l.price).toLocaleString()}</strong></div>
+          ${l.parking && !l.parking.included ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Parking</span><strong>$${l.parking.cost}/mo</strong></div>` : ''}
+          ${l.elevatorFee ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Elevator fee</span><strong>$${l.elevatorFee}</strong></div>` : ''}
+          ${l.incentive ? `<div class="filter-item" style="cursor:default;justify-content:space-between;color:var(--green);font-weight:700;"><span>🎁 ${l.incentive.text}</span><strong>−$${(l.price*(l.incentive.months||1)).toLocaleString()}</strong></div>` : ''}
+          <div class="filter-item" style="cursor:default;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;"><span style="font-weight:700;">Move-in total</span><strong style="color:var(--accent);">$${Math.max(0,totalMoveIn).toLocaleString()}</strong></div>
+        </div>
+      </div>
+
+      <!-- Pet & Parking -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">Lifestyle</div>
+        <div class="filter-group">
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🐾 Pets</span><strong style="color:${l.pet ? 'var(--green)' : 'var(--red)'};">${l.pet ? '✓ Allowed' : '✗ No'}</strong></div>
+          ${l.pet && l.petPolicy?.dogs ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>&nbsp;&nbsp;Dogs</span><strong style="color:var(--green);">✓${l.petPolicy.largeDogsOk?' (any size)':' (small only)'}</strong></div>` : ''}
+          ${l.pet && l.petPolicy?.cats ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>&nbsp;&nbsp;Cats</span><strong style="color:var(--green);">✓</strong></div>` : ''}
+          ${l.pet && l.petPolicy?.deposit ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>&nbsp;&nbsp;Pet deposit</span><strong>$${l.petPolicy.deposit}${l.petPolicy.depositRefundable?' (refundable)':''}</strong></div>` : ''}
+          <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🅿 Parking</span><strong>${l.parking ? (l.parking.included ? '✓ Included' : l.parking.spots+' stall · $'+l.parking.cost+'/mo') : 'Street only'}</strong></div>
+          ${l.parking?.type ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>&nbsp;&nbsp;Type</span><strong>${l.parking.type.charAt(0).toUpperCase()+l.parking.type.slice(1)}</strong></div>` : ''}
+          ${l.flexibleScreening ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>🤝 Screening</span><strong style="color:var(--accent);">Flexible</strong></div>` : ''}
         </div>
       </div>
 
@@ -12403,21 +12470,23 @@ function openProperty(id) {
           <div style="width:34px;height:34px;border-radius:50%;background:${ll.color}18;color:${ll.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;">${ll.initials}</div>
           <div style="flex:1;">
             <div style="font-size:13px;font-weight:700;color:var(--text);">${ll.name} ${ll.verified?'<span style="color:var(--green);font-size:11px;">✓</span>':''}</div>
-            <div style="font-size:11px;color:var(--text3);">${ll.reviews} reviews · ${ll.responseRate}</div>
+            <div style="font-size:11px;color:var(--text3);">${ll.responseRate} · avg ${ll.avgResponse}</div>
           </div>
           <div style="font-size:18px;font-weight:800;color:${scoreColor};">★ ${ll.score}</div>
         </div>
+        <div style="display:flex;flex-direction:column;gap:4px;padding-top:6px;">
+          ${[['Maintenance',l.scores.maintenance],['Communication',l.scores.communication],['Deposit',l.scores.deposit],['Privacy',l.scores.privacy]].map(([k,v])=>`
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+              <span style="color:var(--text3);width:80px;">${k}</span>
+              <div style="flex:1;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${(v/5)*100}%;background:${v>=4.5?'var(--green)':v>=3.5?'var(--yellow)':'var(--red)'};border-radius:2px;"></div></div>
+              <span style="font-weight:700;color:var(--text);width:20px;text-align:right;">${v}</span>
+            </div>`).join('')}
+        </div>
       </div>
 
-      <!-- Actions -->
-      <div class="sidebar-section">
-        <button onclick="openBookingModal(${l.id})" style="width:100%;padding:10px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;">📅 Book a Viewing</button>
-        <button onclick="openMsgModal(${l.id})" style="width:100%;padding:10px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;">✉ Message ${ll.name.split(' ')[0]}</button>
-        <a href="${mapsUrl}" target="_blank" rel="noopener" style="display:block;width:100%;padding:10px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);text-align:center;text-decoration:none;box-sizing:border-box;">📍 Google Maps</a>
-      </div>
-
-      <!-- Save -->
+      <!-- Links -->
       <div class="sidebar-section" style="padding-bottom:8px;">
+        <a href="${mapsUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:7px 0;font-size:12px;color:var(--accent);text-decoration:none;font-weight:600;">📍 View on Google Maps →</a>
         <div class="filter-item" style="cursor:pointer;color:${savedIds.has(l.id)?'var(--red)':'var(--text2)'};" onclick="toggleFav(${l.id});this.style.color=savedIds.has(${l.id})?'var(--red)':'var(--text2)';this.innerHTML=savedIds.has(${l.id})?'<span style=font-size:15px>♥</span> Saved':'<span style=font-size:15px>♡</span> Save this listing';">
           <span style="font-size:15px;">${savedIds.has(l.id)?'♥':'♡'}</span> ${savedIds.has(l.id)?'Saved':'Save this listing'}
         </div>
