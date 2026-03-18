@@ -5864,6 +5864,29 @@ function closeUserDropdown() {
   if (dd) dd.style.display = 'none';
 }
 
+function toggleListingsDropdown() {
+  var dd = document.getElementById('listings-dropdown');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+function closeListingsDropdown() {
+  var dd = document.getElementById('listings-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+function toggleUserDropdownSvc() {
+  var dd = document.getElementById('user-dropdown-svc');
+  var isOpen = dd.style.display !== 'none';
+  dd.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen && currentUser) {
+    document.getElementById('user-dd-name-svc').textContent = currentUser.name || '';
+    document.getElementById('user-dd-email-svc').textContent = currentUser.email || '';
+  }
+}
+function closeUserDropdownSvc() {
+  var dd = document.getElementById('user-dropdown-svc');
+  if (dd) dd.style.display = 'none';
+}
+
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
   if (!e.target.closest('#svc-dropdown-wrap') && !e.target.closest('#svc-dropdown-wrap-inbox')) {
@@ -5877,6 +5900,12 @@ document.addEventListener('click', function(e) {
   }
   if (!e.target.closest('#user-dropdown-wrap-inbox')) {
     closeUserDropdownInbox();
+  }
+  if (!e.target.closest('#listings-dropdown-wrap')) {
+    closeListingsDropdown();
+  }
+  if (!e.target.closest('#user-dropdown-wrap-svc')) {
+    closeUserDropdownSvc();
   }
 });
 
@@ -5900,6 +5929,11 @@ function setSvcFilter(f) {
 let svcSort = 'rating';
 
 function renderServices() {
+  // Sync nav user info from currentUser
+  if (currentUser) {
+    setUserAvatar('nav-avatar-svc', currentUser);
+    document.getElementById('nav-name-svc').textContent = currentUser.name || '';
+  }
   var container = document.getElementById('svc-results');
   if (!container) return;
   var list = serviceData[svcCategory] || [];
@@ -6428,18 +6462,22 @@ let currentStar = 0;
 function setUserAvatar(elId, user) {
   const el = document.getElementById(elId);
   if (!el) return;
-  if (user.photo) {
-    el.innerHTML = `<img src="${user.photo}" alt="${user.initials}">`;
+  const photo = resolvePhoto(user.photo);
+  if (photo) {
+    el.innerHTML = `<img src="${photo}" alt="${user.initials}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
   } else {
+    el.innerHTML = '';
     el.textContent = user.initials;
     el.style.background = 'linear-gradient(135deg,var(--accent),var(--purple))';
   }
 }
 
 setUserAvatar('nav-avatar', currentUser);
-document.getElementById('nav-name').textContent = 'Sarah Mitchell';
+document.getElementById('nav-name').textContent = currentUser.name;
 setUserAvatar('prop-avatar', currentUser);
-document.getElementById('prop-name').textContent = 'Sarah Mitchell';
+document.getElementById('prop-name').textContent = currentUser.name;
+setUserAvatar('nav-avatar-svc', currentUser);
+document.getElementById('nav-name-svc').textContent = currentUser.name;
 
 // ── RENDER DASHBOARD ──
 function renderDashboard() {
@@ -6693,6 +6731,8 @@ async function obFinish() {
   document.getElementById('nav-name').textContent = name;
   setUserAvatar('prop-avatar', currentUser);
   document.getElementById('prop-name').textContent = name;
+  setUserAvatar('nav-avatar-svc', currentUser);
+  document.getElementById('nav-name-svc').textContent = name;
   if (obRole === 'landlord') {
     setUserAvatar('dash-avatar', currentUser);
     document.getElementById('dash-name').textContent = name;
@@ -15681,7 +15721,36 @@ function handleWizardPhoto(input) {
       <input type="text" id="svc-address-input" placeholder="Search address for nearby services..." value="42 Scarboro Ave SW, Calgary" oninput="renderServices()">
     </div>
     <div class="nav-right">
-      <button class="btn btn-ghost" onclick="showScreen('listings')" style="font-size:12px;">← Listings</button>
+      <button class="btn btn-ghost" id="nav-signin-btn-svc" onclick="showScreen('signup')" style="display:none;">Sign in</button>
+      <div style="position:relative;display:inline-block;" id="listings-dropdown-wrap">
+        <button class="svc-nav-btn" onclick="toggleListingsDropdown()">
+          <span class="svc-nav-icon">🏠</span>
+          <span>Listings</span>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style="opacity:0.5;"><path d="M2 4l3 3 3-3"/></svg>
+        </button>
+        <div id="listings-dropdown" class="svc-dropdown" style="display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:8px;background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.03);padding:8px;min-width:230px;z-index:9000;">
+          <div style="padding:6px 12px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">Browse Listings</div>
+          <div class="svc-drop-item" onclick="closeListingsDropdown();showScreen('listings');setHood(document.querySelector('[data-hood=all]'),'all')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <div class="svc-icon" style="background:rgba(79,124,255,0.1);">📍</div>
+            <div><div style="font-weight:700;font-size:13.5px;">All Calgary</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">Browse all neighbourhoods</div></div>
+          </div>
+          <div class="svc-drop-divider"></div>
+          <div class="svc-drop-item" onclick="closeListingsDropdown();showScreen('listings');setHood(document.querySelector('[data-hood=Beltline]'),'Beltline')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <div class="svc-icon" style="background:rgba(34,197,94,0.1);">🏙️</div>
+            <div><div style="font-weight:700;font-size:13.5px;">Beltline</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">Downtown living & nightlife</div></div>
+          </div>
+          <div class="svc-drop-divider"></div>
+          <div class="svc-drop-item" onclick="closeListingsDropdown();showScreen('listings');setHood(document.querySelector('[data-hood=Kensington]'),'Kensington')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <div class="svc-icon" style="background:rgba(168,85,247,0.1);">🌳</div>
+            <div><div style="font-weight:700;font-size:13.5px;">Kensington</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">Shops, cafés & river walks</div></div>
+          </div>
+          <div class="svc-drop-divider"></div>
+          <div class="svc-drop-item" onclick="closeListingsDropdown();showScreen('listings')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <div class="svc-icon" style="background:rgba(245,166,35,0.1);">♥</div>
+            <div><div style="font-weight:700;font-size:13.5px;">Saved Listings</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">Your favourites & shortlist</div></div>
+          </div>
+        </div>
+      </div>
       <div class="inbox-bell-btn" onclick="openInbox()" title="Messages">
         ✉️<div class="inbox-unread-badge" id="inbox-badge-svc">2</div>
       </div>
@@ -15689,11 +15758,27 @@ function handleWizardPhoto(input) {
         🔔<div class="notif-badge" id="notif-badge-svc">3</div>
       </div>
       <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</div>
-      <div style="position:relative;display:inline-block;">
-        <div class="user-pill" style="cursor:pointer;" onclick="toggleUserDropdown()">
-          <div class="user-avatar" id="nav-avatar-svc">SM</div>
-          <span class="user-name" id="nav-name-svc">Sarah</span>
+      <div style="position:relative;display:inline-block;" id="user-dropdown-wrap-svc">
+        <div class="user-pill" style="cursor:pointer;" onclick="toggleUserDropdownSvc()">
+          <div class="user-avatar" id="nav-avatar-svc"></div>
+          <span class="user-name" id="nav-name-svc"></span>
           <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+        </div>
+        <div id="user-dropdown-svc" class="user-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:8px;background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.03);padding:8px;min-width:220px;z-index:9000;">
+          <div style="padding:10px 14px 12px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <div id="user-dd-name-svc" style="font-weight:700;font-size:14px;"></div>
+            <div id="user-dd-email-svc" style="font-size:12px;color:var(--text3);margin-top:2px;"></div>
+          </div>
+          <div class="user-drop-item" onclick="closeUserDropdownSvc();showScreen('dashboard')" style="padding:10px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.12s;">
+            <span style="font-size:16px;">👤</span><div style="font-weight:600;font-size:13px;">Profile</div>
+          </div>
+          <div class="user-drop-item" onclick="closeUserDropdownSvc();openProfileSettings()" style="padding:10px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.12s;">
+            <span style="font-size:16px;">⚙️</span><div style="font-weight:600;font-size:13px;">Settings</div>
+          </div>
+          <div style="height:1px;background:var(--border);margin:4px 10px;"></div>
+          <div class="user-drop-item" onclick="closeUserDropdownSvc();doSupabaseSignOut()" style="padding:10px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.12s;">
+            <span style="font-size:16px;">🚪</span><div style="font-weight:600;font-size:13px;color:var(--red);">Sign out</div>
+          </div>
         </div>
       </div>
     </div>
@@ -15813,9 +15898,14 @@ function applySession(session) {
   document.getElementById('nav-name').textContent = name;
   setUserAvatar('prop-avatar', currentUser);
   document.getElementById('prop-name').textContent = name;
-  // Hide sign-in button when logged in
+  // Sync services nav
+  setUserAvatar('nav-avatar-svc', currentUser);
+  document.getElementById('nav-name-svc').textContent = name;
+  // Hide sign-in buttons when logged in
   var signInBtn = document.getElementById('nav-signin-btn');
   if (signInBtn) signInBtn.style.display = 'none';
+  var signInBtnSvc = document.getElementById('nav-signin-btn-svc');
+  if (signInBtnSvc) signInBtnSvc.style.display = 'none';
 }
 
 function handleAddReview() {
