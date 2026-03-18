@@ -687,15 +687,15 @@ main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .score-bar-fill { height:100%; border-radius:99px; transition:width 0.7s ease; }
 .score-bar-val { width:24px; text-align:right; font-family:'DM Mono',monospace; font-size:11px; color:var(--text3); }
 
-.review-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:10px; }
-.review-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.review-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+.review-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:6px; }
 .reviewer-info { display:flex; align-items:center; gap:9px; }
 .reviewer-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
 .reviewer-name { font-size:13px; font-weight:600; }
 .reviewer-meta { font-size:11.5px; color:var(--text3); margin-top:1px; }
 .review-date { font-size:11px; color:var(--text3); font-family:'DM Mono',monospace; }
-.review-stars { color:var(--yellow); font-size:13px; margin-bottom:8px; }
-.review-text { font-size:13px; color:var(--text2); line-height:1.6; }
+.review-stars { color:var(--yellow); font-size:12px; margin-bottom:4px; display:inline-block; }
+.review-text { font-size:12.5px; color:var(--text2); line-height:1.55; }
 .review-flags-row { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
 
 .write-review-btn { width:100%; padding:11px; background:var(--surface2); border:1.5px dashed var(--border2); border-radius:10px; color:var(--text3); font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all 0.15s; font-weight:500; display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -8197,14 +8197,15 @@ function petPolicyBlockHtml(l) {
         <div class="pet-deposit-val" style="color:var(--green);">None required</div>
       </div>`;
 
+  const rules = [];
+  if (p.cats) rules.push('🐱 Cats OK');
+  if (p.dogs && p.largeDogsOk) rules.push('🐶 Dogs — any size');
+  else if (p.dogs) rules.push('🐶 Dogs — under ' + (p.maxWeight||25) + 'lbs');
+  const depText = p.deposit ? '$' + p.deposit.toLocaleString() + (p.depositRefundable ? ' refundable' : '') + ' deposit' : 'No pet deposit';
   return `
-    <div class="pet-block allowed">
-      <div class="pet-block-title">🐾 Pet policy</div>
-      <div class="pet-rules-grid">
-        ${catRule}${dogRule}${largeRule}
-      </div>
-      ${depositHtml}
-      ${p.notes ? `<div class="pet-note">ℹ️ ${p.notes}</div>` : ''}
+    <div style="font-size:12.5px;color:var(--text2);line-height:1.7;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--green);margin-bottom:4px;">🐾 Pets allowed</div>
+      ${rules.join(' · ')} · ${depText}${p.notes ? '<br><span style="color:var(--text3);font-size:11px;">ℹ️ ' + p.notes + '</span>' : ''}
     </div>`;
 }
 
@@ -12015,8 +12016,8 @@ function openProperty(id) {
       <div class="review-hold-banner">🔒 Retaliation hold — this review and any opposing content will be held for ${r.holdDaysLeft || 7} more days before going live simultaneously.</div>` : '';
 
     const tenantBadges = `
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        ${r.verified ? '<div class="verified-tenancy-pill">✓ Verified tenancy</div>' : ''}
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+        ${r.verified ? '<div class="verified-tenancy-pill">✓ Verified</div>' : ''}
         ${r.goodTenant ? '<div class="good-tenant-badge">⭐ Good Tenant</div>' : ''}
         <div class="tenancy-weight ${weightClass}">${weightLabel}</div>
       </div>`;
@@ -12083,11 +12084,12 @@ function openProperty(id) {
         </div>
         <div class="review-date">${r.date}</div>
       </div>
-      ${tenantBadges}
-      <div class="review-stars">${'★'.repeat(r.score)}${'☆'.repeat(5-r.score)}</div>
-      ${(() => { const srcMap={'post-lease':'rsb-post-lease','post-showing':'rsb-post-showing','past-tenant':'rsb-past-tenant','mid-tenancy':'rsb-mid-tenancy'}; const srcLabel={'post-lease':'✓ Verified Tenant','post-showing':'After showing','past-tenant':'Past tenant · Lease verified','mid-tenancy':'Mid-tenancy'}; const src=r.source||'post-lease'; return `<div class="review-source-badge ${srcMap[src]||'rsb-post-lease'}" style="margin-bottom:7px;">${srcLabel[src]||'Verified Tenant'}</div>`; })()}
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+        <div class="review-stars">${'★'.repeat(r.score)}${'☆'.repeat(5-r.score)}</div>
+        ${tenantBadges}
+      </div>
       <div class="review-text">${r.text}</div>
-      <div class="review-flags-row">${r.flags.map((f,fi)=>flagHtml(f,r.flagType[fi])).join('')}</div>
+      <div class="review-flags-row" style="margin-top:4px;">${r.flags.map((f,fi)=>flagHtml(f,r.flagType[fi])).join('')}</div>
       ${tenantRatingBlock}
       ${responseBlock}
       ${reviewActionRow}
