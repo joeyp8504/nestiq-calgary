@@ -6615,10 +6615,10 @@ function renderBookingPanel(id, s, mode) {
             <span class="svc-date-day">${d.label}</span>
             <span class="svc-date-num">${d.date}</span>
           </div>`).join('')}
-          <div class="svc-date-chip custom-date" onclick="openCustomDate('${id}')" style="position:relative;">
-            <span class="svc-date-day">Other</span>
-            <span class="svc-date-num">📅</span>
-            <input type="date" class="svc-hidden-date" id="svc-custom-date-${id}" onchange="selectCustomDate('${id}', this.value)">
+          <div class="svc-date-chip custom-date${state.customDate && state.date === state.customDate ? ' selected' : ''}" onclick="openCustomDate('${id}')" style="position:relative;">
+            <span class="svc-date-day">${state.customDate ? new Date(state.customDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Other'}</span>
+            <span class="svc-date-num">${state.customDate ? '✓' : '📅'}</span>
+            <input type="date" class="svc-hidden-date" id="svc-custom-date-${id}" value="${state.customDate||''}" onchange="selectCustomDate('${id}', this.value)" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;">
           </div>
         </div>
         <div class="svc-section-label">Preferred time</div>
@@ -6684,12 +6684,31 @@ function selectBookingPkg(id, i) {
 
 function openCustomDate(id) {
   const input = document.getElementById('svc-custom-date-' + id);
-  if (input) { input.style.pointerEvents = 'auto'; input.showPicker ? input.showPicker() : input.click(); }
+  if (!input) return;
+  input.style.pointerEvents = 'auto';
+  input.style.opacity = '1';
+  input.style.position = 'relative';
+  input.style.width = 'auto';
+  input.style.height = 'auto';
+  // Use a one-time listener to catch the selection reliably
+  input.removeEventListener('change', input._svcHandler);
+  input._svcHandler = function() {
+    const val = input.value;
+    if (val && svcBookingState[id]) {
+      svcBookingState[id].date = val;
+      svcBookingState[id].customDate = val;
+      const s = Object.values(serviceData).flat().find(x => x.id === id);
+      if (s) renderBookingPanel(id, s, 'book');
+    }
+  };
+  input.addEventListener('change', input._svcHandler);
+  if (input.showPicker) { try { input.showPicker(); } catch(e) {} } else { input.focus(); }
 }
 
 function selectCustomDate(id, val) {
   if (!val || !svcBookingState[id]) return;
   svcBookingState[id].date = val;
+  svcBookingState[id].customDate = val;
   const s = Object.values(serviceData).flat().find(x => x.id === id);
   if (s) renderBookingPanel(id, s, 'book');
 }
