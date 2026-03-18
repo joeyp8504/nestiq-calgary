@@ -5737,7 +5737,7 @@ const UP = {
   mod2:'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80'
 };
 const listings = [
-  { id:1, img:UP.liv1, photos:[UP.liv1,UP.kit1,UP.bed1,UP.bath1], price:1850, beds:1, baths:1, sqft:680, deposit:900, elevatorFee:75, listingStatus:"active", lastConfirmed:"2026-03-04", address:"1204 – 817 15 Ave SW", hood:"Beltline", badges:["verified","new"], incentive:{type:'free-month',months:1,text:'1st month free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:300,depositRefundable:true,notes:null}, avail:"Available now", soon:false, era:"2000s", renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
+  { id:1, img:UP.liv1, photos:[UP.liv1,UP.kit1,UP.bed1,UP.bath1], price:1850, beds:1, baths:1, sqft:680, deposit:900, elevatorFee:75, listingStatus:"active", lastConfirmed:"2026-03-04", address:"1204 – 817 15 Ave SW", hood:"Beltline", badges:["verified","new"], incentive:{freeMonths:1,apply:'end',leaseTerm:12,text:'13th month free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:true,maxWeight:null,deposit:300,depositRefundable:true,notes:null}, avail:"Available now", soon:false, era:"2000s", renovated:{year:2022, scope:"full"}, parking:{spots:1, type:"underground", included:false, cost:100},
     amenities:["city-view","gym-full","concierge","storage-locker","bike-storage"],
     landlord:{ name:"Marcus W.", score:4.9, reviews:34, color:"#22c55e", initials:"MW", verified:true, responseRate:"98%", avgResponse:"2 hrs", reliability:100, noShows:0, progress:{profile:true,response:true,reviews:true},
       availability:[{day:"Saturday",slots:["10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM"]},{day:"Sunday",slots:["11:00 AM","12:00 PM","2:00 PM"]},{day:"Tuesday",slots:["6:00 PM","7:00 PM"]}] },
@@ -5750,7 +5750,7 @@ const listings = [
       { name:"Priya R.", initials:"PR", color:"#a855f7", score:5, date:"Nov 2024", tenancy:"2020–2024", tenancyMonths:48, verified:true, goodTenant:true, tenantRating:{payment:5,condition:5,communication:4,notice:5}, text:"Very professional and always respectful of my space. Gave proper notice before every single entry. Highly recommend.", flags:["Respectful","Great comms"], flagType:["good","good"], landlordResponse:null }
     ]
   },
-  { id:2, img:UP.bed2, photos:[UP.bed2,UP.liv2,UP.ext1,UP.kit2], price:2400, beds:2, baths:2, sqft:980, flexibleScreening:true, deposit:2400, listingStatus:"active", lastConfirmed:"2026-01-24", address:"308 – 2220 16a St SW", hood:"Bankview", badges:["hot"], incentive:{type:'free-month',months:2,text:'First 2 months free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:25,deposit:250,depositRefundable:true,notes:"Small breeds only — please confirm with landlord"}, avail:"Jun 1", soon:true, era:"1980s", renovated:{year:2019, scope:"kitchen-bath"}, parking:{spots:1, type:"surface", included:true, cost:0},
+  { id:2, img:UP.bed2, photos:[UP.bed2,UP.liv2,UP.ext1,UP.kit2], price:2400, beds:2, baths:2, sqft:980, flexibleScreening:true, deposit:2400, listingStatus:"active", lastConfirmed:"2026-01-24", address:"308 – 2220 16a St SW", hood:"Bankview", badges:["hot"], incentive:{freeMonths:2,apply:'end',leaseTerm:12,text:'13th & 14th months free'}, pet:true, petPolicy:{cats:true,dogs:true,largeDogsOk:false,maxWeight:25,deposit:250,depositRefundable:true,notes:"Small breeds only — please confirm with landlord"}, avail:"Jun 1", soon:true, era:"1980s", renovated:{year:2019, scope:"kitchen-bath"}, parking:{spots:1, type:"surface", included:true, cost:0},
     amenities:["fitness-room","storage-locker","courtyard"],
     landlord:{ name:"Priya S.", score:4.7, reviews:22, color:"#4f7cff", initials:"PS", verified:false, responseRate:"91%", avgResponse:"5 hrs", reliability:96, noShows:1, progress:{profile:true,response:true,reviews:false},
       availability:[{day:"Saturday",slots:["10:00 AM","12:00 PM","2:00 PM"]},{day:"Wednesday",slots:["5:30 PM","6:30 PM"]}] },
@@ -8257,15 +8257,14 @@ function moveInBlockHtml(l) {
       ${depositRow}
       ${parkingRow}
       ${elevatorRow}
-      ${l.incentive ? `<div class="movein-row" style="background:linear-gradient(90deg,rgba(34,197,94,0.06),transparent);border-radius:6px;padding:4px 0;">
-        <div class="movein-label" style="color:var(--green);font-weight:700;">🎁 ${l.incentive.text}</div>
-        <div class="movein-val movein-green">−$${(l.price * (l.incentive.months||1)).toLocaleString()}</div>
-      </div>` : ''}
       <div class="movein-total-row">
         <div class="movein-total-label">Total to move in</div>
-        <div class="movein-total-val">$${(l.incentive ? Math.max(0, total - l.price * (l.incentive.months||1)) : total).toLocaleString()}</div>
+        <div class="movein-total-val">$${total.toLocaleString()}</div>
       </div>
-      ${l.incentive ? `<div class="movein-note">🎁 Landlord incentive: <strong style="color:var(--green);">${l.incentive.text}</strong> — saves you <strong style="color:var(--green);">$${(l.price * (l.incentive.months||1)).toLocaleString()}</strong> on move-in.</div>` : ''}
+      ${l.incentive ? `<div class="movein-note" style="background:linear-gradient(90deg,rgba(34,197,94,0.06),transparent);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:8px 10px;margin-top:8px;">
+        <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:3px;">🎁 ${l.incentive.text}</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.5;">Sign a ${l.incentive.leaseTerm||12}-month lease and get ${l.incentive.freeMonths} additional month${l.incentive.freeMonths>1?'s':''} free at the end. Effective rate: <strong style="color:var(--green);">$${Math.round(l.price * (l.incentive.leaseTerm||12) / ((l.incentive.leaseTerm||12) + l.incentive.freeMonths)).toLocaleString()}/mo</strong></div>
+      </div>` : ''}
       ${savingsNote}
     </div>`;
 }
@@ -12178,6 +12177,14 @@ function openProperty(id) {
             </div>
             <div class="ll-tool-btn-arrow" style="color:var(--accent);">→</div>
           </div>
+          <div class="ll-tool-btn" style="border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.03);" onclick="openIncentiveConfig(${l.id})">
+            <div class="ll-tool-btn-icon">🎁</div>
+            <div>
+              <div class="ll-tool-btn-text" style="color:var(--green);">Free month incentive</div>
+              <div class="ll-tool-btn-sub">${l.incentive ? l.incentive.text + ' · active' : 'Offer bonus months to attract tenants faster'}</div>
+            </div>
+            <div class="ll-tool-btn-arrow" style="color:var(--green);">→</div>
+          </div>
           <div class="ll-tool-btn" onclick="openImport()">
             <div class="ll-tool-btn-icon">📥</div>
             <div>
@@ -12298,7 +12305,7 @@ function openProperty(id) {
     const scoreColor = ll.score >= 4.5 ? 'var(--green)' : ll.score >= 3.5 ? 'var(--yellow)' : 'var(--red)';
     const availColor = l.soon ? 'var(--yellow)' : 'var(--green)';
     const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address + ', Calgary, AB');
-    const totalMoveIn = l.price + (l.deposit||l.price) + (l.parking&&!l.parking.included?l.parking.cost:0) + (l.elevatorFee||0) - (l.incentive?l.price*(l.incentive.months||1):0);
+    const totalMoveIn = l.price + (l.deposit||l.price) + (l.parking&&!l.parking.included?l.parking.cost:0) + (l.elevatorFee||0);
 
     // Market context — same bed count in same hood
     const bedLabel = l.beds === 0 ? 'studios' : l.beds === 1 ? '1-beds' : l.beds === 2 ? '2-beds' : l.beds+'+ beds';
@@ -12366,7 +12373,10 @@ function openProperty(id) {
           <div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Deposit</span><strong>${l.deposit && l.deposit < l.price ? '<span style=color:var(--green)>$'+l.deposit.toLocaleString()+' ↓</span>' : '$'+(l.deposit||l.price).toLocaleString()}</strong></div>
           ${l.parking && !l.parking.included ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Parking</span><strong>$${l.parking.cost}/mo</strong></div>` : ''}
           ${l.elevatorFee ? `<div class="filter-item" style="cursor:default;justify-content:space-between;"><span>Elevator fee</span><strong>$${l.elevatorFee}</strong></div>` : ''}
-          ${l.incentive ? `<div class="filter-item" style="cursor:default;justify-content:space-between;color:var(--green);font-weight:700;"><span>🎁 ${l.incentive.text}</span><strong>−$${(l.price*(l.incentive.months||1)).toLocaleString()}</strong></div>` : ''}
+          ${l.incentive ? `<div class="filter-item" style="cursor:default;flex-direction:column;align-items:flex-start;gap:2px;color:var(--green);">
+            <span style="font-weight:700;">🎁 ${l.incentive.text}</span>
+            <span style="font-size:10px;color:var(--text3);font-weight:400;">${l.incentive.leaseTerm||12}-mo lease + ${l.incentive.freeMonths} free · Effective $${Math.round(l.price * (l.incentive.leaseTerm||12) / ((l.incentive.leaseTerm||12) + l.incentive.freeMonths)).toLocaleString()}/mo</span>
+          </div>` : ''}
           <div class="filter-item" style="cursor:default;justify-content:space-between;border-top:1px solid var(--border);padding-top:8px;"><span style="font-weight:700;">Move-in total</span><strong style="color:var(--accent);">$${Math.max(0,totalMoveIn).toLocaleString()}</strong></div>
         </div>
       </div>
@@ -14835,6 +14845,96 @@ function openLandlordLeaseUpload(convId) {
 
 // ── LISTING EDIT ──
 let editListingId = null;
+
+function setIncentiveFreeMonths(id, n) {
+  var l = listings.find(function(x){return x.id===id});
+  if (!l) return;
+  if (n === 0) { l.incentive = null; }
+  else {
+    var lt = (l.incentive && l.incentive.leaseTerm) || 12;
+    var ap = (l.incentive && l.incentive.apply) || 'end';
+    var txt = n === 1 ? (lt+1)+'th month free' : (lt+1)+'th & '+(lt+2)+'th months free';
+    l.incentive = { freeMonths:n, apply:ap, leaseTerm:lt, text:txt };
+  }
+  openIncentiveConfig(id);
+}
+function setIncentiveLease(id, lt) {
+  var l = listings.find(function(x){return x.id===id});
+  if (!l || !l.incentive) return;
+  l.incentive.leaseTerm = lt;
+  var n = l.incentive.freeMonths;
+  l.incentive.text = n === 1 ? (lt+1)+'th month free' : (lt+1)+'th & '+(lt+2)+'th months free';
+  openIncentiveConfig(id);
+}
+function setIncentiveApply(id, ap) {
+  var l = listings.find(function(x){return x.id===id});
+  if (!l || !l.incentive) return;
+  l.incentive.apply = ap;
+  openIncentiveConfig(id);
+}
+function saveIncentive(id) {
+  document.getElementById('svc-quote-overlay').style.display = 'none';
+  var l = listings.find(function(x){return x.id===id});
+  openProperty(id);
+  showToast(l && l.incentive ? 'Incentive updated' : 'Incentive removed');
+}
+
+function openIncentiveConfig(id) {
+  var l = listings.find(function(x){return x.id===id});
+  if (!l) return;
+  var inc = l.incentive || {};
+  var overlay = document.getElementById('svc-quote-overlay');
+  var box = document.getElementById('svc-quote-body');
+  if (!overlay || !box) return;
+  overlay.style.display = 'flex';
+  _svcBookingActiveId = null;
+
+  var fm = inc.freeMonths || 0;
+  var lt = inc.leaseTerm || 12;
+  var ap = inc.apply || 'end';
+  var effRate = fm > 0 ? Math.round(l.price * lt / (lt + fm)) : l.price;
+
+  var monthBtns = [0,1,2,3].map(function(n) {
+    return '<div class="svc-pill'+(fm===n?' selected':'')+'" onclick="setIncentiveFreeMonths('+id+','+n+')" style="flex:1;text-align:center;padding:10px;">'+(n===0?'None':n+' month'+(n>1?'s':''))+'</div>';
+  }).join('');
+
+  var leaseBtns = [6,12,18,24].map(function(n) {
+    return '<div class="svc-pill'+(lt===n?' selected':'')+'" onclick="setIncentiveLease('+id+','+n+')" style="flex:1;text-align:center;padding:10px;">'+n+' mo</div>';
+  }).join('');
+
+  var activeHtml = fm > 0 ? [
+    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:8px;">Lease term</div>',
+    '<div style="display:flex;gap:8px;margin-bottom:20px;">'+leaseBtns+'</div>',
+    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:8px;">How is it applied?</div>',
+    '<div style="display:flex;gap:8px;margin-bottom:20px;">',
+    '<div class="svc-pill'+(ap==='end'?' selected':'')+'" onclick="setIncentiveApply('+id+',\'end\')" style="flex:1;text-align:center;padding:10px;"><div style="font-weight:700;">Extra months at end</div><div style="font-size:10px;opacity:0.7;margin-top:2px;">Pay '+lt+', get '+(lt+fm)+' total</div></div>',
+    '<div class="svc-pill'+(ap==='discount'?' selected':'')+'" onclick="setIncentiveApply('+id+',\'discount\')" style="flex:1;text-align:center;padding:10px;"><div style="font-weight:700;">Move-in discount</div><div style="font-size:10px;opacity:0.7;margin-top:2px;">Deducted from first payment</div></div>',
+    '</div>',
+    '<div style="background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:16px;">',
+    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:8px;">Preview — what tenants see</div>',
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span class="incentive-pill">🎁 '+(inc.text||'')+'</span></div>',
+    '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);"><span>Listed rent</span><strong>$'+l.price.toLocaleString()+'/mo</strong></div>',
+    '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:4px;"><span>Total lease</span><strong>'+(lt+fm)+' months ('+lt+' paid + '+fm+' free)</strong></div>',
+    '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--green);font-weight:700;margin-top:4px;"><span>Effective rate</span><strong>$'+effRate.toLocaleString()+'/mo</strong></div>',
+    '</div>'
+  ].join('') : '<div style="background:var(--surface2);border-radius:10px;padding:20px;text-align:center;color:var(--text3);font-size:12px;line-height:1.6;">No incentive active. Offering free months helps fill vacancies faster.</div>';
+
+  box.innerHTML = [
+    '<div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">',
+    '<div style="width:40px;height:40px;border-radius:10px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;">🎁</div>',
+    '<div style="flex:1;"><div style="font-size:15px;font-weight:800;color:var(--text);">Free Month Incentive</div><div style="font-size:12px;color:var(--text3);">'+l.address+'</div></div>',
+    '<button onclick="document.getElementById(\'svc-quote-overlay\').style.display=\'none\'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);padding:4px;">✕</button>',
+    '</div>',
+    '<div style="padding:20px 24px 24px;">',
+    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:8px;">How many free months?</div>',
+    '<div style="display:flex;gap:8px;margin-bottom:20px;">'+monthBtns+'</div>',
+    activeHtml,
+    '<div style="display:flex;gap:8px;margin-top:16px;">',
+    '<button onclick="document.getElementById(\'svc-quote-overlay\').style.display=\'none\'" class="svc-send-btn ghost" style="flex:1;">Cancel</button>',
+    '<button onclick="saveIncentive('+id+')" class="svc-send-btn" style="flex:1;">Save</button>',
+    '</div></div>'
+  ].join('');
+}
 
 function openEditListing(id) {
   const l = listings.find(x => x.id === id);
