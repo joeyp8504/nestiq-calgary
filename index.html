@@ -4084,7 +4084,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 <body>
 
 <!-- ══ SIGNUP ══ -->
-<div id="screen-signup" class="screen active">
+<div id="screen-signup" class="screen">
   <div class="signup-glow"></div>
   <div class="onboard-wrap">
 
@@ -4242,7 +4242,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 </div>
 
 <!-- ══ LISTINGS ══ -->
-<div id="screen-listings" class="screen">
+<div id="screen-listings" class="screen active">
   <nav>
     <div class="nav-logo" onclick="showScreen('listings')">
       <div class="nav-logo-icon">🏠</div> <span style="letter-spacing:-1px">Nest<span style="color:#4f7cff">IQ</span></span>
@@ -17080,51 +17080,23 @@ async function doSupabaseSignOut() {
   showToast('Signed out');
 }
 
-// Check session on page load (with OAuth hash detection)
-var _authHandled = false;
-
-(async function() {
-  await new Promise(function(r){ setTimeout(r, 300); });
-  if (_authHandled) return;
-  console.log("[NestIQ Auth] Checking session... hash:", window.location.hash ? "present" : "none");
-  var result = await sb.auth.getSession();
-  if (result.data.session) {
-    console.log("[NestIQ Auth] Session found:", result.data.session.user.email);
-    _authHandled = true;
-    applySession(result.data.session);
-    document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
-    document.getElementById("screen-listings").classList.add("active");
-    if (window.location.hash) history.replaceState(null, "", window.location.pathname);
-  } else if (window.location.hash && window.location.hash.indexOf("access_token") !== -1) {
-    console.log("[NestIQ Auth] Hash has tokens, retrying...");
-    await new Promise(function(r){ setTimeout(r, 1500); });
-    var retry = await sb.auth.getSession();
-    if (retry.data.session && !_authHandled) {
-      _authHandled = true;
-      applySession(retry.data.session);
-      document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
-      document.getElementById("screen-listings").classList.add("active");
-      history.replaceState(null, "", window.location.pathname);
-    }
-  }
-
+// Demo mode — bypass Supabase auth, inject demo user
+var _authHandled = true;
+currentUser = { name: 'Joey', email: 'joeyp8504@gmail.com', role: 'tenant', initials: 'JP', photo: null };
+(function() {
+  try {
+    setUserAvatar('nav-avatar', currentUser);
+    document.getElementById('nav-name').textContent = currentUser.name;
+    setUserAvatar('prop-avatar', currentUser);
+    document.getElementById('prop-name').textContent = currentUser.name;
+    setUserAvatar('nav-avatar-svc', currentUser);
+    document.getElementById('nav-name-svc').textContent = currentUser.name;
+    var signInBtn = document.getElementById('nav-signin-btn');
+    if (signInBtn) signInBtn.style.display = 'none';
+    var signInBtnSvc = document.getElementById('nav-signin-btn-svc');
+    if (signInBtnSvc) signInBtnSvc.style.display = 'none';
+  } catch(e) { console.log('[NestIQ] Demo user setup:', e.message); }
 })();
-
-sb.auth.onAuthStateChange((event, session) => {
-  if (session && !_authHandled) {
-    _authHandled = true;
-    applySession(session);
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-listings').classList.add('active');
-    if (window.location.hash) {
-      history.replaceState(null, '', window.location.pathname);
-    }
-  } else if (event === 'SIGNED_OUT') {
-    _authHandled = false;
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-signup').classList.add('active');
-  }
-});
 
 </script>
 </body>
